@@ -1,6 +1,11 @@
 ﻿using HarmonyLib;
 using Mortal.Core;
 using UnityEngine;
+using Unity.Rendering;
+using UnityEngine.Rendering;
+using System;
+using BepInEx;
+using System.Security.AccessControl;
 using Mortal.Battle;
 
 namespace MortalMod
@@ -20,27 +25,27 @@ namespace MortalMod
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Mortal.Core.DevelopmentOnly), "Start")]
-        public static bool DevelopmentOnly(ref Mortal.Core.DevelopmentOnly instance)
+        public static bool DevelopmentOnly(ref Mortal.Core.DevelopmentOnly __instance)
         {
-            bool isActive = Traverse.Create(instance).Field("_active").GetValue<bool>();
+            bool isActive = Traverse.Create(__instance).Field("_active").GetValue<bool>();
             if (!Debug.isDebugBuild && isActive)
-                instance.gameObject.SetActive(false);
+                __instance.gameObject.SetActive(false);
             return false;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Mortal.Combat.CombatResultTestButton), "Start")]
-        public static bool TestButton(ref Mortal.Combat.CombatResultTestButton instance)
+        public static bool TestButton(ref Mortal.Combat.CombatResultTestButton __instance)
         {
             if (!Debug.isDebugBuild)
-                instance.gameObject.SetActive(false);
+                __instance.gameObject.SetActive(false);
             return false;
         }
 
         //改為測試
         [HarmonyPostfix, HarmonyPatch(typeof(Debug), "isDebugBuild", MethodType.Getter)]
-        public static void IsDebugBuild(ref bool result)
+        public static void isDebugBuild(ref bool __result)
         {
-            result = true;
+            __result = true;
         }
 
         //左下角FPS
@@ -59,10 +64,10 @@ namespace MortalMod
 
         //戰役結束顯示滑鼠
         [HarmonyPostfix, HarmonyPatch(typeof(GameLevelManager), "ContinueGame")]
-        public static void ShowMouse(ref GameLevelManager instance)
+        public static void ShowMouse(ref GameLevelManager __instance)
         {
-            if(instance.IsGameOver)
-                Traverse.Create(instance).Method("ShowMouseCursor").GetValue();
+            if(__instance.IsGameOver)
+                Traverse.Create(__instance).Method("ShowMouseCursor").GetValue();
         }
     }
 }
