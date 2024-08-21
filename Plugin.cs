@@ -110,7 +110,7 @@ namespace MortalMod
             {
                 if (Time.timeScale != 0 && !Mathf.Approximately(Time.timeScale, speed))
                 {
-                    setTimeScale(speed);
+                    SetTimeScale(speed);
                 }
             }
             else
@@ -119,7 +119,7 @@ namespace MortalMod
                 {
                     if(!Mathf.Approximately(Time.timeScale, 10) && !Mathf.Approximately(Time.timeScale, 2))
                     {
-                        setTimeScale(1);
+                        SetTimeScale(1);
                     }
                 }
             }
@@ -253,12 +253,38 @@ namespace MortalMod
                     }
                 }
                 GUILayout.EndHorizontal();
+                
+                FlagCollectionData[] flagsCollection = MissionManagerData.Instance.FlagsCollection;
+                
+                float flagDropDownHeight = Mathf.Min(400);
+                GUILayout.BeginHorizontal("box");
+                flagScrollPosition = GUILayout.BeginScrollView(flagScrollPosition, GUILayout.Width(400), GUILayout.Height(flagDropDownHeight));
+                foreach (CollectionData<FlagData> collectionData in flagsCollection)
+                {
+                    foreach (FlagData flagData in collectionData.List)
+                    {
+                        GUILayout.Label("Flag: " + flagData.name + " State: " + flagData.State,myStyle);
+                        GUILayout.Label("Note: " + flagData.DevNote, myStyle);
+                        if (GUILayout.Button("+1"))
+                        {
+                            flagData.State += 1;
+                        }
+
+                        if (GUILayout.Button("-1"))
+                        {
+                            flagData.State -= 1;
+                        }
+                    }
+                }
+                GUILayout.EndScrollView();
+                GUILayout.EndHorizontal();
+                
             }
             GUILayout.EndArea();
             GUI.DragWindow();
         }
 
-        private void setTimeScale(float targetSpeed)
+        private void SetTimeScale(float targetSpeed)
         {
             if (speed > 0.0f)
                 Time.timeScale = targetSpeed;
