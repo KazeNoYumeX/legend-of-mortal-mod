@@ -1,12 +1,12 @@
-﻿using HarmonyLib;
-using Mortal.Core;
-using UnityEngine;
-using Unity.Rendering;
-using UnityEngine.Rendering;
-using System;
-using BepInEx;
+﻿using System;
 using System.Security.AccessControl;
+using BepInEx;
+using HarmonyLib;
 using Mortal.Battle;
+using Mortal.Core;
+using Unity.Rendering;
+using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace MortalMod
 {
@@ -66,7 +66,7 @@ namespace MortalMod
         [HarmonyPostfix, HarmonyPatch(typeof(GameLevelManager), "ContinueGame")]
         public static void ShowMouse(ref GameLevelManager __instance)
         {
-            if(__instance.IsGameOver)
+            if (__instance.IsGameOver)
                 Traverse.Create(__instance).Method("ShowMouseCursor").GetValue();
         }
     }
