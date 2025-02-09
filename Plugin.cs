@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.Mono;
@@ -8,9 +7,9 @@ using Mortal.Battle;
 using Mortal.Core;
 using UnityEngine;
 
-namespace MortalMod
+namespace LegendOfMortalMod
 {
-    [BepInPlugin("MortalMod", "活俠傳作弊測試選單", "1.0.0")]
+    [BepInPlugin("LegendOfMortalMod", "活俠傳修改選單", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -40,10 +39,10 @@ namespace MortalMod
 
         private void Awake()
         {
-            Debug.Log("MD活俠傳作弊測試選單");
             Instance = this;
-            MenuToggleKey = Config.Bind<KeyCode>(
-                "MortalMod",
+            
+            MenuToggleKey = Config.Bind(
+                "LegendOfMortalMod",
                 "MenuToggleKey",
                 KeyCode.F3,
                 "Menu Toggle Key"

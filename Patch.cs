@@ -1,14 +1,11 @@
-﻿using System;
-using System.Security.AccessControl;
-using BepInEx;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Mortal.Battle;
+using Mortal.Combat;
 using Mortal.Core;
-using Unity.Rendering;
+using Mortal.Story;
 using UnityEngine;
-using UnityEngine.Rendering;
 
-namespace MortalMod
+namespace LegendOfMortalMod
 {
     public class Patch
     {
