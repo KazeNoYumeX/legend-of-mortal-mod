@@ -12,30 +12,29 @@ namespace LegendOfMortalMod
     [BepInPlugin("LegendOfMortalMod", "活俠傳修改選單", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
-        public static Plugin Instance { get; private set; }
-        private ConfigEntry<KeyCode> MenuToggleKey;
-        GUIStyle myStyle = new GUIStyle();
-        private bool showDropdown = false;
-        private int selectedItemIndex = 0;
+        public bool dice;
+        public int diceNumber = 50;
+        private readonly GUIStyle myStyle = new GUIStyle();
+        private string currentStatValue = "";
+        private bool day;
+        private string diceInput = "50";
+        private Vector2 flagScrollPosition = Vector2.zero;
         private GameStatType[] gameStatTypes; // Array to hold all enum values
         private string[] items; // Array to hold string representations of enum values
-        private Vector2 scrollPosition = Vector2.zero;
-        private Vector2 flagScrollPosition = Vector2.zero;
-        private string currentStatValue = "";
 
-        private bool showMenu = false;
         private bool isspeed = false;
+        private Vector2Int lastScreenSize;
+        private ConfigEntry<KeyCode> MenuToggleKey;
+        private Vector2 scrollPosition = Vector2.zero;
+        private int selectedItemIndex;
+        private bool _showDropdown;
+        private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
-        private bool day = false;
-        private bool testAnimation = false;
-        private bool winLose = false;
-        public bool dice = false;
-        public int diceNumber = 50;
-        private string diceInput = "50";
-
-        private Vector2Int lastScreenSize;
+        private bool testAnimation;
         private Rect windowRect;
+        private bool winLose;
+        public static Plugin Instance { get; private set; }
 
         private void Awake()
         {
@@ -47,8 +46,11 @@ namespace LegendOfMortalMod
                 KeyCode.F3,
                 "Menu Toggle Key"
             );
+            
             Harmony.CreateAndPatchAll(typeof(Patch));
+            
             Debug.Log($"Screen.width {Screen.width} Screen.height:{Screen.height}");
+            
             // Initialize window size based on screen dimensions
             float width = Screen.width * 0.5f;
             float height = Screen.height * 0.8f;
@@ -62,7 +64,7 @@ namespace LegendOfMortalMod
 
         private void Start()
         {
-            gameStatTypes = (GameStatType[])System.Enum.GetValues(typeof(GameStatType));
+            gameStatTypes = (GameStatType[])Enum.GetValues(typeof(GameStatType));
             items = new string[gameStatTypes.Length];
             for (int i = 0; i < gameStatTypes.Length; i++)
             {
@@ -71,28 +73,6 @@ namespace LegendOfMortalMod
 
             // Initialize currentStatValue with the default value
             UpdateCurrentStatValue();
-        }
-
-        private void onDestroy()
-        {
-            Harmony.UnpatchAll();
-        }
-
-        void OnScreenSizeChanged(float width, float height)
-        {
-            width *= 0.5f;
-            height *= 0.8f;
-            windowRect = new Rect(
-                (Screen.width - width) / 2,
-                (Screen.height - height) / 2,
-                width,
-                height
-            );
-            // Implement your logic here when screen size changes
-            Debug.Log($"Screen size changed to: {width}x{height}");
-
-            // Example: Adjust UI elements or perform other actions based on new screen size
-            // Your code here...
         }
 
         private void Update()
@@ -107,16 +87,9 @@ namespace LegendOfMortalMod
                 OnScreenSizeChanged(lastScreenSize.x, lastScreenSize.y);
             }
 
-            //Debug.Log($"Screen.width {Screen.width} Screen.height:{Screen.height}");
-            //Debug.Log($"TimeScale {Time.timeScale}");
-            //if (Mortal.Story.StoryManager.Instance != null)
-            //    Debug.Log($"IsPause: {Mortal.Story.StoryManager.Instance.IsStoryPause}");
-            //if (Mortal.Battle.GameLevelManager.Instance != null)
-            //    Debug.Log($"IsPause: {Mortal.Battle.GameLevelManager.Instance.IsPause}");
-
             if (Input.GetKeyDown(MenuToggleKey.Value))
             {
-                showMenu = !showMenu;
+                _showMenu = !_showMenu;
             }
 
             if (isspeed)
@@ -140,36 +113,41 @@ namespace LegendOfMortalMod
                 }
             }
 
-            if (day)
-            {
-                SetActive("[UI]/MainUI/Layer_1/TestDayButton", true);
-                SetActive("[UI]/MainUI/Layer_1/TestNightButton", true);
-            }
-            else
-            {
-                SetActive("[UI]/MainUI/Layer_1/TestDayButton", false);
-                SetActive("[UI]/MainUI/Layer_1/TestNightButton", false);
-            }
+            SetActive("[UI]/MainUI/Layer_1/TestDayButton", day);
+            SetActive("[UI]/MainUI/Layer_1/TestNightButton", day);
+            SetActive("[UI]/MainUI/Layer_5/TestAnimationPanel", testAnimation);
+            SetActive("[UI]/TopPanel/MenuPanel/TestWin",  winLose);
+            SetActive("[UI]/TopPanel/MenuPanel/TestLose", winLose);
+        }
 
-            if (testAnimation)
+        private void OnGUI()
+        {
+            if (_showMenu)
             {
-                SetActive("[UI]/MainUI/Layer_5/TestAnimationPanel", true);
+                windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
             }
-            else
-            {
-                SetActive("[UI]/MainUI/Layer_5/TestAnimationPanel", false);
-            }
+        }
 
-            if (winLose)
-            {
-                SetActive("[UI]/TopPanel/MenuPanel/TestWin", true);
-                SetActive("[UI]/TopPanel/MenuPanel/TestLose", true);
-            }
-            else
-            {
-                SetActive("[UI]/TopPanel/MenuPanel/TestWin", false);
-                SetActive("[UI]/TopPanel/MenuPanel/TestLose", false);
-            }
+        private void onDestroy()
+        {
+            Harmony.UnpatchAll();
+        }
+
+        private void OnScreenSizeChanged(float width, float height)
+        {
+            width *= 0.5f;
+            height *= 0.8f;
+            windowRect = new Rect(
+                (Screen.width - width) / 2,
+                (Screen.height - height) / 2,
+                width,
+                height
+            );
+            // Implement your logic here when screen size changes
+            Debug.Log($"Screen size changed to: {width}x{height}");
+
+            // Example: Adjust UI elements or perform other actions based on new screen size
+            // Your code here...
         }
 
         private void SetActive(string path, bool active)
@@ -178,14 +156,6 @@ namespace LegendOfMortalMod
             if (obj != null)
             {
                 obj.SetActive(active);
-            }
-        }
-
-        private void OnGUI()
-        {
-            if (showMenu)
-            {
-                windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
             }
         }
 
@@ -251,11 +221,11 @@ namespace LegendOfMortalMod
                     // ComboBox button
                     if (GUILayout.Button(items[selectedItemIndex], GUILayout.Width(200)))
                     {
-                        showDropdown = !showDropdown; // Toggle dropdown visibility
+                        _showDropdown = !_showDropdown; // Toggle dropdown visibility
                     }
 
                     // Dropdown list
-                    if (showDropdown)
+                    if (_showDropdown)
                     {
                         float dropdownHeight = Mathf.Min(items.Length * 20, 200); // Calculate dropdown height based on item count
 
@@ -270,7 +240,7 @@ namespace LegendOfMortalMod
                                 if (GUILayout.Button(items[i], GUILayout.ExpandWidth(true)))
                                 {
                                     selectedItemIndex = i; // Set selected item index
-                                    showDropdown = false; // Close the dropdown
+                                    _showDropdown = false; // Close the dropdown
                                     UpdateCurrentStatValue(); // Update the displayed stat value
                                 }
                             }
@@ -301,7 +271,7 @@ namespace LegendOfMortalMod
                     GUILayout.Width(400),
                     GUILayout.Height(flagDropDownHeight)
                 );
-                foreach (CollectionData<FlagData> collectionData in flagsCollection)
+                foreach (FlagCollectionData collectionData in flagsCollection)
                 {
                     foreach (FlagData flagData in collectionData.List)
                     {
