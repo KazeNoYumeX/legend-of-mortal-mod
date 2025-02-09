@@ -614,38 +614,50 @@ namespace LegendOfMortalMod
             }
         }
 
-        private void EnableTitleButton()
+        private static void EnableTitleButton()
         {
-            var title = Traverse.Create(TitleManager.Instance);
-            //title.Method("ShowPanel", title.Field("_testPanel").GetValue(), true);
+            Traverse title = Traverse.Create(TitleManager.Instance);
             if (title != null)
             {
-                var chapter = title.Field("_chapter").GetValue<CanvasGroup>();
-                var missions = title.Field("_missions").GetValue<CanvasGroup>();
-                var combat = title.Field("_combat").GetValue<CanvasGroup>();
-                var testPanel = title.Field("_testPanel").GetValue<CanvasGroup>();
-                var previewPanel = title.Field("_previewPanel").GetValue<CanvasGroup>();
-                if (chapter != null)
+                CanvasGroup chapter = title.Field("_chapter").GetValue<CanvasGroup>();
+                if (chapter)
+                {
                     chapter.gameObject.SetActive(true);
-                if (missions != null)
+                }
+
+                CanvasGroup missions = title.Field("_missions").GetValue<CanvasGroup>();
+                if (missions)
+                {
                     missions.gameObject.SetActive(true);
-                if (combat != null)
+                }
+
+                CanvasGroup combat = title.Field("_combat").GetValue<CanvasGroup>();
+                if (combat)
+                {
                     combat.gameObject.SetActive(true);
-                if (testPanel != null)
+                }
+
+                CanvasGroup testPanel = title.Field("_testPanel").GetValue<CanvasGroup>();
+                if (testPanel)
+                {
                     testPanel.gameObject.SetActive(true);
-                if (previewPanel != null)
+                }
+
+                CanvasGroup previewPanel = title.Field("_previewPanel").GetValue<CanvasGroup>();
+                if (previewPanel)
+                {
                     previewPanel.gameObject.SetActive(true);
+                }
             }
 
             GameObject parentObject = GameObject.Find("UI/Layer_1/Buttons");
-            if (parentObject != null)
+            if (!parentObject)
+                return;
+
+            foreach (Transform child in parentObject.transform)
             {
-                foreach (Transform child in parentObject.transform)
-                {
-                    // Set each child GameObject active
-                    child.gameObject.SetActive(true);
-                }
-                //title.Method("OpenTestPanel").GetValue();
+                // Set each child GameObject active
+                child.gameObject.SetActive(true);
             }
         }
     }
