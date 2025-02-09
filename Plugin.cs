@@ -20,9 +20,9 @@ namespace LegendOfMortalMod
         private string diceInput = "50";
         private Vector2 flagScrollPosition = Vector2.zero;
         private GameStatType[] gameStatTypes; // Array to hold all enum values
+        private bool _accelerateMode;
         private string[] items; // Array to hold string representations of enum values
 
-        private bool isspeed = false;
         private Vector2Int lastScreenSize;
         private ConfigEntry<KeyCode> MenuToggleKey;
         private Vector2 scrollPosition = Vector2.zero;
@@ -92,7 +92,7 @@ namespace LegendOfMortalMod
                 _showMenu = !_showMenu;
             }
 
-            if (isspeed)
+            if (_accelerateMode)
             {
                 if (Time.timeScale != 0 && !Mathf.Approximately(Time.timeScale, speed))
                 {
@@ -167,7 +167,8 @@ namespace LegendOfMortalMod
             {
                 GUILayout.BeginVertical();
                 {
-                    isspeed = GUILayout.Toggle(isspeed, "開啟加速");
+                    _accelerateMode = GUILayout.Toggle(_accelerateMode, "開啟加速");
+                    
                     GUILayout.Label("   加速速度", myStyle);
                     speedInput = GUILayout.TextField(speedInput);
                     float.TryParse(speedInput, out speed);
