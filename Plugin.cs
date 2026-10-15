@@ -224,12 +224,9 @@ namespace LegendOfMortalMod
                     currentStatValue = GUILayout.TextField(currentStatValue, GUILayout.Width(120));
 
                     // Test button (example)
-                    if (GUILayout.Button("設定數值"))
+                    if (GUILayout.Button("設定數值") && int.TryParse(currentStatValue, out int statValue))
                     {
-                        PlayerStatManagerData.Instance.Stats.Set(
-                            gameStatTypes[selectedItemIndex],
-                            int.Parse(currentStatValue)
-                        );
+                        PlayerStatManagerData.Instance.Stats.Set(gameStatTypes[selectedItemIndex], statValue);
                     }
                 }
                 GUILayout.EndHorizontal();
