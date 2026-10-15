@@ -283,23 +283,27 @@ namespace LegendOfMortalMod
                 // The header is boxed; rows get the same padding without the frame.
                 // All text cells also take the value field's top/bottom margin and padding (but no left/right,
                 // so columns stay put). That puts every cell's first line on the same line as the field's text.
-                RectOffset fieldMargin = GUI.skin.textField.margin, fieldPadding = GUI.skin.textField.padding;
-                RectOffset buttonMargin = GUI.skin.button.margin, buttonPadding = GUI.skin.button.padding;
-                _flagTextStyle ??= new GUIStyle(myStyle)
+                // GUI.skin is only readable inside OnGUI, so the styles are built on the first draw
+                if (_flagTextStyle == null)
                 {
-                    margin = new RectOffset(0, 0, fieldMargin.top, fieldMargin.bottom),
-                    padding = new RectOffset(0, 0, fieldPadding.top, fieldPadding.bottom),
-                };
-                _headerInputStyle ??= new GUIStyle(GUI.skin.textField) { normal = { background = null }, fontSize = myStyle.fontSize };
-                _headerButtonStyle ??= new GUIStyle(GUI.skin.button)
-                {
-                    normal = { background = null },
-                    fontSize = myStyle.fontSize,
-                    margin = new RectOffset(buttonMargin.left, buttonMargin.right, fieldMargin.top, fieldMargin.bottom),
-                    padding = new RectOffset(buttonPadding.left, buttonPadding.right, fieldPadding.top, fieldPadding.bottom),
-                };
-                _flagHeaderStyle ??= new GUIStyle(GUI.skin.box) { margin = new RectOffset() };
-                _flagRowStyle ??= new GUIStyle { padding = GUI.skin.box.padding };
+                    RectOffset fieldMargin = GUI.skin.textField.margin, fieldPadding = GUI.skin.textField.padding;
+                    RectOffset buttonMargin = GUI.skin.button.margin, buttonPadding = GUI.skin.button.padding;
+                    _flagTextStyle = new GUIStyle(myStyle)
+                    {
+                        margin = new RectOffset(0, 0, fieldMargin.top, fieldMargin.bottom),
+                        padding = new RectOffset(0, 0, fieldPadding.top, fieldPadding.bottom),
+                    };
+                    _headerInputStyle = new GUIStyle(GUI.skin.textField) { normal = { background = null }, fontSize = myStyle.fontSize };
+                    _headerButtonStyle = new GUIStyle(GUI.skin.button)
+                    {
+                        normal = { background = null },
+                        fontSize = myStyle.fontSize,
+                        margin = new RectOffset(buttonMargin.left, buttonMargin.right, fieldMargin.top, fieldMargin.bottom),
+                        padding = new RectOffset(buttonPadding.left, buttonPadding.right, fieldPadding.top, fieldPadding.bottom),
+                    };
+                    _flagHeaderStyle = new GUIStyle(GUI.skin.box) { margin = new RectOffset() };
+                    _flagRowStyle = new GUIStyle { padding = GUI.skin.box.padding };
+                }
                 GUILayout.BeginHorizontal(_flagHeaderStyle);
                 GUILayout.Label("名稱", _flagTextStyle, GUILayout.Width(FlagNameWidth));
                 GUILayout.Label("備註", _flagTextStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
