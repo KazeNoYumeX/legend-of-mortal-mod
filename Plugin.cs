@@ -31,6 +31,7 @@ namespace LegendOfMortalMod
         private Vector2 scrollPosition = Vector2.zero;
         private int selectedItemIndex;
         private bool _showDropdown;
+        private Rect _dropdownRect;
         private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
@@ -124,7 +125,27 @@ namespace LegendOfMortalMod
             Matrix4x4 oldMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(_guiScale, _guiScale, 1));
             windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
+            if (_showDropdown)
+            {
+                GUI.Window(123457, _dropdownRect, DrawDropdown, GUIContent.none, GUI.skin.box);
+                GUI.BringWindowToFront(123457);
+            }
             GUI.matrix = oldMatrix;
+        }
+
+        private void DrawDropdown(int windowID)
+        {
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+            for (int i = 0; i < items.Length; i++)
+            {
+                if (GUILayout.Button(items[i]))
+                {
+                    selectedItemIndex = i;
+                    _showDropdown = false;
+                    UpdateCurrentStatValue();
+                }
+            }
+            GUILayout.EndScrollView();
         }
 
         private void OnDestroy()
@@ -212,34 +233,22 @@ namespace LegendOfMortalMod
                 GUILayout.EndVertical();
                 GUILayout.BeginHorizontal();
                 {
-                    // ComboBox button
+                    // ComboBox button; the list itself is drawn by DrawDropdown as a popup window
                     if (GUILayout.Button(items[selectedItemIndex], GUILayout.Width(200)))
                     {
-                        _showDropdown = !_showDropdown; // Toggle dropdown visibility
+                        _showDropdown = !_showDropdown;
                     }
 
-                    // Dropdown list
-                    if (_showDropdown)
+                    // Place the popup under the button. Offsets match the BeginArea above.
+                    if (Event.current.type == EventType.Repaint)
                     {
-                        float dropdownHeight = Mathf.Min(items.Length * 20, 200); // Calculate dropdown height based on item count
-
-                        scrollPosition = GUILayout.BeginScrollView(
-                            scrollPosition,
-                            GUILayout.Width(200),
-                            GUILayout.Height(dropdownHeight)
+                        Rect button = GUILayoutUtility.GetLastRect();
+                        _dropdownRect = new Rect(
+                            windowRect.x + 10 + button.x,
+                            windowRect.y + 20 + button.yMax,
+                            button.width,
+                            Mathf.Min(items.Length * 25 + 10, 300)
                         );
-                        {
-                            for (int i = 0; i < items.Length; i++)
-                            {
-                                if (GUILayout.Button(items[i], GUILayout.ExpandWidth(true)))
-                                {
-                                    selectedItemIndex = i; // Set selected item index
-                                    _showDropdown = false; // Close the dropdown
-                                    UpdateCurrentStatValue(); // Update the displayed stat value
-                                }
-                            }
-                        }
-                        GUILayout.EndScrollView();
                     }
 
                     // Display selected item text field
