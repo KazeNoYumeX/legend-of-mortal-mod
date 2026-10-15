@@ -185,6 +185,7 @@ namespace LegendOfMortalMod
             {
                 GUILayout.BeginVertical();
                 {
+                    GUILayout.Label("基本設定", myStyle);
                     // Each row: a 200-wide control, then a 120-wide value field, so the columns line up
                     GUILayout.BeginHorizontal();
                     _accelerateMode = GUILayout.Toggle(_accelerateMode, "開啟加速", GUILayout.Width(200));
@@ -233,6 +234,7 @@ namespace LegendOfMortalMod
                 }
                 GUILayout.EndHorizontal();
 
+                GUILayout.Label("測試", myStyle);
                 if (GUILayout.Button("開啟/關閉 修改資源"))
                 {
                     if (!GameObject.Find("[UI]/TopPanel/StatusPanel/TestPanel").activeSelf)
@@ -258,8 +260,9 @@ namespace LegendOfMortalMod
 
                 FlagCollectionData[] flagsCollection = MissionManagerData.Instance.FlagsCollection;
 
+                GUILayout.Label("旗標", myStyle);
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("搜尋旗標", myStyle, GUILayout.ExpandWidth(false));
+                GUILayout.Label("搜尋", myStyle, GUILayout.ExpandWidth(false));
                 _flagSearch = GUILayout.TextField(_flagSearch);
                 GUILayout.EndHorizontal();
 
