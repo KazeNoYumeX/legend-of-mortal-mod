@@ -35,7 +35,10 @@ namespace LegendOfMortalMod
         private readonly Dictionary<FlagData, string> _flagInputs = new Dictionary<FlagData, string>();
         private string _flagSearch = "";
         private string _flagSearchInput = "";
-        private GUIStyle _headerCellStyle;
+        private GUIStyle _headerInputStyle;
+        private GUIStyle _headerButtonStyle;
+        private GUIStyle _flagHeaderStyle;
+        private GUIStyle _flagRowStyle;
 
         // Flag list column widths, shared by the header and the rows
         private const float FlagNameWidth = 200, FlagStateWidth = 60, FlagInputWidth = 80, FlagSetWidth = 50, FlagStepWidth = 35;
@@ -274,15 +277,22 @@ namespace LegendOfMortalMod
                 // The list fills the rest of the window; one row per flag, the note shrinks first
                 GUILayout.BeginVertical("box", GUILayout.ExpandHeight(true));
 
-                // Header stays outside the scroll view so it doesn't scroll away. Its widths and margins
-                // copy the row cells below, plus room for the always-shown vertical scrollbar.
-                _headerCellStyle ??= new GUIStyle(myStyle) { margin = GUI.skin.button.margin };
-                GUILayout.BeginHorizontal();
+                // Header stays outside the scroll view so it doesn't scroll away. Each header cell uses the
+                // style of the control below it minus the background, so text and spacing match exactly.
+                // The header is boxed; rows get the same padding without the frame.
+                _headerInputStyle ??= new GUIStyle(GUI.skin.textField) { normal = { background = null } };
+                _headerButtonStyle ??= new GUIStyle(GUI.skin.button) { normal = { background = null } };
+                _flagHeaderStyle ??= new GUIStyle(GUI.skin.box) { margin = new RectOffset() };
+                _flagRowStyle ??= new GUIStyle { padding = GUI.skin.box.padding };
+                GUILayout.BeginHorizontal(_flagHeaderStyle);
                 GUILayout.Label("名稱", myStyle, GUILayout.Width(FlagNameWidth));
                 GUILayout.Label("備註", myStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
                 GUILayout.Label("目前", myStyle, GUILayout.Width(FlagStateWidth));
-                GUILayout.Label("新數值", _headerCellStyle, GUILayout.Width(FlagInputWidth));
-                GUILayout.Label("操作", _headerCellStyle, GUILayout.Width(FlagSetWidth + 2 * FlagStepWidth + 2 * GUI.skin.button.margin.left));
+                GUILayout.Label("新數值", _headerInputStyle, GUILayout.Width(FlagInputWidth));
+                GUILayout.Label("操作", _headerButtonStyle, GUILayout.Width(FlagSetWidth));
+                GUILayout.Label("", _headerButtonStyle, GUILayout.Width(FlagStepWidth));
+                GUILayout.Label("", _headerButtonStyle, GUILayout.Width(FlagStepWidth));
+                // Room for the always-shown vertical scrollbar of the list
                 GUILayout.Space(GUI.skin.verticalScrollbar.fixedWidth + GUI.skin.verticalScrollbar.margin.left);
                 GUILayout.EndHorizontal();
 
@@ -294,7 +304,7 @@ namespace LegendOfMortalMod
                         if (!MatchesFlagSearch(flagData))
                             continue;
 
-                        GUILayout.BeginHorizontal();
+                        GUILayout.BeginHorizontal(_flagRowStyle);
                         GUILayout.Label(flagData.name, myStyle, GUILayout.Width(FlagNameWidth));
                         GUILayout.Label(flagData.DevNote ?? "", myStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
                         string state = flagData.State.ToString();
@@ -323,6 +333,8 @@ namespace LegendOfMortalMod
                             flagData.State -= 1;
                             _flagInputs.Remove(flagData);
                         }
+                        // Ends the row like the header's spacer does, so both meet the padding the same way
+                        GUILayout.Space(0);
                         GUILayout.EndHorizontal();
                     }
                 }
