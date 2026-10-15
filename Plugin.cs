@@ -225,12 +225,6 @@ namespace LegendOfMortalMod
                             .Create(GameLevelManager.Instance)
                             .Method("ShowGameOver", GameOverType.Timeout, true)
                             .GetValue();
-                    if (
-                        GUILayout.Button(
-                            "標題畫面顯示全按鈕(按兩次)(不知道會不會影響存檔謹慎使用 使用前備份)"
-                        )
-                    )
-                        EnableTitleButton();
                 }
                 GUILayout.EndVertical();
                 GUILayout.BeginHorizontal();
@@ -598,53 +592,6 @@ namespace LegendOfMortalMod
                 default:
                     currentStatValue = ""; // Default value if no match found
                     break;
-            }
-        }
-
-        private static void EnableTitleButton()
-        {
-            Traverse title = Traverse.Create(TitleManager.Instance);
-            if (title != null)
-            {
-                CanvasGroup chapter = title.Field("_chapter").GetValue<CanvasGroup>();
-                if (chapter)
-                {
-                    chapter.gameObject.SetActive(true);
-                }
-
-                CanvasGroup missions = title.Field("_missions").GetValue<CanvasGroup>();
-                if (missions)
-                {
-                    missions.gameObject.SetActive(true);
-                }
-
-                CanvasGroup combat = title.Field("_combat").GetValue<CanvasGroup>();
-                if (combat)
-                {
-                    combat.gameObject.SetActive(true);
-                }
-
-                CanvasGroup testPanel = title.Field("_testPanel").GetValue<CanvasGroup>();
-                if (testPanel)
-                {
-                    testPanel.gameObject.SetActive(true);
-                }
-
-                CanvasGroup previewPanel = title.Field("_previewPanel").GetValue<CanvasGroup>();
-                if (previewPanel)
-                {
-                    previewPanel.gameObject.SetActive(true);
-                }
-            }
-
-            GameObject parentObject = GameObject.Find("UI/Layer_1/Buttons");
-            if (!parentObject)
-                return;
-
-            foreach (Transform child in parentObject.transform)
-            {
-                // Set each child GameObject active
-                child.gameObject.SetActive(true);
             }
         }
     }
