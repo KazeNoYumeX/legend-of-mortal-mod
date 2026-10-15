@@ -36,6 +36,9 @@ namespace LegendOfMortalMod
         private string _flagSearch = "";
         private string _flagSearchInput = "";
         private GUIStyle _headerCellStyle;
+
+        // Flag list column widths, shared by the header and the rows
+        private const float FlagNameWidth = 200, FlagStateWidth = 60, FlagInputWidth = 80, FlagSetWidth = 50, FlagStepWidth = 35;
         private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
@@ -275,11 +278,11 @@ namespace LegendOfMortalMod
                 // copy the row cells below, plus room for the always-shown vertical scrollbar.
                 _headerCellStyle ??= new GUIStyle(myStyle) { margin = GUI.skin.button.margin };
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("名稱", myStyle, GUILayout.Width(200));
+                GUILayout.Label("名稱", myStyle, GUILayout.Width(FlagNameWidth));
                 GUILayout.Label("備註", myStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
-                GUILayout.Label("目前", myStyle, GUILayout.Width(60));
-                GUILayout.Label("新數值", _headerCellStyle, GUILayout.Width(80));
-                GUILayout.Label("操作", _headerCellStyle, GUILayout.Width(50 + 35 + 35 + 2 * GUI.skin.button.margin.left));
+                GUILayout.Label("目前", myStyle, GUILayout.Width(FlagStateWidth));
+                GUILayout.Label("新數值", _headerCellStyle, GUILayout.Width(FlagInputWidth));
+                GUILayout.Label("操作", _headerCellStyle, GUILayout.Width(FlagSetWidth + 2 * FlagStepWidth + 2 * GUI.skin.button.margin.left));
                 GUILayout.Space(GUI.skin.verticalScrollbar.fixedWidth + GUI.skin.verticalScrollbar.margin.left);
                 GUILayout.EndHorizontal();
 
@@ -292,29 +295,29 @@ namespace LegendOfMortalMod
                             continue;
 
                         GUILayout.BeginHorizontal();
-                        GUILayout.Label(flagData.name, myStyle, GUILayout.Width(200));
+                        GUILayout.Label(flagData.name, myStyle, GUILayout.Width(FlagNameWidth));
                         GUILayout.Label(flagData.DevNote ?? "", myStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
-                        GUILayout.Label(flagData.State.ToString(), myStyle, GUILayout.Width(60));
+                        GUILayout.Label(flagData.State.ToString(), myStyle, GUILayout.Width(FlagStateWidth));
 
                         // Show the live state unless the user is typing a new one
                         string shown = _flagInputs.TryGetValue(flagData, out string typed) ? typed : flagData.State.ToString();
-                        string edited = GUILayout.TextField(shown, GUILayout.Width(80));
+                        string edited = GUILayout.TextField(shown, GUILayout.Width(FlagInputWidth));
                         if (edited != shown)
                             _flagInputs[flagData] = edited;
 
-                        if (GUILayout.Button("設定", GUILayout.Width(50)) && int.TryParse(edited, out int newState))
+                        if (GUILayout.Button("設定", GUILayout.Width(FlagSetWidth)) && int.TryParse(edited, out int newState))
                         {
                             flagData.State = newState;
                             _flagInputs.Remove(flagData);
                         }
 
-                        if (GUILayout.Button("+1", GUILayout.Width(35)))
+                        if (GUILayout.Button("+1", GUILayout.Width(FlagStepWidth)))
                         {
                             flagData.State += 1;
                             _flagInputs.Remove(flagData);
                         }
 
-                        if (GUILayout.Button("-1", GUILayout.Width(35)))
+                        if (GUILayout.Button("-1", GUILayout.Width(FlagStepWidth)))
                         {
                             flagData.State -= 1;
                             _flagInputs.Remove(flagData);
