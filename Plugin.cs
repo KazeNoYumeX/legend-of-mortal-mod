@@ -26,6 +26,8 @@ namespace LegendOfMortalMod
 
         private Vector2Int lastScreenSize;
         private ConfigEntry<KeyCode> MenuToggleKey;
+        private ConfigEntry<float> UiScale;
+        private float _guiScale = 1;
         private Vector2 scrollPosition = Vector2.zero;
         private int selectedItemIndex;
         private bool _showDropdown;
@@ -47,20 +49,14 @@ namespace LegendOfMortalMod
                 KeyCode.F3,
                 "Menu Toggle Key"
             );
-            
-            _harmony = Harmony.CreateAndPatchAll(typeof(Patch));
-            
-            Debug.Log($"Screen.width {Screen.width} Screen.height:{Screen.height}");
-            
-            // Initialize window size based on screen dimensions
-            float width = Screen.width * 0.5f;
-            float height = Screen.height * 0.8f;
-            windowRect = new Rect(
-                (Screen.width - width) / 2,
-                (Screen.height - height) / 2,
-                width,
-                height
+            UiScale = Config.Bind(
+                "LegendOfMortalMod",
+                "UiScale",
+                1f,
+                "Menu size multiplier, on top of automatic scaling to screen height (1080p = 1x)"
             );
+
+            _harmony = Harmony.CreateAndPatchAll(typeof(Patch));
         }
 
         private void Start()
@@ -84,8 +80,7 @@ namespace LegendOfMortalMod
                 lastScreenSize.x = Screen.width;
                 lastScreenSize.y = Screen.height;
 
-                // Call a method or raise an event indicating screen size change
-                OnScreenSizeChanged(lastScreenSize.x, lastScreenSize.y);
+                OnScreenSizeChanged();
             }
 
             if (Input.GetKeyDown(MenuToggleKey.Value))
@@ -123,10 +118,13 @@ namespace LegendOfMortalMod
 
         private void OnGUI()
         {
-            if (_showMenu)
-            {
-                windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
-            }
+            if (!_showMenu)
+                return;
+
+            Matrix4x4 oldMatrix = GUI.matrix;
+            GUI.matrix = Matrix4x4.Scale(new Vector3(_guiScale, _guiScale, 1));
+            windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
+            GUI.matrix = oldMatrix;
         }
 
         private void OnDestroy()
@@ -134,21 +132,15 @@ namespace LegendOfMortalMod
             _harmony?.UnpatchSelf();
         }
 
-        private void OnScreenSizeChanged(float width, float height)
+        // The menu is laid out on a virtual screen 1080 / UiScale units high and scaled up to the real one
+        private void OnScreenSizeChanged()
         {
-            width *= 0.5f;
-            height *= 0.8f;
-            windowRect = new Rect(
-                (Screen.width - width) / 2,
-                (Screen.height - height) / 2,
-                width,
-                height
-            );
-            // Implement your logic here when screen size changes
-            Debug.Log($"Screen size changed to: {width}x{height}");
-
-            // Example: Adjust UI elements or perform other actions based on new screen size
-            // Your code here...
+            _guiScale = Screen.height / 1080f * Mathf.Max(UiScale.Value, 0.1f);
+            float screenWidth = Screen.width / _guiScale;
+            float screenHeight = Screen.height / _guiScale;
+            float width = screenWidth * 0.5f;
+            float height = screenHeight * 0.8f;
+            windowRect = new Rect((screenWidth - width) / 2, (screenHeight - height) / 2, width, height);
         }
 
         private void SetActive(string path, bool active)
