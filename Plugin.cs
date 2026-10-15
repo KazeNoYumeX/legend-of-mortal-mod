@@ -17,7 +17,6 @@ namespace LegendOfMortalMod
         public int diceNumber = 50;
         private readonly GUIStyle myStyle = new GUIStyle();
         private string currentStatValue = "";
-        private bool day;
         private string diceInput = "50";
         private Vector2 flagScrollPosition = Vector2.zero;
         private GameStatType[] gameStatTypes; // Array to hold all enum values
@@ -37,7 +36,6 @@ namespace LegendOfMortalMod
         private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
-        private bool testAnimation;
         private Rect windowRect;
         private bool winLose;
         public static Plugin Instance { get; private set; }
@@ -112,9 +110,10 @@ namespace LegendOfMortalMod
                 }
             }
 
-            SetActive("[UI]/MainUI/Layer_1/TestDayButton", day);
-            SetActive("[UI]/MainUI/Layer_1/TestNightButton", day);
-            SetActive("[UI]/MainUI/Layer_5/TestAnimationPanel", testAnimation);
+            // Debug builds show these test controls; keep them hidden
+            SetActive("[UI]/MainUI/Layer_1/TestDayButton", false);
+            SetActive("[UI]/MainUI/Layer_1/TestNightButton", false);
+            SetActive("[UI]/MainUI/Layer_5/TestAnimationPanel", false);
             SetActive("[UI]/TopPanel/MenuPanel/TestWin",  winLose);
             SetActive("[UI]/TopPanel/MenuPanel/TestLose", winLose);
         }
@@ -202,8 +201,6 @@ namespace LegendOfMortalMod
                         else
                             SetActive("[UI]/TopPanel/StatusPanel/TestPanel", false);
                     }
-                    day = GUILayout.Toggle(day, "測試白天晚上");
-                    testAnimation = GUILayout.Toggle(testAnimation, "測試動畫");
                     winLose = GUILayout.Toggle(winLose, "單挑直接勝利/失敗");
                     if (GUILayout.Button("團體戰玩家死亡"))
                         Traverse
