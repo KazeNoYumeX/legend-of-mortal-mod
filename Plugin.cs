@@ -87,10 +87,7 @@ namespace LegendOfMortalMod
 
             if (Input.GetKeyDown(MenuToggleKey.Value))
             {
-                _showMenu = !_showMenu;
-                // Flag states change while the menu is closed; re-read them on open
-                _flagInputs.Clear();
-            }
+                _showMenu = !_showMenu;            }
 
             if (_accelerateMode)
             {
@@ -180,6 +177,7 @@ namespace LegendOfMortalMod
         public void DoMyWindow(int windowID)
         {
             myStyle.fontSize = 14;
+            myStyle.clipping = TextClipping.Clip;
             myStyle.normal.textColor = Color.white;
             GUILayout.BeginArea(new Rect(10, 20, windowRect.width - 20, windowRect.height - 30));
             {
@@ -263,13 +261,9 @@ namespace LegendOfMortalMod
                 _flagSearch = GUILayout.TextField(_flagSearch);
                 GUILayout.EndHorizontal();
 
-                float flagDropDownHeight = Mathf.Min(400);
-                GUILayout.BeginHorizontal("box");
-                flagScrollPosition = GUILayout.BeginScrollView(
-                    flagScrollPosition,
-                    GUILayout.Width(400),
-                    GUILayout.Height(flagDropDownHeight)
-                );
+                // The list fills the rest of the window; one row per flag, the note shrinks first
+                GUILayout.BeginHorizontal("box", GUILayout.ExpandHeight(true));
+                flagScrollPosition = GUILayout.BeginScrollView(flagScrollPosition, GUILayout.ExpandHeight(true));
                 foreach (FlagCollectionData collectionData in flagsCollection)
                 {
                     foreach (FlagData flagData in collectionData.List)
@@ -277,30 +271,32 @@ namespace LegendOfMortalMod
                         if (!MatchesFlagSearch(flagData))
                             continue;
 
-                        GUILayout.Label(
-                            "Flag: " + flagData.name + " State: " + flagData.State,
-                            myStyle
-                        );
-                        GUILayout.Label("Note: " + flagData.DevNote, myStyle);
                         GUILayout.BeginHorizontal();
-                        if (GUILayout.Button("+1"))
+                        GUILayout.Label(flagData.name, myStyle, GUILayout.Width(200));
+                        GUILayout.Label(flagData.DevNote ?? "", myStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
+
+                        // Show the live state unless the user is typing a new one
+                        string shown = _flagInputs.TryGetValue(flagData, out string typed) ? typed : flagData.State.ToString();
+                        string edited = GUILayout.TextField(shown, GUILayout.Width(80));
+                        if (edited != shown)
+                            _flagInputs[flagData] = edited;
+
+                        if (GUILayout.Button("設定", GUILayout.ExpandWidth(false)) && int.TryParse(edited, out int newState))
+                        {
+                            flagData.State = newState;
+                            _flagInputs.Remove(flagData);
+                        }
+
+                        if (GUILayout.Button("+1", GUILayout.ExpandWidth(false)))
                         {
                             flagData.State += 1;
                             _flagInputs.Remove(flagData);
                         }
 
-                        if (GUILayout.Button("-1"))
+                        if (GUILayout.Button("-1", GUILayout.ExpandWidth(false)))
                         {
                             flagData.State -= 1;
                             _flagInputs.Remove(flagData);
-                        }
-
-                        if (!_flagInputs.TryGetValue(flagData, out string flagInput))
-                            flagInput = flagData.State.ToString();
-                        _flagInputs[flagData] = GUILayout.TextField(flagInput, GUILayout.Width(80));
-                        if (GUILayout.Button("設定") && int.TryParse(_flagInputs[flagData], out int newState))
-                        {
-                            flagData.State = newState;
                         }
                         GUILayout.EndHorizontal();
                     }
