@@ -4,7 +4,7 @@
         <LangVersion>latest</LangVersion>
         <AssemblyName>LegendOfMortalMod</AssemblyName>
         <RootNamespace>LegendOfMortalMod</RootNamespace>
-        <Version>1.1.0</Version>
+        <Version>1.1.1</Version>
         <Product>LegendOfMortalMod</Product>
         <DebugType>none</DebugType>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
