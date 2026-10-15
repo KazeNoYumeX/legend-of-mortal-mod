@@ -88,6 +88,8 @@ namespace LegendOfMortalMod
             if (Input.GetKeyDown(MenuToggleKey.Value))
             {
                 _showMenu = !_showMenu;
+                // Flag states change while the menu is closed; re-read them on open
+                _flagInputs.Clear();
             }
 
             if (_accelerateMode)
