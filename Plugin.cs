@@ -185,36 +185,17 @@ namespace LegendOfMortalMod
             {
                 GUILayout.BeginVertical();
                 {
-                    _accelerateMode = GUILayout.Toggle(_accelerateMode, "開啟加速");
-                    
-                    GUILayout.Label("   加速速度", myStyle);
-                    speedInput = GUILayout.TextField(speedInput);
-                    float.TryParse(speedInput, out speed);
-                    dice = GUILayout.Toggle(dice, "控制骰子");
-                    GUILayout.Label("    骰子數字", myStyle);
-                    diceInput = GUILayout.TextField(diceInput);
-                    int.TryParse(diceInput, out diceNumber);
-                    if (GUILayout.Button("開啟/關閉 修改資源"))
-                    {
-                        if (!GameObject.Find("[UI]/TopPanel/StatusPanel/TestPanel").activeSelf)
-                        {
-                            SetActive("[UI]/TopPanel/StatusPanel/TestPanel", true);
-                            SetActive("[UI]/TopPanel/StatusPanel/TestPanel/Flags", true);
-                        }
-                        else
-                            SetActive("[UI]/TopPanel/StatusPanel/TestPanel", false);
-                    }
-                    winLose = GUILayout.Toggle(winLose, "單挑直接勝利/失敗");
-                    GUILayout.Label("團體戰", myStyle);
+                    // Each row: a 200-wide control, then a 120-wide value field, so the columns line up
                     GUILayout.BeginHorizontal();
-                    if (GUILayout.Button("玩家死亡"))
-                        ShowGameOver(GameOverType.PlayerDie);
-                    if (GUILayout.Button("友方獲勝"))
-                        ShowGameOver(GameOverType.FriendWin);
-                    if (GUILayout.Button("敵方獲勝"))
-                        ShowGameOver(GameOverType.EnemyWin);
-                    if (GUILayout.Button("時間到"))
-                        ShowGameOver(GameOverType.Timeout);
+                    _accelerateMode = GUILayout.Toggle(_accelerateMode, "開啟加速", GUILayout.Width(200));
+                    speedInput = GUILayout.TextField(speedInput, GUILayout.Width(120));
+                    float.TryParse(speedInput, out speed);
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.BeginHorizontal();
+                    dice = GUILayout.Toggle(dice, "控制骰子", GUILayout.Width(200));
+                    diceInput = GUILayout.TextField(diceInput, GUILayout.Width(120));
+                    int.TryParse(diceInput, out diceNumber);
                     GUILayout.EndHorizontal();
                 }
                 GUILayout.EndVertical();
@@ -239,7 +220,7 @@ namespace LegendOfMortalMod
                     }
 
                     // Display selected item text field
-                    currentStatValue = GUILayout.TextField(currentStatValue);
+                    currentStatValue = GUILayout.TextField(currentStatValue, GUILayout.Width(120));
 
                     // Test button (example)
                     if (GUILayout.Button("設定數值"))
@@ -250,6 +231,29 @@ namespace LegendOfMortalMod
                         );
                     }
                 }
+                GUILayout.EndHorizontal();
+
+                if (GUILayout.Button("開啟/關閉 修改資源"))
+                {
+                    if (!GameObject.Find("[UI]/TopPanel/StatusPanel/TestPanel").activeSelf)
+                    {
+                        SetActive("[UI]/TopPanel/StatusPanel/TestPanel", true);
+                        SetActive("[UI]/TopPanel/StatusPanel/TestPanel/Flags", true);
+                    }
+                    else
+                        SetActive("[UI]/TopPanel/StatusPanel/TestPanel", false);
+                }
+                winLose = GUILayout.Toggle(winLose, "單挑直接勝利/失敗");
+                GUILayout.Label("團體戰", myStyle);
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("玩家死亡"))
+                    ShowGameOver(GameOverType.PlayerDie);
+                if (GUILayout.Button("友方獲勝"))
+                    ShowGameOver(GameOverType.FriendWin);
+                if (GUILayout.Button("敵方獲勝"))
+                    ShowGameOver(GameOverType.EnemyWin);
+                if (GUILayout.Button("時間到"))
+                    ShowGameOver(GameOverType.Timeout);
                 GUILayout.EndHorizontal();
 
                 FlagCollectionData[] flagsCollection = MissionManagerData.Instance.FlagsCollection;
