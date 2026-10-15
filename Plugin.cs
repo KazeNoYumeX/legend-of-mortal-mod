@@ -297,10 +297,11 @@ namespace LegendOfMortalMod
                         GUILayout.BeginHorizontal();
                         GUILayout.Label(flagData.name, myStyle, GUILayout.Width(FlagNameWidth));
                         GUILayout.Label(flagData.DevNote ?? "", myStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
-                        GUILayout.Label(flagData.State.ToString(), myStyle, GUILayout.Width(FlagStateWidth));
+                        string state = flagData.State.ToString();
+                        GUILayout.Label(state, myStyle, GUILayout.Width(FlagStateWidth));
 
                         // Show the live state unless the user is typing a new one
-                        string shown = _flagInputs.TryGetValue(flagData, out string typed) ? typed : flagData.State.ToString();
+                        string shown = _flagInputs.TryGetValue(flagData, out string typed) ? typed : state;
                         string edited = GUILayout.TextField(shown, GUILayout.Width(FlagInputWidth));
                         if (edited != shown)
                             _flagInputs[flagData] = edited;
