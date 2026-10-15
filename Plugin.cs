@@ -21,6 +21,7 @@ namespace LegendOfMortalMod
         private Vector2 flagScrollPosition = Vector2.zero;
         private GameStatType[] gameStatTypes; // Array to hold all enum values
         private bool _accelerateMode;
+        private Harmony _harmony;
         private string[] items; // Array to hold string representations of enum values
 
         private Vector2Int lastScreenSize;
@@ -47,7 +48,7 @@ namespace LegendOfMortalMod
                 "Menu Toggle Key"
             );
             
-            Harmony.CreateAndPatchAll(typeof(Patch));
+            _harmony = Harmony.CreateAndPatchAll(typeof(Patch));
             
             Debug.Log($"Screen.width {Screen.width} Screen.height:{Screen.height}");
             
@@ -128,9 +129,9 @@ namespace LegendOfMortalMod
             }
         }
 
-        private void onDestroy()
+        private void OnDestroy()
         {
-            Harmony.UnpatchAll();
+            _harmony?.UnpatchSelf();
         }
 
         private void OnScreenSizeChanged(float width, float height)
