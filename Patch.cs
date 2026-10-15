@@ -63,6 +63,14 @@ namespace LegendOfMortalMod
             return false;
         }
 
+        // 左下角劇情 key 除錯輸入框，遊戲在 isDebugBuild 時才顯示
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StoryMainUI), "Awake")]
+        public static void HideDebugStoryKey(ref StoryMainUI __instance)
+        {
+            Traverse.Create(__instance).Field("_debugStoryKey").GetValue<Component>()?.gameObject.SetActive(false);
+        }
+
         // 戰役結束顯示滑鼠
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GameLevelManager), "ContinueGame")]
