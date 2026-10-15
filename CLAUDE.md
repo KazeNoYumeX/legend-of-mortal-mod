@@ -11,7 +11,13 @@ A BepInEx 6 plugin (HarmonyX-based mod) for the Unity game **活俠傳 / Legend 
 - SDK-style `LegendOfMortalMod.csproj`, `net472`, `LangVersion latest`: `dotnet build -c Release`
 - After building, the DLL is copied to `$(GamePath)\BepInEx\plugins\LegendOfMortalMod\` if that folder exists. `GamePath` defaults to the Steam install (`C:\Program Files (x86)\Steam\steamapps\common\LegendOfMortal`); pass `-p:GamePath=NUL` to build without deploying.
 - Formatting: CSharpier — `dotnet tool restore` then `dotnet csharpier .`
-- No tests. Verify by launching through Steam (`steam://rungameid/1859910`; launching `Mortal.exe` from a tool shell gets the process killed when the command ends) and reading `<game>\BepInEx\LogOutput.log`. It should list `Loading [活俠傳修改選單 1.0.0]` and no Harmony errors.
+- No tests. Verify by launching with `explorer.exe "steam://rungameid/1859910"` and reading `<game>\BepInEx\LogOutput.log`. It should list `Loading [活俠傳修改選單 1.0.0]` and no Harmony errors. Check the log's timestamp first: when BepInEx doesn't start, the file is not rewritten and you read the previous run's log.
+
+## Game/loader gotchas
+
+- Never start `Mortal.exe` directly. The game restarts itself through Steam, and if Steam wasn't running it inherits the injected game's `DOORSTOP_INITIALIZED` environment variable. Every later Steam launch then skips Doorstop and BepInEx never starts (log not rewritten, `winhttp.dll` still loaded). Fix: fully exit Steam and reopen it normally.
+- `BepInEx.cfg` `[Preloader.Entrypoint] Type` must be `Camera`, not the default `Application`. With `Application` the chainloader runs before the engine is ready (`Screen.width` reports ~298) and the plugin is destroyed when the `CoreScenes` scene loads, so `Update`/`OnGUI` never run and F3 does nothing.
+- The game routes Unity logs nowhere useful (Player.log has no managed output). To see Unity messages and exceptions, set `[Logging.Disk] WriteUnityLog = true` and `InstantFlushing = true` temporarily.
 
 ## Dependencies
 
