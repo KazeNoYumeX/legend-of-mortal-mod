@@ -87,7 +87,9 @@ namespace LegendOfMortalMod
 
             if (Input.GetKeyDown(MenuToggleKey.Value))
             {
-                _showMenu = !_showMenu;            }
+                _showMenu = !_showMenu;
+                // Unsaved flag edits would look like real values on reopen; drop them
+                _flagInputs.Clear();            }
 
             if (_accelerateMode)
             {
