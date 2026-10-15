@@ -202,26 +202,17 @@ namespace LegendOfMortalMod
                             SetActive("[UI]/TopPanel/StatusPanel/TestPanel", false);
                     }
                     winLose = GUILayout.Toggle(winLose, "單挑直接勝利/失敗");
-                    if (GUILayout.Button("團體戰玩家死亡"))
-                        Traverse
-                            .Create(GameLevelManager.Instance)
-                            .Method("ShowGameOver", GameOverType.PlayerDie, true)
-                            .GetValue();
-                    if (GUILayout.Button("團體戰友方獲勝"))
-                        Traverse
-                            .Create(GameLevelManager.Instance)
-                            .Method("ShowGameOver", GameOverType.FriendWin, true)
-                            .GetValue();
-                    if (GUILayout.Button("團體戰敵方獲勝"))
-                        Traverse
-                            .Create(GameLevelManager.Instance)
-                            .Method("ShowGameOver", GameOverType.EnemyWin, true)
-                            .GetValue();
-                    if (GUILayout.Button("團體戰時間到"))
-                        Traverse
-                            .Create(GameLevelManager.Instance)
-                            .Method("ShowGameOver", GameOverType.Timeout, true)
-                            .GetValue();
+                    GUILayout.Label("團體戰", myStyle);
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("玩家死亡"))
+                        ShowGameOver(GameOverType.PlayerDie);
+                    if (GUILayout.Button("友方獲勝"))
+                        ShowGameOver(GameOverType.FriendWin);
+                    if (GUILayout.Button("敵方獲勝"))
+                        ShowGameOver(GameOverType.EnemyWin);
+                    if (GUILayout.Button("時間到"))
+                        ShowGameOver(GameOverType.Timeout);
+                    GUILayout.EndHorizontal();
                 }
                 GUILayout.EndVertical();
                 GUILayout.BeginHorizontal();
@@ -304,6 +295,11 @@ namespace LegendOfMortalMod
             }
             GUILayout.EndArea();
             GUI.DragWindow();
+        }
+
+        private static void ShowGameOver(GameOverType type)
+        {
+            Traverse.Create(GameLevelManager.Instance).Method("ShowGameOver", type, true).GetValue();
         }
 
         private void SetTimeScale(float targetSpeed)
