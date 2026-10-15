@@ -2,13 +2,18 @@
 
 ## 安裝方法 Installation
 
-- `legend-of-mortal-mod.zip` 中包含 [BepInEx](https://github.com/BepInEx/BepInEx)
-- 將 `legend-of-mortal-mod.zip` 解壓縮到遊戲目錄下
+> [!IMPORTANT]
+> 本 Mod 只支援 **BepInEx 6**（Unity Mono 版，建議 `6.0.0-be.697`），**不支援 BepInEx 5**。
+> 裝成 BepInEx 5 時 Mod 完全不會載入，`BepInEx/LogOutput.log` 會顯示 `0 plugins to load`。
+> 判斷方式：`BepInEx/core` 裡有 `BepInEx.Unity.Mono.dll` 是 6，只有 `BepInEx.dll` 是 5。
+
+- `legend-of-mortal-mod.zip` 中包含 [BepInEx](https://github.com/BepInEx/BepInEx)；若要自行安裝，請下載 [BepInEx 6 be.697（Unity Mono x64）](https://builds.bepinex.dev/projects/bepinex_be/697/BepInEx-Unity.Mono-win-x64-6.0.0-be.697%2B5362580.zip)
+- 將 `legend-of-mortal-mod.zip` 解壓縮到遊戲目錄下（若已裝過 BepInEx 5，請先刪除遊戲目錄下的 `BepInEx/core`、`winhttp.dll`、`doorstop_config.ini`）
 - 啟動一次遊戲後關閉，打開 `BepInEx/config/BepInEx.cfg`，把 `[Preloader.Entrypoint]` 底下的 `Type = Application` 改成 `Type = Camera`（不改的話選單不會出現）
 
 ## 疑難排解 Troubleshooting
 
-- 按 `F3` 沒反應：確認上面的 `Type = Camera` 已修改
+- 按 `F3` 沒反應：確認裝的是 BepInEx 6，且上面的 `Type = Camera` 已修改
 - `BepInEx/LogOutput.log` 沒有更新：完全結束 Steam 後重新開啟，再從 Steam 啟動遊戲
 
 ## 使用方法 Usage
