@@ -35,6 +35,7 @@ namespace LegendOfMortalMod
         private readonly Dictionary<FlagData, string> _flagInputs = new Dictionary<FlagData, string>();
         private string _flagSearch = "";
         private string _flagSearchInput = "";
+        private GUIStyle _headerCellStyle;
         private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
@@ -268,8 +269,21 @@ namespace LegendOfMortalMod
                 GUILayout.EndHorizontal();
 
                 // The list fills the rest of the window; one row per flag, the note shrinks first
-                GUILayout.BeginHorizontal("box", GUILayout.ExpandHeight(true));
-                flagScrollPosition = GUILayout.BeginScrollView(flagScrollPosition, GUILayout.ExpandHeight(true));
+                GUILayout.BeginVertical("box", GUILayout.ExpandHeight(true));
+
+                // Header stays outside the scroll view so it doesn't scroll away. Its widths and margins
+                // copy the row cells below, plus room for the always-shown vertical scrollbar.
+                _headerCellStyle ??= new GUIStyle(myStyle) { margin = GUI.skin.button.margin };
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("名稱", myStyle, GUILayout.Width(200));
+                GUILayout.Label("備註", myStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
+                GUILayout.Label("目前", myStyle, GUILayout.Width(60));
+                GUILayout.Label("新數值", _headerCellStyle, GUILayout.Width(80));
+                GUILayout.Label("操作", _headerCellStyle, GUILayout.Width(50 + 35 + 35 + 2 * GUI.skin.button.margin.left));
+                GUILayout.Space(GUI.skin.verticalScrollbar.fixedWidth + GUI.skin.verticalScrollbar.margin.left);
+                GUILayout.EndHorizontal();
+
+                flagScrollPosition = GUILayout.BeginScrollView(flagScrollPosition, false, true, GUILayout.ExpandHeight(true));
                 foreach (FlagCollectionData collectionData in flagsCollection)
                 {
                     foreach (FlagData flagData in collectionData.List)
@@ -288,19 +302,19 @@ namespace LegendOfMortalMod
                         if (edited != shown)
                             _flagInputs[flagData] = edited;
 
-                        if (GUILayout.Button("設定", GUILayout.ExpandWidth(false)) && int.TryParse(edited, out int newState))
+                        if (GUILayout.Button("設定", GUILayout.Width(50)) && int.TryParse(edited, out int newState))
                         {
                             flagData.State = newState;
                             _flagInputs.Remove(flagData);
                         }
 
-                        if (GUILayout.Button("+1", GUILayout.ExpandWidth(false)))
+                        if (GUILayout.Button("+1", GUILayout.Width(35)))
                         {
                             flagData.State += 1;
                             _flagInputs.Remove(flagData);
                         }
 
-                        if (GUILayout.Button("-1", GUILayout.ExpandWidth(false)))
+                        if (GUILayout.Button("-1", GUILayout.Width(35)))
                         {
                             flagData.State -= 1;
                             _flagInputs.Remove(flagData);
@@ -309,7 +323,7 @@ namespace LegendOfMortalMod
                     }
                 }
                 GUILayout.EndScrollView();
-                GUILayout.EndHorizontal();
+                GUILayout.EndVertical();
             }
             GUILayout.EndArea();
             GUI.DragWindow();
