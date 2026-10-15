@@ -35,6 +35,7 @@ namespace LegendOfMortalMod
         private readonly Dictionary<FlagData, string> _flagInputs = new Dictionary<FlagData, string>();
         private string _flagSearch = "";
         private string _flagSearchInput = "";
+        private GUIStyle _flagTextStyle;
         private GUIStyle _headerInputStyle;
         private GUIStyle _headerButtonStyle;
         private GUIStyle _flagHeaderStyle;
@@ -280,14 +281,29 @@ namespace LegendOfMortalMod
                 // Header stays outside the scroll view so it doesn't scroll away. Each header cell uses the
                 // style of the control below it minus the background, so text and spacing match exactly.
                 // The header is boxed; rows get the same padding without the frame.
-                _headerInputStyle ??= new GUIStyle(GUI.skin.textField) { normal = { background = null } };
-                _headerButtonStyle ??= new GUIStyle(GUI.skin.button) { normal = { background = null } };
+                // All text cells also take the value field's top/bottom margin and padding (but no left/right,
+                // so columns stay put). That puts every cell's first line on the same line as the field's text.
+                RectOffset fieldMargin = GUI.skin.textField.margin, fieldPadding = GUI.skin.textField.padding;
+                RectOffset buttonMargin = GUI.skin.button.margin, buttonPadding = GUI.skin.button.padding;
+                _flagTextStyle ??= new GUIStyle(myStyle)
+                {
+                    margin = new RectOffset(0, 0, fieldMargin.top, fieldMargin.bottom),
+                    padding = new RectOffset(0, 0, fieldPadding.top, fieldPadding.bottom),
+                };
+                _headerInputStyle ??= new GUIStyle(GUI.skin.textField) { normal = { background = null }, fontSize = myStyle.fontSize };
+                _headerButtonStyle ??= new GUIStyle(GUI.skin.button)
+                {
+                    normal = { background = null },
+                    fontSize = myStyle.fontSize,
+                    margin = new RectOffset(buttonMargin.left, buttonMargin.right, fieldMargin.top, fieldMargin.bottom),
+                    padding = new RectOffset(buttonPadding.left, buttonPadding.right, fieldPadding.top, fieldPadding.bottom),
+                };
                 _flagHeaderStyle ??= new GUIStyle(GUI.skin.box) { margin = new RectOffset() };
                 _flagRowStyle ??= new GUIStyle { padding = GUI.skin.box.padding };
                 GUILayout.BeginHorizontal(_flagHeaderStyle);
-                GUILayout.Label("名稱", myStyle, GUILayout.Width(FlagNameWidth));
-                GUILayout.Label("備註", myStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
-                GUILayout.Label("目前", myStyle, GUILayout.Width(FlagStateWidth));
+                GUILayout.Label("名稱", _flagTextStyle, GUILayout.Width(FlagNameWidth));
+                GUILayout.Label("備註", _flagTextStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
+                GUILayout.Label("目前", _flagTextStyle, GUILayout.Width(FlagStateWidth));
                 GUILayout.Label("新數值", _headerInputStyle, GUILayout.Width(FlagInputWidth));
                 GUILayout.Label("操作", _headerButtonStyle, GUILayout.Width(FlagSetWidth));
                 GUILayout.Label("", _headerButtonStyle, GUILayout.Width(FlagStepWidth));
@@ -305,10 +321,10 @@ namespace LegendOfMortalMod
                             continue;
 
                         GUILayout.BeginHorizontal(_flagRowStyle);
-                        GUILayout.Label(flagData.name, myStyle, GUILayout.Width(FlagNameWidth));
-                        GUILayout.Label(flagData.DevNote ?? "", myStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
+                        GUILayout.Label(flagData.name, _flagTextStyle, GUILayout.Width(FlagNameWidth));
+                        GUILayout.Label(flagData.DevNote ?? "", _flagTextStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
                         string state = flagData.State.ToString();
-                        GUILayout.Label(state, myStyle, GUILayout.Width(FlagStateWidth));
+                        GUILayout.Label(state, _flagTextStyle, GUILayout.Width(FlagStateWidth));
 
                         // Show the live state unless the user is typing a new one
                         string shown = _flagInputs.TryGetValue(flagData, out string typed) ? typed : state;
