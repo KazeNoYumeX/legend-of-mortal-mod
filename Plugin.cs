@@ -34,6 +34,7 @@ namespace LegendOfMortalMod
         private Rect _dropdownRect;
         private readonly Dictionary<FlagData, string> _flagInputs = new Dictionary<FlagData, string>();
         private string _flagSearch = "";
+        private string _flagSearchInput = "";
         private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
@@ -260,7 +261,10 @@ namespace LegendOfMortalMod
                 GUILayout.Label("旗標", myStyle);
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("搜尋", myStyle, GUILayout.ExpandWidth(false));
-                _flagSearch = GUILayout.TextField(_flagSearch);
+                _flagSearchInput = GUILayout.TextField(_flagSearchInput);
+                // Layout and the events after it must see the same rows, so filter changes wait for the next Layout
+                if (Event.current.type == EventType.Layout)
+                    _flagSearch = _flagSearchInput;
                 GUILayout.EndHorizontal();
 
                 // The list fills the rest of the window; one row per flag, the note shrinks first
