@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.Mono;
@@ -32,6 +33,7 @@ namespace LegendOfMortalMod
         private int selectedItemIndex;
         private bool _showDropdown;
         private Rect _dropdownRect;
+        private readonly Dictionary<FlagData, string> _flagInputs = new Dictionary<FlagData, string>();
         private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
@@ -283,15 +285,27 @@ namespace LegendOfMortalMod
                             myStyle
                         );
                         GUILayout.Label("Note: " + flagData.DevNote, myStyle);
+                        GUILayout.BeginHorizontal();
                         if (GUILayout.Button("+1"))
                         {
                             flagData.State += 1;
+                            _flagInputs.Remove(flagData);
                         }
 
                         if (GUILayout.Button("-1"))
                         {
                             flagData.State -= 1;
+                            _flagInputs.Remove(flagData);
                         }
+
+                        if (!_flagInputs.TryGetValue(flagData, out string flagInput))
+                            flagInput = flagData.State.ToString();
+                        _flagInputs[flagData] = GUILayout.TextField(flagInput, GUILayout.Width(80));
+                        if (GUILayout.Button("設定") && int.TryParse(_flagInputs[flagData], out int newState))
+                        {
+                            flagData.State = newState;
+                        }
+                        GUILayout.EndHorizontal();
                     }
                 }
                 GUILayout.EndScrollView();
