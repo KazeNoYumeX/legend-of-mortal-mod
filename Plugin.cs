@@ -33,6 +33,7 @@ namespace LegendOfMortalMod
         private bool _showDropdown;
         private Rect _dropdownRect;
         private readonly Dictionary<FlagData, string> _flagInputs = new Dictionary<FlagData, string>();
+        private string _flagSearch = "";
         private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
@@ -251,6 +252,11 @@ namespace LegendOfMortalMod
 
                 FlagCollectionData[] flagsCollection = MissionManagerData.Instance.FlagsCollection;
 
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("搜尋旗標", myStyle, GUILayout.ExpandWidth(false));
+                _flagSearch = GUILayout.TextField(_flagSearch);
+                GUILayout.EndHorizontal();
+
                 float flagDropDownHeight = Mathf.Min(400);
                 GUILayout.BeginHorizontal("box");
                 flagScrollPosition = GUILayout.BeginScrollView(
@@ -262,6 +268,9 @@ namespace LegendOfMortalMod
                 {
                     foreach (FlagData flagData in collectionData.List)
                     {
+                        if (!MatchesFlagSearch(flagData))
+                            continue;
+
                         GUILayout.Label(
                             "Flag: " + flagData.name + " State: " + flagData.State,
                             myStyle
@@ -295,6 +304,13 @@ namespace LegendOfMortalMod
             }
             GUILayout.EndArea();
             GUI.DragWindow();
+        }
+
+        private bool MatchesFlagSearch(FlagData flagData)
+        {
+            return _flagSearch.Length == 0
+                || flagData.name.IndexOf(_flagSearch, StringComparison.OrdinalIgnoreCase) >= 0
+                || (flagData.DevNote ?? "").IndexOf(_flagSearch, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private static void ShowGameOver(GameOverType type)
