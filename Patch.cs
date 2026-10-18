@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using HarmonyLib;
 using Mortal.Battle;
 using Mortal.Combat;
 using Mortal.Core;
@@ -20,6 +21,34 @@ namespace LegendOfMortalMod
                 random = Plugin.Instance.diceNumber;
 
             return true;
+        }
+
+        // 練功 / 煉丹 / 鍛造面板的「最大消費」次數來源，面板打開時記下來
+        private static readonly HashSet<StatConvertCollectionData> SpendLimitSources = new HashSet<StatConvertCollectionData>();
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MartialPanel), "Open")]
+        public static void RecordMartialSpendLimit(MartialPanel __instance)
+        {
+            SpendLimitSources.Add(Traverse.Create(__instance).Field("_maxDataConvert").GetValue<StatConvertCollectionData>());
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UpgradePanel), "Open")]
+        public static void RecordUpgradeSpendLimit(UpgradePanel __instance)
+        {
+            SpendLimitSources.Add(Traverse.Create(__instance).Field("_maxDataConvert").GetValue<StatConvertCollectionData>());
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(StatConvertCollectionData), "GetSummary")]
+        public static bool ModifySpendLimit(StatConvertCollectionData __instance, ref float __result)
+        {
+            if (!Plugin.Instance.spendLimit || Plugin.Instance.spendLimitNumber <= 0 || !SpendLimitSources.Contains(__instance))
+                return true;
+
+            __result = Plugin.Instance.spendLimitNumber;
+            return false;
         }
 
         [HarmonyPrefix]

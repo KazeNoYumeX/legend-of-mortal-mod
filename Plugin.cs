@@ -17,6 +17,9 @@ namespace LegendOfMortalMod
         public int diceNumber = 50;
         private readonly GUIStyle myStyle = new GUIStyle();
         private string diceInput = "50";
+        public bool spendLimit;
+        public int spendLimitNumber = 99;
+        private string spendLimitInput = "99";
         private bool _accelerateMode;
         private Harmony _harmony;
 
@@ -198,6 +201,13 @@ namespace LegendOfMortalMod
             dice = GUILayout.Toggle(dice, "控制骰子", GUILayout.Width(200));
             diceInput = GUILayout.TextField(diceInput, GUILayout.Width(120));
             int.TryParse(diceInput, out diceNumber);
+            GUILayout.EndHorizontal();
+
+            // 練功 / 煉丹 / 鍛造的「最大消費」，面板打開時套用
+            GUILayout.BeginHorizontal();
+            spendLimit = GUILayout.Toggle(spendLimit, "單次消費上限", GUILayout.Width(200));
+            spendLimitInput = GUILayout.TextField(spendLimitInput, GUILayout.Width(120));
+            int.TryParse(spendLimitInput, out spendLimitNumber);
             GUILayout.EndHorizontal();
 
             GUILayout.Space(8);
