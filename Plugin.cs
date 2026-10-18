@@ -16,33 +16,31 @@ namespace LegendOfMortalMod
         public bool dice;
         public int diceNumber = 50;
         private readonly GUIStyle myStyle = new GUIStyle();
-        private string currentStatValue = "";
         private string diceInput = "50";
-        private Vector2 flagScrollPosition = Vector2.zero;
-        private GameStatType[] gameStatTypes; // Array to hold all enum values
         private bool _accelerateMode;
         private Harmony _harmony;
-        private string[] items; // Array to hold string representations of enum values
 
         private Vector2Int lastScreenSize;
         private ConfigEntry<KeyCode> MenuToggleKey;
         private ConfigEntry<float> UiScale;
         private float _guiScale = 1;
-        private Vector2 scrollPosition = Vector2.zero;
-        private int selectedItemIndex;
-        private bool _showDropdown;
-        private Rect _dropdownRect;
-        private readonly Dictionary<FlagData, string> _flagInputs = new Dictionary<FlagData, string>();
-        private string _flagSearch = "";
-        private string _flagSearchInput = "";
-        private GUIStyle _flagTextStyle;
+        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標" };
+        private int _tab;
+        private int _tabInput;
+        private readonly Vector2[] _tabScroll = new Vector2[TabNames.Length];
+        // Unsaved typed values and locked values, keyed by GameStat / RelationshipStat / FlagData
+        private readonly Dictionary<ScriptableObject, string> _inputs = new Dictionary<ScriptableObject, string>();
+        private readonly Dictionary<ScriptableObject, int> _locks = new Dictionary<ScriptableObject, int>();
+        private string _search = "";
+        private string _searchInput = "";
+        private GUIStyle _textStyle;
         private GUIStyle _headerInputStyle;
         private GUIStyle _headerButtonStyle;
-        private GUIStyle _flagHeaderStyle;
-        private GUIStyle _flagRowStyle;
+        private GUIStyle _headerStyle;
+        private GUIStyle _rowStyle;
 
-        // Flag list column widths, shared by the header and the rows
-        private const float FlagNameWidth = 200, FlagStateWidth = 60, FlagInputWidth = 80, FlagSetWidth = 50, FlagStepWidth = 35;
+        // Table column widths, shared by the header and the rows
+        private const float NameWidth = 200, RangeWidth = 120, StateWidth = 60, InputWidth = 80, SetWidth = 50, StepWidth = 35, LockWidth = 50;
         private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
@@ -70,19 +68,6 @@ namespace LegendOfMortalMod
             _harmony = Harmony.CreateAndPatchAll(typeof(Patch));
         }
 
-        private void Start()
-        {
-            gameStatTypes = (GameStatType[])Enum.GetValues(typeof(GameStatType));
-            items = new string[gameStatTypes.Length];
-            for (int i = 0; i < gameStatTypes.Length; i++)
-            {
-                items[i] = gameStatTypes[i].ToString();
-            }
-
-            // Initialize currentStatValue with the default value
-            UpdateCurrentStatValue();
-        }
-
         private void Update()
         {
             if (Screen.width != lastScreenSize.x || Screen.height != lastScreenSize.y)
@@ -97,8 +82,15 @@ namespace LegendOfMortalMod
             if (Input.GetKeyDown(MenuToggleKey.Value))
             {
                 _showMenu = !_showMenu;
-                // Unsaved flag edits would look like real values on reopen; drop them
-                _flagInputs.Clear();            }
+                // Unsaved edits would look like real values on reopen; drop them
+                _inputs.Clear();
+            }
+
+            foreach (KeyValuePair<ScriptableObject, int> locked in _locks)
+            {
+                if (GetValue(locked.Key) != locked.Value)
+                    SetValue(locked.Key, locked.Value);
+            }
 
             if (_accelerateMode)
             {
@@ -137,27 +129,7 @@ namespace LegendOfMortalMod
             Matrix4x4 oldMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(_guiScale, _guiScale, 1));
             windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
-            if (_showDropdown)
-            {
-                GUI.Window(123457, _dropdownRect, DrawDropdown, GUIContent.none, GUI.skin.box);
-                GUI.BringWindowToFront(123457);
-            }
             GUI.matrix = oldMatrix;
-        }
-
-        private void DrawDropdown(int windowID)
-        {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-            for (int i = 0; i < items.Length; i++)
-            {
-                if (GUILayout.Button(items[i]))
-                {
-                    selectedItemIndex = i;
-                    _showDropdown = false;
-                    UpdateCurrentStatValue();
-                }
-            }
-            GUILayout.EndScrollView();
         }
 
         private void OnDestroy()
@@ -191,185 +163,216 @@ namespace LegendOfMortalMod
             myStyle.clipping = TextClipping.Clip;
             myStyle.normal.textColor = Color.white;
             GUILayout.BeginArea(new Rect(10, 20, windowRect.width - 20, windowRect.height - 30));
+
+            _tabInput = GUILayout.Toolbar(_tabInput, TabNames);
+            // Layout and the events after it must draw the same controls, so tab and filter changes wait for the next Layout
+            if (Event.current.type == EventType.Layout)
             {
-                GUILayout.BeginVertical();
-                {
-                    GUILayout.Label("基本設定", myStyle);
-                    // Each row: a 200-wide control, then a 120-wide value field, so the columns line up
-                    GUILayout.BeginHorizontal();
-                    _accelerateMode = GUILayout.Toggle(_accelerateMode, "開啟加速", GUILayout.Width(200));
-                    speedInput = GUILayout.TextField(speedInput, GUILayout.Width(120));
-                    float.TryParse(speedInput, out speed);
-                    GUILayout.EndHorizontal();
-
-                    GUILayout.BeginHorizontal();
-                    dice = GUILayout.Toggle(dice, "控制骰子", GUILayout.Width(200));
-                    diceInput = GUILayout.TextField(diceInput, GUILayout.Width(120));
-                    int.TryParse(diceInput, out diceNumber);
-                    GUILayout.EndHorizontal();
-                }
-                GUILayout.EndVertical();
-                GUILayout.BeginHorizontal();
-                {
-                    // ComboBox button; the list itself is drawn by DrawDropdown as a popup window
-                    if (GUILayout.Button(items[selectedItemIndex], GUILayout.Width(200)))
-                    {
-                        _showDropdown = !_showDropdown;
-                    }
-
-                    // Place the popup under the button. Offsets match the BeginArea above.
-                    if (Event.current.type == EventType.Repaint)
-                    {
-                        Rect button = GUILayoutUtility.GetLastRect();
-                        _dropdownRect = new Rect(
-                            windowRect.x + 10 + button.x,
-                            windowRect.y + 20 + button.yMax,
-                            button.width,
-                            Mathf.Min(items.Length * 25 + 10, 300)
-                        );
-                    }
-
-                    // Display selected item text field
-                    currentStatValue = GUILayout.TextField(currentStatValue, GUILayout.Width(120));
-
-                    // Test button (example)
-                    if (GUILayout.Button("設定數值") && int.TryParse(currentStatValue, out int statValue))
-                    {
-                        PlayerStatManagerData.Instance.Stats.Set(gameStatTypes[selectedItemIndex], statValue);
-                    }
-                }
-                GUILayout.EndHorizontal();
-
-                GUILayout.Label("測試", myStyle);
-                if (GUILayout.Button("開啟/關閉 修改資源"))
-                {
-                    if (!GameObject.Find("[UI]/TopPanel/StatusPanel/TestPanel").activeSelf)
-                    {
-                        SetActive("[UI]/TopPanel/StatusPanel/TestPanel", true);
-                        SetActive("[UI]/TopPanel/StatusPanel/TestPanel/Flags", true);
-                    }
-                    else
-                        SetActive("[UI]/TopPanel/StatusPanel/TestPanel", false);
-                }
-                winLose = GUILayout.Toggle(winLose, "單挑直接勝利/失敗");
-                GUILayout.Label("團體戰", myStyle);
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("玩家死亡"))
-                    ShowGameOver(GameOverType.PlayerDie);
-                if (GUILayout.Button("友方獲勝"))
-                    ShowGameOver(GameOverType.FriendWin);
-                if (GUILayout.Button("敵方獲勝"))
-                    ShowGameOver(GameOverType.EnemyWin);
-                if (GUILayout.Button("時間到"))
-                    ShowGameOver(GameOverType.Timeout);
-                GUILayout.EndHorizontal();
-
-                FlagCollectionData[] flagsCollection = MissionManagerData.Instance.FlagsCollection;
-
-                GUILayout.Label("旗標", myStyle);
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("搜尋", myStyle, GUILayout.ExpandWidth(false));
-                _flagSearchInput = GUILayout.TextField(_flagSearchInput);
-                // Layout and the events after it must see the same rows, so filter changes wait for the next Layout
-                if (Event.current.type == EventType.Layout)
-                    _flagSearch = _flagSearchInput;
-                GUILayout.EndHorizontal();
-
-                // The list fills the rest of the window; one row per flag, the note shrinks first
-                GUILayout.BeginVertical("box", GUILayout.ExpandHeight(true));
-
-                // Header stays outside the scroll view so it doesn't scroll away. Each header cell uses the
-                // style of the control below it minus the background, so text and spacing match exactly.
-                // The header is boxed; rows get the same padding without the frame.
-                // All text cells also take the value field's top/bottom margin and padding (but no left/right,
-                // so columns stay put). That puts every cell's first line on the same line as the field's text.
-                // GUI.skin is only readable inside OnGUI, so the styles are built on the first draw
-                if (_flagTextStyle == null)
-                {
-                    RectOffset fieldMargin = GUI.skin.textField.margin, fieldPadding = GUI.skin.textField.padding;
-                    RectOffset buttonMargin = GUI.skin.button.margin, buttonPadding = GUI.skin.button.padding;
-                    _flagTextStyle = new GUIStyle(myStyle)
-                    {
-                        margin = new RectOffset(0, 0, fieldMargin.top, fieldMargin.bottom),
-                        padding = new RectOffset(0, 0, fieldPadding.top, fieldPadding.bottom),
-                    };
-                    _headerInputStyle = new GUIStyle(GUI.skin.textField) { normal = { background = null }, fontSize = myStyle.fontSize };
-                    _headerButtonStyle = new GUIStyle(GUI.skin.button)
-                    {
-                        normal = { background = null },
-                        fontSize = myStyle.fontSize,
-                        margin = new RectOffset(buttonMargin.left, buttonMargin.right, fieldMargin.top, fieldMargin.bottom),
-                        padding = new RectOffset(buttonPadding.left, buttonPadding.right, fieldPadding.top, fieldPadding.bottom),
-                    };
-                    _flagHeaderStyle = new GUIStyle(GUI.skin.box) { margin = new RectOffset() };
-                    _flagRowStyle = new GUIStyle { padding = GUI.skin.box.padding };
-                }
-                GUILayout.BeginHorizontal(_flagHeaderStyle);
-                GUILayout.Label("名稱", _flagTextStyle, GUILayout.Width(FlagNameWidth));
-                GUILayout.Label("備註", _flagTextStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
-                GUILayout.Label("目前", _flagTextStyle, GUILayout.Width(FlagStateWidth));
-                GUILayout.Label("新數值", _headerInputStyle, GUILayout.Width(FlagInputWidth));
-                GUILayout.Label("操作", _headerButtonStyle, GUILayout.Width(FlagSetWidth));
-                GUILayout.Label("", _headerButtonStyle, GUILayout.Width(FlagStepWidth));
-                GUILayout.Label("", _headerButtonStyle, GUILayout.Width(FlagStepWidth));
-                // Room for the always-shown vertical scrollbar of the list
-                GUILayout.Space(GUI.skin.verticalScrollbar.fixedWidth + GUI.skin.verticalScrollbar.margin.left);
-                GUILayout.EndHorizontal();
-
-                flagScrollPosition = GUILayout.BeginScrollView(flagScrollPosition, false, true, GUILayout.ExpandHeight(true));
-                foreach (FlagCollectionData collectionData in flagsCollection)
-                {
-                    foreach (FlagData flagData in collectionData.List)
-                    {
-                        if (!MatchesFlagSearch(flagData))
-                            continue;
-
-                        GUILayout.BeginHorizontal(_flagRowStyle);
-                        GUILayout.Label(flagData.name, _flagTextStyle, GUILayout.Width(FlagNameWidth));
-                        GUILayout.Label(flagData.DevNote ?? "", _flagTextStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
-                        string state = flagData.State.ToString();
-                        GUILayout.Label(state, _flagTextStyle, GUILayout.Width(FlagStateWidth));
-
-                        // Show the live state unless the user is typing a new one
-                        string shown = _flagInputs.TryGetValue(flagData, out string typed) ? typed : state;
-                        string edited = GUILayout.TextField(shown, GUILayout.Width(FlagInputWidth));
-                        if (edited != shown)
-                            _flagInputs[flagData] = edited;
-
-                        if (GUILayout.Button("設定", GUILayout.Width(FlagSetWidth)) && int.TryParse(edited, out int newState))
-                        {
-                            flagData.State = newState;
-                            _flagInputs.Remove(flagData);
-                        }
-
-                        if (GUILayout.Button("+1", GUILayout.Width(FlagStepWidth)))
-                        {
-                            flagData.State += 1;
-                            _flagInputs.Remove(flagData);
-                        }
-
-                        if (GUILayout.Button("-1", GUILayout.Width(FlagStepWidth)))
-                        {
-                            flagData.State -= 1;
-                            _flagInputs.Remove(flagData);
-                        }
-                        // Ends the row like the header's spacer does, so both meet the padding the same way
-                        GUILayout.Space(0);
-                        GUILayout.EndHorizontal();
-                    }
-                }
-                GUILayout.EndScrollView();
-                GUILayout.EndVertical();
+                // A filter from another tab would make this one look empty
+                if (_tab != _tabInput)
+                    _searchInput = "";
+                _tab = _tabInput;
+                _search = _searchInput;
             }
+            GUILayout.Space(8);
+
+            if (_tab == 0)
+                DrawBasicTab();
+            else
+                DrawValueTable();
+
             GUILayout.EndArea();
             GUI.DragWindow();
         }
 
-        private bool MatchesFlagSearch(FlagData flagData)
+        private void DrawBasicTab()
         {
-            return _flagSearch.Length == 0
-                || flagData.name.IndexOf(_flagSearch, StringComparison.OrdinalIgnoreCase) >= 0
-                || (flagData.DevNote ?? "").IndexOf(_flagSearch, StringComparison.OrdinalIgnoreCase) >= 0;
+            // Each row: a 200-wide control, then a 120-wide value field, so the columns line up
+            GUILayout.BeginHorizontal();
+            _accelerateMode = GUILayout.Toggle(_accelerateMode, "開啟加速", GUILayout.Width(200));
+            speedInput = GUILayout.TextField(speedInput, GUILayout.Width(120));
+            float.TryParse(speedInput, out speed);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            dice = GUILayout.Toggle(dice, "控制骰子", GUILayout.Width(200));
+            diceInput = GUILayout.TextField(diceInput, GUILayout.Width(120));
+            int.TryParse(diceInput, out diceNumber);
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(8);
+            GUILayout.Label("單挑", myStyle);
+            winLose = GUILayout.Toggle(winLose, "顯示直接勝利/失敗按鈕");
+
+            GUILayout.Space(8);
+            GUILayout.Label("團體戰", myStyle);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("玩家死亡"))
+                ShowGameOver(GameOverType.PlayerDie);
+            if (GUILayout.Button("友方獲勝"))
+                ShowGameOver(GameOverType.FriendWin);
+            if (GUILayout.Button("敵方獲勝"))
+                ShowGameOver(GameOverType.EnemyWin);
+            if (GUILayout.Button("時間到"))
+                ShowGameOver(GameOverType.Timeout);
+            GUILayout.EndHorizontal();
+        }
+
+        // 角色屬性 / 好感度 / 旗標 share one table: name, note, range, current, new value, set, +1, -1, lock
+        private void DrawValueTable()
+        {
+            // Header stays outside the scroll view so it doesn't scroll away. Each header cell uses the
+            // style of the control below it minus the background, so text and spacing match exactly.
+            // The header is boxed; rows get the same padding without the frame.
+            // All text cells also take the value field's top/bottom margin and padding (but no left/right,
+            // so columns stay put). That puts every cell's first line on the same line as the field's text.
+            // GUI.skin is only readable inside OnGUI, so the styles are built on the first draw
+            if (_textStyle == null)
+            {
+                RectOffset fieldMargin = GUI.skin.textField.margin, fieldPadding = GUI.skin.textField.padding;
+                RectOffset buttonMargin = GUI.skin.button.margin, buttonPadding = GUI.skin.button.padding;
+                _textStyle = new GUIStyle(myStyle)
+                {
+                    margin = new RectOffset(0, 0, fieldMargin.top, fieldMargin.bottom),
+                    padding = new RectOffset(0, 0, fieldPadding.top, fieldPadding.bottom),
+                };
+                _headerInputStyle = new GUIStyle(GUI.skin.textField) { normal = { background = null }, fontSize = myStyle.fontSize };
+                _headerButtonStyle = new GUIStyle(GUI.skin.button)
+                {
+                    normal = { background = null },
+                    fontSize = myStyle.fontSize,
+                    margin = new RectOffset(buttonMargin.left, buttonMargin.right, fieldMargin.top, fieldMargin.bottom),
+                    padding = new RectOffset(buttonPadding.left, buttonPadding.right, fieldPadding.top, fieldPadding.bottom),
+                };
+                _headerStyle = new GUIStyle(GUI.skin.box) { margin = new RectOffset() };
+                _rowStyle = new GUIStyle { padding = GUI.skin.box.padding };
+            }
+
+            // The list fills the rest of the window; one row per value, the note shrinks first
+            GUILayout.BeginVertical("box", GUILayout.ExpandHeight(true));
+
+            // Search sits in the box with the rows' padding, so "搜尋" lines up with the 名稱 column
+            GUILayout.BeginHorizontal(_rowStyle);
+            GUILayout.Label("搜尋", _textStyle, GUILayout.ExpandWidth(false));
+            GUILayout.Space(8);
+            _searchInput = GUILayout.TextField(_searchInput);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal(_headerStyle);
+            GUILayout.Label("名稱", _textStyle, GUILayout.Width(NameWidth));
+            GUILayout.Label("備註", _textStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
+            GUILayout.Label("範圍", _textStyle, GUILayout.Width(RangeWidth));
+            GUILayout.Label("目前", _textStyle, GUILayout.Width(StateWidth));
+            GUILayout.Label("新數值", _headerInputStyle, GUILayout.Width(InputWidth));
+            GUILayout.Label("操作", _headerButtonStyle, GUILayout.Width(SetWidth));
+            GUILayout.Label("", _headerButtonStyle, GUILayout.Width(StepWidth));
+            GUILayout.Label("", _headerButtonStyle, GUILayout.Width(StepWidth));
+            GUILayout.Label("", _headerButtonStyle, GUILayout.Width(LockWidth));
+            // Room for the always-shown vertical scrollbar of the list
+            GUILayout.Space(GUI.skin.verticalScrollbar.fixedWidth + GUI.skin.verticalScrollbar.margin.left);
+            GUILayout.EndHorizontal();
+
+            _tabScroll[_tab] = GUILayout.BeginScrollView(_tabScroll[_tab], false, true, GUILayout.ExpandHeight(true));
+            PlayerStatManagerData manager = PlayerStatManagerData.Instance;
+            switch (_tab)
+            {
+                case 1:
+                    foreach (GameStat stat in manager.Stats.List)
+                        DrawValueRow(stat, stat.StatType.ToString(), stat.Name, $"{stat.Min} ~ {stat.Max}");
+                    break;
+                case 2:
+                    foreach (RelationshipStat relationship in manager.Relationships.List)
+                        DrawValueRow(relationship, relationship.Type.ToString(), relationship.Active ? "" : "未結識", "0 ~ 100");
+                    break;
+                case 3:
+                    foreach (FlagCollectionData collectionData in MissionManagerData.Instance.FlagsCollection)
+                    foreach (FlagData flagData in collectionData.List)
+                        DrawValueRow(flagData, flagData.name, flagData.DevNote, "");
+                    break;
+            }
+            GUILayout.EndScrollView();
+            GUILayout.EndVertical();
+        }
+
+        private void DrawValueRow(ScriptableObject key, string name, string note, string range)
+        {
+            note = note ?? "";
+            if (
+                _search.Length != 0
+                && name.IndexOf(_search, StringComparison.OrdinalIgnoreCase) < 0
+                && note.IndexOf(_search, StringComparison.OrdinalIgnoreCase) < 0
+            )
+                return;
+
+            GUILayout.BeginHorizontal(_rowStyle);
+            GUILayout.Label(name, _textStyle, GUILayout.Width(NameWidth));
+            GUILayout.Label(note, _textStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
+            GUILayout.Label(range, _textStyle, GUILayout.Width(RangeWidth));
+            int value = GetValue(key);
+            string state = value.ToString();
+            GUILayout.Label(state, _textStyle, GUILayout.Width(StateWidth));
+
+            // Show the live value unless the user is typing a new one
+            string shown = _inputs.TryGetValue(key, out string typed) ? typed : state;
+            string edited = GUILayout.TextField(shown, GUILayout.Width(InputWidth));
+            if (edited != shown)
+                _inputs[key] = edited;
+
+            if (GUILayout.Button("設定", GUILayout.Width(SetWidth)) && int.TryParse(edited, out int newValue))
+                ApplyValue(key, newValue);
+            if (GUILayout.Button("+1", GUILayout.Width(StepWidth)))
+                ApplyValue(key, value + 1);
+            if (GUILayout.Button("-1", GUILayout.Width(StepWidth)))
+                ApplyValue(key, value - 1);
+
+            bool locked = _locks.ContainsKey(key);
+            if (GUILayout.Toggle(locked, locked ? "已鎖定" : "鎖定", GUI.skin.button, GUILayout.Width(LockWidth)) != locked)
+            {
+                if (locked)
+                    _locks.Remove(key);
+                else
+                    _locks[key] = value;
+            }
+            // Ends the row like the header's spacer does, so both meet the padding the same way
+            GUILayout.Space(0);
+            GUILayout.EndHorizontal();
+        }
+
+        // Sets a value from the menu; a locked value is re-locked at the new one
+        private void ApplyValue(ScriptableObject key, int value)
+        {
+            SetValue(key, value);
+            _inputs.Remove(key);
+            if (_locks.ContainsKey(key))
+                _locks[key] = GetValue(key);
+        }
+
+        private static int GetValue(ScriptableObject key)
+        {
+            switch (key)
+            {
+                case GameStat stat:
+                    return stat.Value;
+                case RelationshipStat relationship:
+                    return relationship.Value;
+                default:
+                    return ((FlagData)key).State;
+            }
+        }
+
+        private static void SetValue(ScriptableObject key, int value)
+        {
+            switch (key)
+            {
+                case GameStat stat:
+                    stat.SetValue(value); // clamps to Min ~ Max itself
+                    break;
+                case RelationshipStat relationship:
+                    relationship.SetValue(Mathf.Clamp(value, 0, 100));
+                    break;
+                default:
+                    ((FlagData)key).State = value;
+                    break;
+            }
         }
 
         private static void ShowGameOver(GameOverType type)
@@ -381,11 +384,6 @@ namespace LegendOfMortalMod
         {
             if (speed > 0.0f)
                 Time.timeScale = targetSpeed;
-        }
-
-        private void UpdateCurrentStatValue()
-        {
-            currentStatValue = PlayerStatManagerData.Instance.Stats.Get(gameStatTypes[selectedItemIndex]).Value.ToString();
         }
     }
 }
