@@ -50,3 +50,9 @@ Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值
 
 > [!WARNING]
 > Locking story flags can soft-lock the story. Use with care.
+
+## Screenshots
+
+| 好感度 Affection | 書籍 Books | 旗標 Flags |
+|---|---|---|
+| ![Affection tab](docs/screenshots/affection.webp) | ![Books tab](docs/screenshots/books.webp) | ![Flags tab](docs/screenshots/flags.webp) |
