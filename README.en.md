@@ -31,7 +31,7 @@ Press `F3` in game to open the menu. The key can be changed with `MenuToggleKey`
 |---|---|---|
 | 基本 | Basic | Game speed, dice control, per-session spend limit, battle-end buttons |
 | 角色屬性 | Stats | All player stats: search, set, +1 / -1, lock |
-| 好感度 | Affection | Relationship values for every character, same controls |
+| 好感度 | Affection | Relationship values for every character, same controls; 全滿 (max) / 歸零 (reset) set every character the search shows to 100 / 0 |
 | 旗標 | Flags | Story flags, same controls |
 
 Options on the 基本 (Basic) tab:
@@ -44,7 +44,7 @@ Options on the 基本 (Basic) tab:
 | 顯示直接勝利/失敗按鈕 | Duel (單挑): show instant win/lose buttons |
 | 玩家死亡 / 友方獲勝 / 敵方獲勝 / 時間到 | Group battle (團體戰): end with player dies / allies win / enemies win / time out |
 
-Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值 New value; buttons 設定 Set and 鎖定 Lock. A locked value is restored every frame.
+Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值 New value; buttons 設定 Set and 鎖定 Lock. A locked value is restored every frame. Setting a locked value (including 全滿 / 歸零) re-locks it at the new value.
 
 > [!WARNING]
 > Locking story flags can soft-lock the story. Use with care.
