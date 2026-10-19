@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace LegendOfMortalMod
 {
-    [BepInPlugin("LegendOfMortalMod", "活俠傳修改選單", "1.2.0")]
+    [BepInPlugin("LegendOfMortalMod", "活俠傳修改選單", "1.3.0")]
     public class Plugin : BaseUnityPlugin
     {
         public bool dice;
