@@ -385,7 +385,7 @@ namespace LegendOfMortalMod
             return string.IsNullOrEmpty(name) ? book.Id : name;
         }
 
-        private static string BookNote(Book book) => !book.IsMartial ? "" : book.Complete ? "秘笈" : "殘篇";
+        private static string BookNote(Book book) => book.IsMartial ? "秘笈" : "";
 
         // 全持有 only gives books not held yet; 歸零 skips practiced books, since the save drops a book
         // with no copies and its 修練 progress with it
