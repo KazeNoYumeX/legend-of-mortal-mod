@@ -27,6 +27,14 @@
 
 ## 使用效果 Screenshots
 
-| 好感度 | 書籍 | 旗標 |
-|---|---|---|
-| ![好感度頁](docs/screenshots/affection.webp) | ![書籍頁](docs/screenshots/books.webp) | ![旗標頁](docs/screenshots/flags.webp) |
+### 好感度
+
+![好感度頁](docs/screenshots/affection.webp)
+
+### 書籍
+
+![書籍頁](docs/screenshots/books.webp)
+
+### 旗標
+
+![旗標頁](docs/screenshots/flags.webp)
