@@ -403,7 +403,12 @@ namespace LegendOfMortalMod
             : talent.BattleSkill ? "戰役"
             : "";
 
-        private static int TalentMaxLevel(PlayerTalentData talent) => Traverse.Create(talent).Field("_maxLevel").GetValue<int>();
+        // A renamed field would read as 0 and clamp every skill to 0, so no field means no cap
+        private static int TalentMaxLevel(PlayerTalentData talent)
+        {
+            Traverse field = Traverse.Create(talent).Field("_maxLevel");
+            return field.FieldExists() ? field.GetValue<int>() : int.MaxValue;
+        }
 
         // 全持有 only gives books not held yet; 歸零 skips practiced books, since the save drops a book
         // with no copies and its 修練 progress with it
