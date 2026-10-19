@@ -27,7 +27,7 @@ namespace LegendOfMortalMod
         private ConfigEntry<KeyCode> MenuToggleKey;
         private ConfigEntry<float> UiScale;
         private float _guiScale = 1;
-        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標" };
+        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍" };
         private int _tab;
         private int _tabInput;
         private readonly Vector2[] _tabScroll = new Vector2[TabNames.Length];
@@ -49,6 +49,7 @@ namespace LegendOfMortalMod
         private string speedInput = "1";
         private Rect windowRect;
         private bool winLose;
+        private static readonly LeanLocalizationResolver Locale = new LeanLocalizationResolver();
         public static Plugin Instance { get; private set; }
 
         private void Awake()
@@ -274,6 +275,13 @@ namespace LegendOfMortalMod
                 if (GUILayout.Button("歸零", GUILayout.Width(SetWidth)))
                     SetAllRelationships(0);
             }
+            else if (_tab == 4)
+            {
+                if (GUILayout.Button("全持有", GUILayout.Width(LockWidth + 10)))
+                    SetAllBooks(true);
+                if (GUILayout.Button("歸零", GUILayout.Width(SetWidth)))
+                    SetAllBooks(false);
+            }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal(_headerStyle);
             GUILayout.Label("名稱", _textStyle, GUILayout.Width(NameWidth));
@@ -305,6 +313,10 @@ namespace LegendOfMortalMod
                     foreach (FlagCollectionData collectionData in MissionManagerData.Instance.FlagsCollection)
                     foreach (FlagData flagData in collectionData.List)
                         DrawValueRow(flagData, flagData.name, flagData.DevNote, "");
+                    break;
+                case 4:
+                    foreach (Book book in ItemDatabase.Instance.Books.List)
+                        DrawValueRow(book, BookName(book), BookNote(book), "");
                     break;
             }
             GUILayout.EndScrollView();
@@ -367,6 +379,29 @@ namespace LegendOfMortalMod
             }
         }
 
+        private static string BookName(Book book)
+        {
+            string name = Locale.GetString(book.GetNameKey());
+            return string.IsNullOrEmpty(name) ? book.Id : name;
+        }
+
+        private static string BookNote(Book book) => !book.IsMartial ? "" : book.Complete ? "秘笈" : "殘篇";
+
+        // 全持有 only gives books not held yet; 歸零 skips practiced books, since the save drops a book
+        // with no copies and its 修練 progress with it
+        private void SetAllBooks(bool own)
+        {
+            foreach (Book book in ItemDatabase.Instance.Books.List)
+            {
+                if (!MatchesSearch(BookName(book), BookNote(book)))
+                    continue;
+                if (own && book.CurrentCount == 0)
+                    ApplyValue(book, 1);
+                else if (!own && book.CurrentMartialLevel == 0 && book.CurrentLevelPoints == 0)
+                    ApplyValue(book, 0);
+            }
+        }
+
         // Sets a value from the menu; a locked value is re-locked at the new one
         private void ApplyValue(ScriptableObject key, int value)
         {
@@ -384,6 +419,8 @@ namespace LegendOfMortalMod
                     return stat.Value;
                 case RelationshipStat relationship:
                     return relationship.Value;
+                case ItemData item:
+                    return item.CurrentCount;
                 default:
                     return ((FlagData)key).State;
             }
@@ -398,6 +435,9 @@ namespace LegendOfMortalMod
                     break;
                 case RelationshipStat relationship:
                     relationship.SetValue(Mathf.Clamp(value, 0, 100));
+                    break;
+                case ItemData item:
+                    item.SetCount(Mathf.Max(value, 0));
                     break;
                 default:
                     ((FlagData)key).State = value;
