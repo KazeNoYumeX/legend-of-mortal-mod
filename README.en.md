@@ -34,6 +34,7 @@ Press `F3` in game to open the menu. The key can be changed with `MenuToggleKey`
 | 好感度 | Affection | Relationship values for every character, same controls; 全滿 (max) / 歸零 (reset) set every character the search shows to 100 / 0 |
 | 旗標 | Flags | Story flags, same controls |
 | 書籍 | Books | How many of each book and martial arts manual you hold, same controls; 全持有 (own all) gives 1 of every shown book you lack, 歸零 (reset) sets shown books to 0 but skips manuals you have trained, since the save drops a book you hold none of and its training progress with it |
+| 技能 | Skills | Level of each of the hero's skills (0 = not learned), same controls; the note marks duel (決鬥) and group battle (戰役) skills |
 
 Options on the 基本 (Basic) tab:
 
