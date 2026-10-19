@@ -1,4 +1,6 @@
-# 活俠傳修改 Mod 
+# 活俠傳修改 Mod
+
+繁體中文 | [English](README.en.md)
 
 ## 安裝方法 Installation
 
