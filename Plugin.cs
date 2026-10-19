@@ -266,6 +266,14 @@ namespace LegendOfMortalMod
             GUILayout.Label("搜尋", _textStyle, GUILayout.ExpandWidth(false));
             GUILayout.Space(8);
             _searchInput = GUILayout.TextField(_searchInput);
+            if (_tab == 2)
+            {
+                // Only the rows the search shows
+                if (GUILayout.Button("全滿", GUILayout.Width(SetWidth)))
+                    SetAllRelationships(100);
+                if (GUILayout.Button("歸零", GUILayout.Width(SetWidth)))
+                    SetAllRelationships(0);
+            }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal(_headerStyle);
             GUILayout.Label("名稱", _textStyle, GUILayout.Width(NameWidth));
@@ -291,7 +299,7 @@ namespace LegendOfMortalMod
                     break;
                 case 2:
                     foreach (RelationshipStat relationship in manager.Relationships.List)
-                        DrawValueRow(relationship, relationship.Type.ToString(), relationship.Active ? "" : "未結識", "0 ~ 100");
+                        DrawValueRow(relationship, relationship.Type.ToString(), RelationshipNote(relationship), "0 ~ 100");
                     break;
                 case 3:
                     foreach (FlagCollectionData collectionData in MissionManagerData.Instance.FlagsCollection)
@@ -306,11 +314,7 @@ namespace LegendOfMortalMod
         private void DrawValueRow(ScriptableObject key, string name, string note, string range)
         {
             note = note ?? "";
-            if (
-                _search.Length != 0
-                && name.IndexOf(_search, StringComparison.OrdinalIgnoreCase) < 0
-                && note.IndexOf(_search, StringComparison.OrdinalIgnoreCase) < 0
-            )
+            if (!MatchesSearch(name, note))
                 return;
 
             GUILayout.BeginHorizontal(_rowStyle);
@@ -345,6 +349,22 @@ namespace LegendOfMortalMod
             // Ends the row like the header's spacer does, so both meet the padding the same way
             GUILayout.Space(0);
             GUILayout.EndHorizontal();
+        }
+
+        private bool MatchesSearch(string name, string note) =>
+            _search.Length == 0
+            || name.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0
+            || note.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        private static string RelationshipNote(RelationshipStat relationship) => relationship.Active ? "" : "未結識";
+
+        private void SetAllRelationships(int value)
+        {
+            foreach (RelationshipStat relationship in PlayerStatManagerData.Instance.Relationships.List)
+            {
+                if (MatchesSearch(relationship.Type.ToString(), RelationshipNote(relationship)))
+                    ApplyValue(relationship, value);
+            }
         }
 
         // Sets a value from the menu; a locked value is re-locked at the new one
