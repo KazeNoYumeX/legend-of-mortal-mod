@@ -27,7 +27,7 @@ namespace LegendOfMortalMod
         private ConfigEntry<KeyCode> MenuToggleKey;
         private ConfigEntry<float> UiScale;
         private float _guiScale = 1;
-        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍" };
+        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "技能" };
         private int _tab;
         private int _tabInput;
         private readonly Vector2[] _tabScroll = new Vector2[TabNames.Length];
@@ -318,6 +318,10 @@ namespace LegendOfMortalMod
                     foreach (Book book in ItemDatabase.Instance.Books.List)
                         DrawValueRow(book, BookName(book), BookNote(book), "");
                     break;
+                case 5:
+                    foreach (PlayerTalentData talent in manager.Talents.List)
+                        DrawValueRow(talent, TalentName(talent), TalentNote(talent), $"0 ~ {TalentMaxLevel(talent)}");
+                    break;
             }
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
@@ -387,6 +391,20 @@ namespace LegendOfMortalMod
 
         private static string BookNote(Book book) => book.IsMartial ? "秘笈" : "";
 
+        private static string TalentName(PlayerTalentData talent)
+        {
+            string name = Locale.GetString(talent.GetIdKey());
+            return string.IsNullOrEmpty(name) ? talent.Id : name;
+        }
+
+        private static string TalentNote(PlayerTalentData talent) =>
+            talent.CombatSkill && talent.BattleSkill ? "決鬥、戰役"
+            : talent.CombatSkill ? "決鬥"
+            : talent.BattleSkill ? "戰役"
+            : "";
+
+        private static int TalentMaxLevel(PlayerTalentData talent) => Traverse.Create(talent).Field("_maxLevel").GetValue<int>();
+
         // 全持有 only gives books not held yet; 歸零 skips practiced books, since the save drops a book
         // with no copies and its 修練 progress with it
         private void SetAllBooks(bool own)
@@ -421,6 +439,8 @@ namespace LegendOfMortalMod
                     return relationship.Value;
                 case ItemData item:
                     return item.CurrentCount;
+                case PlayerTalentData talent:
+                    return talent.Level;
                 default:
                     return ((FlagData)key).State;
             }
@@ -438,6 +458,9 @@ namespace LegendOfMortalMod
                     break;
                 case ItemData item:
                     item.SetCount(Mathf.Max(value, 0));
+                    break;
+                case PlayerTalentData talent:
+                    talent.Setup(Mathf.Clamp(value, 0, TalentMaxLevel(talent)));
                     break;
                 default:
                     ((FlagData)key).State = value;
