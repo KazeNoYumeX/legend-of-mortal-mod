@@ -37,7 +37,7 @@ Press `F3` in game to open the menu. The key can be changed with `MenuToggleKey`
 |---|---|---|
 | 基本 | Basic | Game speed, dice control, per-session spend limit, battle-end buttons |
 | 角色屬性 | Stats | All player stats: search, set, +1 / -1, lock |
-| 好感度 | Affection | Relationship values for every character, same controls; 全滿 (max) / 歸零 (reset) set every character the search shows to 100 / 0 |
+| 好感度 | Affection | Relationship values for every character, same controls; 全滿 (max) / 歸零 (reset) set every character the search shows to 100 / 0; click the note 已結識 (met) / 未結識 (not met) to toggle it, and 全部結識 (meet all) marks every character the search shows as met |
 | 旗標 | Flags | Story flags, same controls |
 | 書籍 | Books | How many of each book and martial arts manual you hold, same controls; 全持有 (own all) gives 1 of every shown book you lack, 歸零 (reset) sets shown books to 0 but skips manuals you have trained, since the save drops a book you hold none of and its training progress with it |
 | 技能 | Skills | Level of each of the hero's skills (0 = not learned), same controls; the note marks duel (決鬥) and group battle (戰役) skills |
@@ -57,6 +57,7 @@ Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值
 > [!WARNING]
 > - Locking story flags can soft-lock the story. If unsure, don't lock them.
 > - Normal play never teaches many skills at once, and some skills replace a lower one. Setting levels directly can leave you with both, which may break battles.
+> - Changing whether a character is met only adds them to the list. It does not play the meeting story or set its flags, so related events may break or happen early.
 > - Flags and skills deliberately have no one-click buttons like 全持有 / 歸零, because they are riskier for your save. Save often before editing.
 
 ## Screenshots
