@@ -274,6 +274,8 @@ namespace LegendOfMortalMod
                     ForShownRelationships(relationship => ApplyValue(relationship, 100));
                 if (GUILayout.Button("歸零", GUILayout.Width(SetWidth)))
                     ForShownRelationships(relationship => ApplyValue(relationship, 0));
+                if (GUILayout.Button("全部結識", GUILayout.Width(LockWidth + 30)))
+                    ForShownRelationships(relationship => relationship.SetActive(true));
             }
             else if (_tab == 4)
             {
@@ -335,7 +337,14 @@ namespace LegendOfMortalMod
 
             GUILayout.BeginHorizontal(_rowStyle);
             GUILayout.Label(name, _textStyle, GUILayout.Width(NameWidth));
-            GUILayout.Label(note, _textStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
+            if (key is RelationshipStat relationship)
+            {
+                if (GUILayout.Button(note, GUILayout.Width(LockWidth + 10)))
+                    relationship.SetActive(!relationship.Active);
+                GUILayout.FlexibleSpace();
+            }
+            else
+                GUILayout.Label(note, _textStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
             GUILayout.Label(range, _textStyle, GUILayout.Width(RangeWidth));
             int value = GetValue(key);
             string state = value.ToString();
@@ -372,7 +381,7 @@ namespace LegendOfMortalMod
             || name.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0
             || note.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0;
 
-        private static string RelationshipNote(RelationshipStat relationship) => relationship.Active ? "" : "未結識";
+        private static string RelationshipNote(RelationshipStat relationship) => relationship.Active ? "已結識" : "未結識";
 
         private void ForShownRelationships(Action<RelationshipStat> action)
         {
