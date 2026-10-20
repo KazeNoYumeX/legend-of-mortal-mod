@@ -271,9 +271,9 @@ namespace LegendOfMortalMod
             {
                 // Only the rows the search shows
                 if (GUILayout.Button("全滿", GUILayout.Width(SetWidth)))
-                    SetAllRelationships(100);
+                    ForShownRelationships(relationship => ApplyValue(relationship, 100));
                 if (GUILayout.Button("歸零", GUILayout.Width(SetWidth)))
-                    SetAllRelationships(0);
+                    ForShownRelationships(relationship => ApplyValue(relationship, 0));
             }
             else if (_tab == 4)
             {
@@ -374,12 +374,12 @@ namespace LegendOfMortalMod
 
         private static string RelationshipNote(RelationshipStat relationship) => relationship.Active ? "" : "未結識";
 
-        private void SetAllRelationships(int value)
+        private void ForShownRelationships(Action<RelationshipStat> action)
         {
             foreach (RelationshipStat relationship in PlayerStatManagerData.Instance.Relationships.List)
             {
                 if (MatchesSearch(relationship.Type.ToString(), RelationshipNote(relationship)))
-                    ApplyValue(relationship, value);
+                    action(relationship);
             }
         }
 
