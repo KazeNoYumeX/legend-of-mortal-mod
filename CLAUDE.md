@@ -11,7 +11,7 @@ A BepInEx 6 plugin (HarmonyX-based mod) for the Unity game **活俠傳 / Legend 
 - SDK-style `LegendOfMortalMod.csproj`, `net472`, `LangVersion latest`: `dotnet build -c Release`
 - After building, the DLL is copied to `$(GamePath)\BepInEx\plugins\LegendOfMortalMod\` if that folder exists. `GamePath` defaults to the Steam install (`C:\Program Files (x86)\Steam\steamapps\common\LegendOfMortal`); pass `-p:GamePath=NUL` to build without deploying.
 - Formatting: CSharpier — `dotnet tool restore` then `dotnet csharpier .`
-- No tests. Verify by launching with `explorer.exe "steam://rungameid/1859910"` and reading `<game>\BepInEx\LogOutput.log`. It should list `Loading [活俠傳修改選單 1.0.0]` and no Harmony errors. Check the log's timestamp first: when BepInEx doesn't start, the file is not rewritten and you read the previous run's log.
+- No tests. Verify by launching with `explorer.exe "steam://rungameid/1859910"` and reading `<game>\BepInEx\LogOutput.log`. It should list `Loading [活俠傳修改選單 <version>]` and no Harmony errors. Check the log's timestamp first: when BepInEx doesn't start, the file is not rewritten and you read the previous run's log.
 
 ## Game/loader gotchas
 
