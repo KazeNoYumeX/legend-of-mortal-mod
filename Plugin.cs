@@ -8,6 +8,7 @@ using BepInEx.Unity.Mono;
 using HarmonyLib;
 using Mortal.Core;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace LegendOfMortalMod
 {
@@ -26,7 +27,10 @@ namespace LegendOfMortalMod
         private Vector2Int lastScreenSize;
         private ConfigEntry<KeyCode> MenuToggleKey;
         private ConfigEntry<float> UiScale;
+        private ConfigEntry<bool> MenuOpaque;
         private float _guiScale = 1;
+        // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
+        private RectTransform _clickBlocker;
         private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "技能" };
         private int _tab;
         private int _tabInput;
@@ -69,6 +73,7 @@ namespace LegendOfMortalMod
                 1f,
                 "Menu size multiplier, on top of automatic scaling to screen height (1080p = 1x)"
             );
+            MenuOpaque = Config.Bind("LegendOfMortalMod", "MenuOpaque", false, "Draw the menu on an opaque background");
 
             _harmony = Harmony.CreateAndPatchAll(typeof(Patch));
         }
@@ -126,6 +131,29 @@ namespace LegendOfMortalMod
             SetActive("[UI]/TopPanel/MenuPanel/TestLose", false);
 
             DiceControl.Update(_diceButtons);
+            UpdateClickBlocker();
+        }
+
+        private void UpdateClickBlocker()
+        {
+            if (_clickBlocker == null)
+            {
+                if (!_showMenu)
+                    return;
+                GameObject canvas = new GameObject("LegendOfMortalMod.ClickBlocker", typeof(Canvas), typeof(GraphicRaycaster));
+                DontDestroyOnLoad(canvas);
+                canvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                canvas.GetComponent<Canvas>().sortingOrder = short.MaxValue;
+                GameObject panel = new GameObject("Panel", typeof(RectTransform), typeof(Image));
+                panel.transform.SetParent(canvas.transform, false);
+                panel.GetComponent<Image>().color = Color.clear;
+                _clickBlocker = panel.GetComponent<RectTransform>();
+                // IMGUI measures from the top left, in menu units scaled by _guiScale
+                _clickBlocker.anchorMin = _clickBlocker.anchorMax = _clickBlocker.pivot = new Vector2(0, 1);
+            }
+            _clickBlocker.gameObject.SetActive(_showMenu);
+            _clickBlocker.anchoredPosition = new Vector2(windowRect.x, -windowRect.y) * _guiScale;
+            _clickBlocker.sizeDelta = windowRect.size * _guiScale;
         }
 
         private void OnGUI()
@@ -138,7 +166,17 @@ namespace LegendOfMortalMod
             if (_battleButtons)
                 BattleResult.DrawButtons(_guiScale);
             if (_showMenu)
+            {
+                // Windows draw after everything else, so this sits behind the window's own see-through skin
+                if (MenuOpaque.Value)
+                {
+                    Color oldColor = GUI.color;
+                    GUI.color = new Color(0.1f, 0.1f, 0.1f, 1);
+                    GUI.DrawTexture(windowRect, Texture2D.whiteTexture);
+                    GUI.color = oldColor;
+                }
                 windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
+            }
             GUI.matrix = oldMatrix;
         }
 
@@ -228,6 +266,7 @@ namespace LegendOfMortalMod
             // 單挑隨時顯示；團體戰只在暫停選單顯示
             _battleButtons = GUILayout.Toggle(_battleButtons, "戰鬥畫面顯示結算按鈕");
             _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
+            MenuOpaque.Value = GUILayout.Toggle(MenuOpaque.Value, "選單不透明");
         }
 
         // 角色屬性 / 好感度 / 旗標 share one table: name, note, range, current, new value, set, +1, -1, lock
