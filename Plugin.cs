@@ -412,6 +412,16 @@ namespace LegendOfMortalMod
             string state = value.ToString();
             GUILayout.Label(state, _textStyle, GUILayout.Width(StateWidth));
 
+            // 講經堂 entries are unlock only: one button while the count is still 0
+            if (key is LibraryItemData)
+            {
+                if (value == 0 && GUILayout.Button("解鎖", GUILayout.Width(InputWidth)))
+                    ApplyValue(key, value + 1);
+                GUILayout.Space(0);
+                GUILayout.EndHorizontal();
+                return;
+            }
+
             // Show the live value unless the user is typing a new one
             string shown = _inputs.TryGetValue(key, out string typed) ? typed : state;
             string edited = GUILayout.TextField(shown, GUILayout.Width(InputWidth));
@@ -578,12 +588,8 @@ namespace LegendOfMortalMod
                     talent.Setup(Mathf.Clamp(value, 0, TalentMaxLevel(talent)));
                     break;
                 case LibraryItemData entry:
-                    // Unlock only: the count (0 = locked) never goes down
-                    if (value > entry.Count)
-                    {
-                        entry.Set(value);
-                        Instance._saveUniverse = true;
-                    }
+                    entry.Set(value);
+                    Instance._saveUniverse = true;
                     break;
                 default:
                     ((FlagData)key).State = value;
