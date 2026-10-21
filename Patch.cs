@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using HarmonyLib;
 using Mortal.Battle;
 using Mortal.Combat;
@@ -10,17 +11,60 @@ namespace LegendOfMortalMod
 {
     public class Patch
     {
+        // 骰子畫面開啟、擲骰、關閉，給 DiceControl 的指定按鈕用
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(DiceMenuDialog), "ExecuteRoll")]
+        public static void DiceOpen(DiceMenuDialog __instance, string[] options, string checkName)
+        {
+            DiceControl.Begin(__instance, checkName, options);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(DiceMenuDialog), "Roll")]
+        public static void DiceRoll(DiceMenuDialog __instance)
+        {
+            DiceControl.BeginRoll(__instance);
+        }
+
+        // 指定的擲骰跳過轉盤動畫
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(DiceMenuDialog), "StartSpin")]
+        public static bool DiceFastSpin(DiceMenuDialog __instance, ref IEnumerator __result)
+        {
+            if (!DiceControl.FastRoll(__instance))
+                return true;
+            __result = DiceControl.FastSpin(__instance);
+            return false;
+        }
+
+        // 指定的擲骰出結果後不等「繼續」(也略過命運點重擲的詢問)
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(DiceMenuDialog), "GetNextInput")]
+        public static void DiceFastContinue(DiceMenuDialog __instance, ref bool __result)
+        {
+            if (DiceControl.FastRolled(__instance))
+                __result = true;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(DiceMenuDialog), "OnDisable")]
+        public static void DiceClose(DiceMenuDialog __instance)
+        {
+            DiceControl.End(__instance);
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(CheckPointManager), "Dice")]
-        public static bool ModifyDiceNumber(ref int random)
+        public static void BeforeDice(string name, ref int random)
         {
-            if (!Plugin.Instance.dice)
-                return true;
+            DiceControl.BeforeDice(name, ref random);
+        }
 
-            if (Plugin.Instance.diceNumber > 0 && Plugin.Instance.diceNumber < 100)
-                random = Plugin.Instance.diceNumber;
-
-            return true;
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(CheckPointManager), "Dice")]
+        public static void AfterDice(string name, DiceCheckResult __result)
+        {
+            DiceControl.AfterDice(name, __result);
         }
 
         // 練功 / 煉丹 / 鍛造面板的「最大消費」次數來源，面板打開時記下來

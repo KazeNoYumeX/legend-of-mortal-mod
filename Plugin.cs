@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Configuration;
+using BepInEx.Logging;
 using BepInEx.Unity.Mono;
 using HarmonyLib;
-using Mortal.Battle;
 using Mortal.Core;
 using UnityEngine;
 
@@ -13,10 +14,9 @@ namespace LegendOfMortalMod
     [BepInPlugin("LegendOfMortalMod", "活俠傳修改選單", "1.3.0")]
     public class Plugin : BaseUnityPlugin
     {
-        public bool dice;
-        public int diceNumber = 50;
+        private bool _battleButtons;
+        private bool _diceButtons;
         private readonly GUIStyle myStyle = new GUIStyle();
-        private string diceInput = "50";
         public bool spendLimit;
         public int spendLimitNumber = 99;
         private string spendLimitInput = "99";
@@ -48,14 +48,15 @@ namespace LegendOfMortalMod
         private float speed = 1;
         private string speedInput = "1";
         private Rect windowRect;
-        private bool winLose;
         private static readonly LeanLocalizationResolver Locale = new LeanLocalizationResolver();
         public static Plugin Instance { get; private set; }
+        internal static ManualLogSource Log { get; private set; }
 
         private void Awake()
         {
             Instance = this;
-            
+            Log = Logger;
+
             MenuToggleKey = Config.Bind(
                 "LegendOfMortalMod",
                 "MenuToggleKey",
@@ -121,24 +122,42 @@ namespace LegendOfMortalMod
             SetActive("[UI]/MainUI/Layer_1/TestDayButton", false);
             SetActive("[UI]/MainUI/Layer_1/TestNightButton", false);
             SetActive("[UI]/MainUI/Layer_5/TestAnimationPanel", false);
-            SetActive("[UI]/TopPanel/MenuPanel/TestWin",  winLose);
-            SetActive("[UI]/TopPanel/MenuPanel/TestLose", winLose);
+            SetActive("[UI]/TopPanel/MenuPanel/TestWin", false);
+            SetActive("[UI]/TopPanel/MenuPanel/TestLose", false);
+
+            DiceControl.Update(_diceButtons);
         }
 
         private void OnGUI()
         {
-            if (!_showMenu)
+            if (!_showMenu && !_battleButtons)
                 return;
 
             Matrix4x4 oldMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(_guiScale, _guiScale, 1));
-            windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
+            if (_battleButtons)
+                BattleResult.DrawButtons(_guiScale);
+            if (_showMenu)
+                windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
             GUI.matrix = oldMatrix;
         }
 
         private void OnDestroy()
         {
             _harmony?.UnpatchSelf();
+            DiceControl.Clear();
+        }
+
+        internal static IEnumerable<object> Items(object obj, string field)
+        {
+            if (obj != null && Traverse.Create(obj).Field(field).GetValue() is IEnumerable list)
+            {
+                foreach (object item in list)
+                {
+                    if (item != null)
+                        yield return item;
+                }
+            }
         }
 
         // The menu is laid out on a virtual screen 1080 / UiScale units high and scaled up to the real one
@@ -198,12 +217,6 @@ namespace LegendOfMortalMod
             float.TryParse(speedInput, out speed);
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            dice = GUILayout.Toggle(dice, "控制骰子", GUILayout.Width(200));
-            diceInput = GUILayout.TextField(diceInput, GUILayout.Width(120));
-            int.TryParse(diceInput, out diceNumber);
-            GUILayout.EndHorizontal();
-
             // 練功 / 煉丹 / 鍛造的「最大消費」，面板打開時套用
             GUILayout.BeginHorizontal();
             spendLimit = GUILayout.Toggle(spendLimit, "單次消費上限", GUILayout.Width(200));
@@ -212,21 +225,9 @@ namespace LegendOfMortalMod
             GUILayout.EndHorizontal();
 
             GUILayout.Space(8);
-            GUILayout.Label("單挑", myStyle);
-            winLose = GUILayout.Toggle(winLose, "顯示直接勝利/失敗按鈕");
-
-            GUILayout.Space(8);
-            GUILayout.Label("團體戰", myStyle);
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("玩家死亡"))
-                ShowGameOver(GameOverType.PlayerDie);
-            if (GUILayout.Button("友方獲勝"))
-                ShowGameOver(GameOverType.FriendWin);
-            if (GUILayout.Button("敵方獲勝"))
-                ShowGameOver(GameOverType.EnemyWin);
-            if (GUILayout.Button("時間到"))
-                ShowGameOver(GameOverType.Timeout);
-            GUILayout.EndHorizontal();
+            // 單挑隨時顯示；團體戰只在暫停選單顯示
+            _battleButtons = GUILayout.Toggle(_battleButtons, "戰鬥畫面顯示結算按鈕");
+            _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
         }
 
         // 角色屬性 / 好感度 / 旗標 share one table: name, note, range, current, new value, set, +1, -1, lock
@@ -480,11 +481,6 @@ namespace LegendOfMortalMod
                     ((FlagData)key).State = value;
                     break;
             }
-        }
-
-        private static void ShowGameOver(GameOverType type)
-        {
-            Traverse.Create(GameLevelManager.Instance).Method("ShowGameOver", type, true).GetValue();
         }
 
         private void SetTimeScale(float targetSpeed)

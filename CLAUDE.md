@@ -22,13 +22,15 @@ A BepInEx 6 plugin (HarmonyX-based mod) for the Unity game **活俠傳 / Legend 
 ## Dependencies
 
 - BepInEx `6.0.0-be.697` (`BepInEx.Unity.Mono`, which brings HarmonyX) and `UnityEngine.Modules 2020.3.49` come from NuGet (`nuget.bepinex.dev`, configured in the csproj). Keep the BepInEx package version the same as the BepInEx build installed in the game. A BepInEx 5 install loads no BepInEx 6 plugins (log says `0 plugins to load`).
-- Game assemblies `Mortal.Core/Battle/Combat/Story.dll` are committed in `assembly-libaries/` (note the misspelled folder name). Refresh them from `<game>\Mortal_Data\Managed` after game updates.
+- Game assemblies `Mortal.Core/Battle/Combat/Story.dll` and `UnityEngine.UI.dll` are committed in `assembly-libaries/` (note the misspelled folder name). Refresh them from `<game>\Mortal_Data\Managed` after game updates.
 
 ## Architecture
 
-Two source files:
+Source files:
 
-- `Plugin.cs` — the `BaseUnityPlugin` entry point. `Awake` binds config and calls `Harmony.CreateAndPatchAll(typeof(Patch))` (instance kept for `UnpatchSelf` in `OnDestroy`); exposes a static `Plugin.Instance` so patches can read menu state (e.g. `dice`, `diceNumber`). `Update` enforces `Time.timeScale` for accelerate mode and toggles the game's hidden developer UI objects by hard-coded hierarchy paths (`GameObject.Find("[UI]/MainUI/...")`). `OnGUI`/`DoMyWindow` draws the tabbed IMGUI menu: 基本 (speed, dice control, battle-end triggers), then 角色屬性 (`PlayerStatManagerData.Instance.Stats`), 好感度 (`.Relationships`) and 旗標 (`MissionManagerData.Instance.FlagsCollection`), which share one searchable table (`DrawValueRow`) with set/+1/-1 and a lock that `Update` re-applies every frame.
+- `Plugin.cs` — the `BaseUnityPlugin` entry point. `Awake` binds config and calls `Harmony.CreateAndPatchAll(typeof(Patch))` (instance kept for `UnpatchSelf` in `OnDestroy`); exposes a static `Plugin.Instance` so patches can read menu state (e.g. `spendLimit`). `Update` enforces `Time.timeScale` for accelerate mode and toggles the game's hidden developer UI objects by hard-coded hierarchy paths (`GameObject.Find("[UI]/MainUI/...")`). `OnGUI`/`DoMyWindow` draws the tabbed IMGUI menu: 基本 (speed, spend limit, toggles for the battle and dice overlays), then 角色屬性 (`PlayerStatManagerData.Instance.Stats`), 好感度 (`.Relationships`) and 旗標 (`MissionManagerData.Instance.FlagsCollection`), which share one searchable table (`DrawValueRow`) with set/+1/-1 and a lock that `Update` re-applies every frame.
+- `BattleResult.cs` — semi-transparent 判定勝利/落敗/平手 IMGUI buttons (second click within 3 s confirms) over a fight (單挑 always, 團體戰 only while paused), ending it through the game's own result paths.
+- `DiceControl.cs` — uGUI 指定 buttons injected into the dice dialog, one per option; works out the raw roll that lands on it and forces the result in the `CheckPointManager.Dice` patches; that roll skips the wheel spin and the 繼續 prompt.
 - `Patch.cs` — Harmony patches against game types. Notably it forces `Debug.isDebugBuild` to return `true`, which unlocks the game's built-in dev/test features that the menu relies on; other patches then suppress the unwanted dev overlays (FPS display, profiler, `DevelopmentOnly`, test buttons).
 
 Conventions:
