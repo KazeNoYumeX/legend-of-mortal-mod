@@ -118,7 +118,7 @@ namespace LegendOfMortalMod
                 }
             }
 
-            // Debug builds show these test controls; keep them hidden
+            // Test controls left in the scenes; keep them hidden
             SetActive("[UI]/MainUI/Layer_1/TestDayButton", false);
             SetActive("[UI]/MainUI/Layer_1/TestNightButton", false);
             SetActive("[UI]/MainUI/Layer_5/TestAnimationPanel", false);

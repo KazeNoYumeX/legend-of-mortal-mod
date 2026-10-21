@@ -95,53 +95,12 @@ namespace LegendOfMortalMod
             return false;
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(DevelopmentOnly), "Start")]
-        public static bool DevelopmentOnly(ref DevelopmentOnly __instance)
-        {
-            bool isActive = Traverse.Create(__instance).Field("_active").GetValue<bool>();
-            if (!Debug.isDebugBuild && isActive)
-                __instance.gameObject.SetActive(false);
-            return false;
-        }
-
-        // 單挑的 Win/Lose 測試按鈕，isDebugBuild 被改成 true 後會顯示，結算改用 BattleResult
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(CombatResultTestButton), "Start")]
-        public static bool TestButton(ref CombatResultTestButton __instance)
-        {
-            __instance.gameObject.SetActive(false);
-            return false;
-        }
-        
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Debug), "isDebugBuild", MethodType.Getter)]
-        public static void isDebugBuild(ref bool __result)
-        {
-            __result = true;
-        }
-        
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(FpsDisplayController), "Update")]
-        public static bool FpsDisplayController()
-        {
-            return false;
-        }
-
         // 左上角資源監視器 Profiler
         [HarmonyPrefix]
         [HarmonyPatch(typeof(ProfilerRecorderController), "OnGUI")]
         public static bool ProfilerRecorderController()
         {
             return false;
-        }
-
-        // 左下角劇情 key 除錯輸入框，遊戲在 isDebugBuild 時才顯示
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(StoryMainUI), "Awake")]
-        public static void HideDebugStoryKey(ref StoryMainUI __instance)
-        {
-            Traverse.Create(__instance).Field("_debugStoryKey").GetValue<Component>()?.gameObject.SetActive(false);
         }
 
         // 戰役結束顯示滑鼠
