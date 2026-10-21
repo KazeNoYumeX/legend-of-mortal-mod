@@ -19,9 +19,9 @@
 
     <!-- Game assemblies, copied from <game>\Mortal_Data\Managed (UnityEngine.UI is not in the UnityEngine.Modules package) -->
     <ItemGroup>
-        <Reference Include="assembly-libaries\Mortal.*.dll" Private="false" />
-        <Reference Include="assembly-libaries\UnityEngine.UI.dll" Private="false" />
-        <Reference Include="assembly-libaries\Fungus.dll" Private="false" />
+        <Reference Include="lib\Mortal.*.dll" Private="false" />
+        <Reference Include="lib\UnityEngine.UI.dll" Private="false" />
+        <Reference Include="lib\Fungus.dll" Private="false" />
     </ItemGroup>
 
     <!-- Copy the built plugin into the game when it is installed. Override with -p:GamePath=... -->

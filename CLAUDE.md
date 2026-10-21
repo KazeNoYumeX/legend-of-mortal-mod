@@ -22,7 +22,7 @@ A BepInEx 6 plugin (HarmonyX-based mod) for the Unity game **活俠傳 / Legend 
 ## Dependencies
 
 - BepInEx `6.0.0-be.697` (`BepInEx.Unity.Mono`, which brings HarmonyX) and `UnityEngine.Modules 2020.3.49` come from NuGet (`nuget.bepinex.dev`, configured in the csproj). Keep the BepInEx package version the same as the BepInEx build installed in the game. A BepInEx 5 install loads no BepInEx 6 plugins (log says `0 plugins to load`).
-- Game assemblies `Mortal.Core/Battle/Combat/Story.dll`, `UnityEngine.UI.dll` and `Fungus.dll` are committed in `assembly-libaries/` (note the misspelled folder name). Refresh them from `<game>\Mortal_Data\Managed` after game updates.
+- Game assemblies `Mortal.Core/Battle/Combat/Story.dll`, `UnityEngine.UI.dll` and `Fungus.dll` are committed in `lib/`. Refresh them from `<game>\Mortal_Data\Managed` after game updates.
 
 ## Architecture
 
