@@ -35,7 +35,7 @@ Press `F3` in game to open the menu. The key can be changed with `MenuToggleKey`
 
 | Tab | Meaning | What it does |
 |---|---|---|
-| 基本 | Basic | Game speed, dice control, per-session spend limit, battle-end buttons |
+| 基本 | Basic | Game speed, per-session spend limit, battle result buttons, dice pick buttons |
 | 角色屬性 | Stats | All player stats: search, set, +1 / -1, lock |
 | 好感度 | Affection | Relationship values for every character, same controls; 全滿 (max) / 歸零 (reset) set every character the search shows to 100 / 0; click the note 已結識 (met) / 未結識 (not met) to toggle it, and 全部結識 (meet all) marks every character the search shows as met |
 | 旗標 | Flags | Story flags, same controls |
@@ -47,10 +47,9 @@ Options on the 基本 (Basic) tab:
 | Label | Meaning |
 |---|---|
 | 開啟加速 | Speed up the game by the multiplier in the field |
-| 控制骰子 | Force story dice rolls (checks) to the number in the field (1–99) |
 | 單次消費上限 | Override the per-session spend limit of training (練功), alchemy (煉丹) and forging (鍛造). Tick it and enter the number before opening the panel; if the panel is already open, close and reopen it |
-| 顯示直接勝利/失敗按鈕 | Duel (單挑): show instant win/lose buttons |
-| 玩家死亡 / 友方獲勝 / 敵方獲勝 / 時間到 | Group battle (團體戰): end with player dies / allies win / enemies win / time out |
+| 戰鬥畫面顯示結算按鈕 | Show 判定勝利 (win) / 判定落敗 (lose) at the top of a fight, plus 判定平手 (draw) in duels that have a draw exit. Click again within 3 s to confirm; the story continues as if the fight ended normally. Always shown in duels (單挑), only in the pause menu in group battles (團體戰) |
+| 骰子畫面顯示指定按鈕 | Add a 指定 (pick) button left of each option of a story dice roll (check); it rolls that result straight away, skipping the wheel. Picking again after a roll costs a fate point, like the game's reroll |
 
 Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值 New value; buttons 設定 Set and 鎖定 Lock. A locked value is restored every frame. Setting a locked value (including 全滿 / 歸零) re-locks it at the new value, which is handy for things like money (銀兩) or poison points (毒藥點數). Every tab has a search box that matches the name or the note.
 
