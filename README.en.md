@@ -51,7 +51,7 @@ Options on the 基本 (Basic) tab:
 | 單次消費上限 | Override the per-session spend limit of training (練功), alchemy (煉丹) and forging (鍛造). Tick it and enter the number before opening the panel; if the panel is already open, close and reopen it |
 | 戰鬥畫面顯示結算按鈕 | Show 判定勝利 (win) / 判定落敗 (lose) at the top of a fight, plus 判定平手 (draw) in duels that have a draw exit. Click again within 3 s to confirm; the story continues as if the fight ended normally. Always shown in duels (單挑), only in the pause menu in group battles (團體戰) |
 | 骰子畫面顯示指定按鈕 | Add a 指定 (pick) button left of each option of a story dice roll (check); it rolls that result straight away, skipping the wheel. Picking again after a roll costs a fate point, like the game's reroll |
-| 選單不透明 | Draw the menu on an opaque background (remembered). Either way, clicks on the menu never reach the game buttons behind it |
+| 選單不透明 | Clicks on the menu don't reach the game buttons behind it (on by default, remembered). It only blocks clicks; the menu looks the same |
 
 Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值 New value; buttons 設定 Set and 鎖定 Lock (講經堂 has only 解鎖 Unlock). A locked value is restored every frame. Setting a locked value (including 全滿 / 歸零) re-locks it at the new value, which is handy for things like money (銀兩) or poison points (毒藥點數). Every tab has a search box that matches the name or the note.
 
