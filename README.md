@@ -70,7 +70,3 @@
 ### 旗標
 
 ![旗標頁](docs/screenshots/flags.webp)
-
-## 致謝 Credits
-
-- 戰鬥結算按鈕與骰子指定按鈕的做法參考 [Toufff/zhaohuo-system](https://github.com/Toufff/zhaohuo-system)（MIT）

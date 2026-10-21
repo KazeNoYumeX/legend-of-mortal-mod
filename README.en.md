@@ -74,7 +74,3 @@ Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值
 ### 旗標 Flags
 
 ![Flags tab](docs/screenshots/flags.webp)
-
-## Credits
-
-- The battle result and dice pick buttons follow the approach of [Toufff/zhaohuo-system](https://github.com/Toufff/zhaohuo-system) (MIT)
