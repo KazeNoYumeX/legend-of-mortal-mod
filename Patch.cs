@@ -95,6 +95,14 @@ namespace LegendOfMortalMod
             return false;
         }
 
+        // 遊戲讀過全域存檔才會存它 (LoadUniverseData 結尾也會存)；在那之前講經堂是空的，存了會蓋掉真的紀錄
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SaveSystem), "SaveUniverseData")]
+        public static void UniverseSaved()
+        {
+            Plugin.Instance.universeLoaded = true;
+        }
+
         // 左上角資源監視器 Profiler
         [HarmonyPrefix]
         [HarmonyPatch(typeof(ProfilerRecorderController), "OnGUI")]

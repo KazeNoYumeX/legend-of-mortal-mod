@@ -31,7 +31,10 @@ namespace LegendOfMortalMod
         private float _guiScale = 1;
         // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
         private RectTransform _clickBlocker;
-        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "技能" };
+        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "技能", "講經堂" };
+        // 講經堂 records live in the global save (Save_universe.dat), which the game only writes at certain points
+        private bool _saveUniverse;
+        internal bool universeLoaded;
         private int _tab;
         private int _tabInput;
         private readonly Vector2[] _tabScroll = new Vector2[TabNames.Length];
@@ -100,6 +103,13 @@ namespace LegendOfMortalMod
             {
                 if (GetValue(locked.Key) != locked.Value)
                     SetValue(locked.Key, locked.Value);
+            }
+
+            // Once per frame, so 全部解鎖 writes the file once
+            if (_saveUniverse && universeLoaded && SaveSystem.Instance != null)
+            {
+                _saveUniverse = false;
+                SaveSystem.Instance.SaveUniverseData();
             }
 
             if (_accelerateMode)
@@ -324,6 +334,15 @@ namespace LegendOfMortalMod
                 if (GUILayout.Button("歸零", GUILayout.Width(SetWidth)))
                     SetAllBooks(false);
             }
+            else if (_tab == 6)
+            {
+                if (GUILayout.Button("全部解鎖", GUILayout.Width(LockWidth + 30)))
+                    ForLibraryEntries((item, note) =>
+                    {
+                        if (item.Count == 0 && MatchesSearch(LibraryTitle(item), note))
+                            ApplyValue(item, 1);
+                    });
+            }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal(_headerStyle);
             GUILayout.Label("名稱", _textStyle, GUILayout.Width(NameWidth));
@@ -363,6 +382,9 @@ namespace LegendOfMortalMod
                 case 5:
                     foreach (PlayerTalentData talent in manager.Talents.List)
                         DrawValueRow(talent, TalentName(talent), TalentNote(talent), $"0 ~ {TalentMaxLevel(talent)}");
+                    break;
+                case 6:
+                    ForLibraryEntries((item, note) => DrawValueRow(item, LibraryTitle(item), note, ""));
                     break;
             }
             GUILayout.EndScrollView();
@@ -459,6 +481,30 @@ namespace LegendOfMortalMod
             return field.FieldExists() ? field.GetValue<int>() : int.MaxValue;
         }
 
+        // 生死簿 and 汗青書 in 講經堂; the list name is the note, so searching it shows one list
+        private static void ForLibraryEntries(Action<LibraryItemData, string> action)
+        {
+            LibrarySystem library = LibrarySystem.Instance;
+            if (library == null || !Instance.universeLoaded)
+                return;
+            foreach (LibraryItemData item in library.Dead.List)
+            {
+                if (item != null)
+                    action(item, "生死簿");
+            }
+            foreach (LibraryItemData item in library.EndGame.List)
+            {
+                if (item != null)
+                    action(item, "汗青書");
+            }
+        }
+
+        private static string LibraryTitle(LibraryItemData item)
+        {
+            string name = Locale.GetString(item.GetTitleKey());
+            return string.IsNullOrEmpty(name) ? item.name : name;
+        }
+
         // 全持有 only gives books not held yet; 歸零 skips practiced books, since the save drops a book
         // with no copies and its 修練 progress with it
         private void SetAllBooks(bool own)
@@ -495,6 +541,8 @@ namespace LegendOfMortalMod
                     return item.CurrentCount;
                 case PlayerTalentData talent:
                     return talent.Level;
+                case LibraryItemData entry:
+                    return entry.Count;
                 default:
                     return ((FlagData)key).State;
             }
@@ -515,6 +563,14 @@ namespace LegendOfMortalMod
                     break;
                 case PlayerTalentData talent:
                     talent.Setup(Mathf.Clamp(value, 0, TalentMaxLevel(talent)));
+                    break;
+                case LibraryItemData entry:
+                    // Unlock only: the count (0 = locked) never goes down
+                    if (value > entry.Count)
+                    {
+                        entry.Set(value);
+                        Instance._saveUniverse = true;
+                    }
                     break;
                 default:
                     ((FlagData)key).State = value;
