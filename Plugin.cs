@@ -412,11 +412,21 @@ namespace LegendOfMortalMod
             string state = value.ToString();
             GUILayout.Label(state, _textStyle, GUILayout.Width(StateWidth));
 
-            // 講經堂 entries are unlock only: one button while the count is still 0
+            // 講經堂 entries are unlock only: one button while the count is still 0. The unused columns are
+            // blank cells styled like the header's, so the columns line up with the other rows
             if (key is LibraryItemData)
             {
-                if (value == 0 && GUILayout.Button("解鎖", GUILayout.Width(InputWidth)))
-                    ApplyValue(key, value + 1);
+                GUILayout.Label("", _headerInputStyle, GUILayout.Width(InputWidth));
+                if (value == 0)
+                {
+                    if (GUILayout.Button("解鎖", GUILayout.Width(SetWidth)))
+                        ApplyValue(key, value + 1);
+                }
+                else
+                    GUILayout.Label("", _headerButtonStyle, GUILayout.Width(SetWidth));
+                GUILayout.Label("", _headerButtonStyle, GUILayout.Width(StepWidth));
+                GUILayout.Label("", _headerButtonStyle, GUILayout.Width(StepWidth));
+                GUILayout.Label("", _headerButtonStyle, GUILayout.Width(LockWidth));
                 GUILayout.Space(0);
                 GUILayout.EndHorizontal();
                 return;
