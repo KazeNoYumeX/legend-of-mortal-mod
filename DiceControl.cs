@@ -199,7 +199,6 @@ namespace LegendOfMortalMod
 
         private static void Render()
         {
-            ReadBranches();
             bool canSpecify = CanSpecify();
             // 一欄按鈕放在遊戲選項左邊，避開選項超出框的文字
             float columnWidth = MinButtonWidth, rowsLeft = float.MaxValue;
@@ -241,10 +240,12 @@ namespace LegendOfMortalMod
         {
             if (_dialog == null || !CanSpecify())
                 return;
-            _pendingBranch = branch;
-            _pendingRaw = branch < _raws.Length ? _raws[branch] : null;
             try
             {
+                // 按下時才算，避免每幀重找點數，也用當下的加成
+                ReadBranches();
+                _pendingBranch = branch;
+                _pendingRaw = branch < _raws.Length ? _raws[branch] : null;
                 // 只走遊戲自己的開始方式，轉盤、結果顯示和消耗都照原本的流程
                 if (!_awaitingFirstRoll)
                 {
