@@ -7,6 +7,7 @@ using Mortal.Battle;
 using Mortal.Combat;
 using Mortal.Core;
 using UnityEngine;
+using SceneController = Mortal.Core.SceneController;
 
 namespace LegendOfMortalMod
 {
