@@ -212,7 +212,7 @@ namespace LegendOfMortalMod
                 if (!visible)
                     continue;
                 Text label = button.GetComponentInChildren<Text>();
-                label.text = _pendingBranch == branch ? "已指定" : "指定";
+                label.text = "指定";
                 button.interactable = canSpecify;
                 columnWidth = Mathf.Max(columnWidth, label.preferredWidth + 20);
                 rowsLeft = Mathf.Min(rowsLeft, VisualBounds(NativeRows[i]).xMin);
