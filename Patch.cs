@@ -105,12 +105,12 @@ namespace LegendOfMortalMod
             return false;
         }
 
+        // 單挑的 Win/Lose 測試按鈕，isDebugBuild 被改成 true 後會顯示，結算改用 BattleResult
         [HarmonyPrefix]
         [HarmonyPatch(typeof(CombatResultTestButton), "Start")]
         public static bool TestButton(ref CombatResultTestButton __instance)
         {
-            if (!Debug.isDebugBuild)
-                __instance.gameObject.SetActive(false);
+            __instance.gameObject.SetActive(false);
             return false;
         }
         
