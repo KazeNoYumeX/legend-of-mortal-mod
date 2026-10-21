@@ -11,7 +11,7 @@ using UnityEngine.UI;
 namespace LegendOfMortalMod
 {
     // 骰子畫面每個選項左邊加一顆「指定」按鈕，按下就擲骰並落在那個選項，跳過轉盤動畫。結果仍由遊戲自己結算。
-    // 做法參考 Toufff/zhaohuo-system 的 GameAdapter / NativeDicePresenter (MIT)
+    // 改寫自 Toufff/zhaohuo-system 的 GameAdapter / NativeDicePresenter，Copyright (c) 2026 Toufff，MIT 授權，見 THIRD-PARTY-NOTICES.md
     internal static class DiceControl
     {
         private const float ButtonHeight = 32, MinButtonWidth = 76;

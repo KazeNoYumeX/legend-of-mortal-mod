@@ -12,7 +12,7 @@ using SceneController = Mortal.Core.SceneController;
 namespace LegendOfMortalMod
 {
     // 戰鬥畫面上方中央的半透明結算按鈕，走遊戲自己的結算流程，劇情旗標和真的打完一樣。
-    // 做法參考 Toufff/zhaohuo-system 的 CombatResult (MIT)
+    // 改寫自 Toufff/zhaohuo-system 的 CombatResult，Copyright (c) 2026 Toufff，MIT 授權，見 THIRD-PARTY-NOTICES.md
     internal static class BattleResult
     {
         private const int Win = 0, Lose = 1, Stalemate = 2;
