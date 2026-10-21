@@ -131,7 +131,8 @@ namespace LegendOfMortalMod
             _dialog = null;
             _name = "";
             _optionCount = 0;
-            _awaitingFirstRoll = _rollRequested = _rolling = _observedActive = _failed = _fastRoll = _fastRolled = false;
+            // _failed 不重設：壞過一次就到遊戲重開前都不再加按鈕，免得每次骰子都再報錯
+            _awaitingFirstRoll = _rollRequested = _rolling = _observedActive = _fastRoll = _fastRolled = false;
             _pendingRaw = _pendingBranch = _forcedBranch = null;
             NativeRows.Clear();
             Buttons.Clear();
