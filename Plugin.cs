@@ -485,7 +485,7 @@ namespace LegendOfMortalMod
         private static void ForLibraryEntries(Action<LibraryItemData, string> action)
         {
             LibrarySystem library = LibrarySystem.Instance;
-            if (library == null || !Instance.universeLoaded)
+            if (library == null || !Instance.UniverseLoaded(library))
                 return;
             foreach (LibraryItemData item in library.Dead.List)
             {
@@ -497,6 +497,19 @@ namespace LegendOfMortalMod
                 if (item != null)
                     action(item, "汗青書");
             }
+        }
+
+        // The game loads the global save at startup, often before our patches see it; all counts start at 0,
+        // so any recorded entry also means it is loaded
+        private bool UniverseLoaded(LibrarySystem library)
+        {
+            foreach (LibraryItemCollection collection in new[] { library.Dead, library.EndGame, library.Achievement, library.EndCg })
+            {
+                if (universeLoaded)
+                    break;
+                universeLoaded = collection != null && collection.List.Exists(item => item != null && item.Count > 0);
+            }
+            return universeLoaded;
         }
 
         private static string LibraryTitle(LibraryItemData item)
