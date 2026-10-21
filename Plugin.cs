@@ -265,7 +265,7 @@ namespace LegendOfMortalMod
 
             GUILayout.Space(8);
             // 單挑隨時顯示；團體戰只在暫停選單顯示
-            _battleButtons = GUILayout.Toggle(_battleButtons, "戰鬥畫面顯示結算按鈕");
+            _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定");
             _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
             BlockMenuClicks.Value = GUILayout.Toggle(BlockMenuClicks.Value, "選單不透明");
         }

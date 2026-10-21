@@ -49,7 +49,7 @@ Options on the 基本 (Basic) tab:
 |---|---|
 | 開啟加速 | Speed up the game by the multiplier in the field |
 | 單次消費上限 | Override the per-session spend limit of training (練功), alchemy (煉丹) and forging (鍛造). Tick it and enter the number before opening the panel; if the panel is already open, close and reopen it |
-| 戰鬥畫面顯示結算按鈕 | Show 判定勝利 (win) / 判定落敗 (lose) at the top of a fight, plus 判定平手 (draw) in duels that have a draw exit. Click again within 3 s to confirm; the story continues as if the fight ended normally. Always shown in duels (單挑), only in the pause menu in group battles (團體戰) |
+| 顯示戰鬥判定 | Show 判定勝利 (win) / 判定落敗 (lose) at the top of a fight, plus 判定平手 (draw) in duels that have a draw exit. Click again within 3 s to confirm; the story continues as if the fight ended normally. Always shown in duels (單挑), only in the pause menu in group battles (團體戰) |
 | 骰子畫面顯示指定按鈕 | Add a 指定 (pick) button left of each option of a story dice roll (check); it rolls that result straight away, skipping the wheel. Picking again after a roll costs a fate point, like the game's reroll |
 | 選單不透明 | Clicks on the menu don't reach the game buttons behind it (on by default, remembered). It only blocks clicks; the menu looks the same |
 
