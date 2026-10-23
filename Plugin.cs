@@ -42,7 +42,7 @@ namespace LegendOfMortalMod
         private int _tab;
         private int _tabInput;
 
-        // 最小化：只留基本頁，視窗縮到內容大小；還原時回到原本的大小
+        // 選單最小化：只留基本頁，視窗縮到內容大小；還原時回到原本的大小
         private bool _minimized;
         private bool _minimizedInput;
         private float _minimizedHeight = 300;
@@ -327,7 +327,7 @@ namespace LegendOfMortalMod
             _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
             _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
             BlockMenuClicks.Value = GUILayout.Toggle(BlockMenuClicks.Value, "選單不透明");
-            _minimizedInput = GUILayout.Toggle(_minimizedInput, "最小化");
+            _minimizedInput = GUILayout.Toggle(_minimizedInput, "選單最小化");
             if (_minimized && Event.current.type == EventType.Repaint)
                 _minimizedHeight = GUILayoutUtility.GetLastRect().yMax + 30;
         }
