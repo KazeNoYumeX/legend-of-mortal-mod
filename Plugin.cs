@@ -75,8 +75,8 @@ namespace LegendOfMortalMod
             StepWidth = 35,
             LockWidth = 50;
         private bool _showMenu;
-        private float speed = 1;
-        private string speedInput = "1";
+        private float speed = 2;
+        private string speedInput = "2";
         private Rect windowRect;
         private static readonly LeanLocalizationResolver Locale = new LeanLocalizationResolver();
         public static Plugin Instance { get; private set; }
