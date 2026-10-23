@@ -15,10 +15,13 @@ namespace LegendOfMortalMod
     // 改寫自 Toufff/zhaohuo-system 的 CombatResult，Copyright (c) 2026 Toufff，MIT 授權，見 THIRD-PARTY-NOTICES.md
     internal static class BattleResult
     {
-        private const int Win = 0, Lose = 1, Stalemate = 2;
+        private const int Win = 0,
+            Lose = 1,
+            Stalemate = 2;
         private static readonly string[] Labels = { "判定勝利", "判定落敗", "判定平手" };
         private const int ForcedEnemyWin = 1; // Mortal.Battle.BattleForceResult
         private const float ConfirmTime = 3f;
+
         // 第一次按下的按鈕，ConfirmTime 秒內再按一次才結算
         private static int _pending = -1;
         private static float _pendingUntil;
@@ -39,7 +42,10 @@ namespace LegendOfMortalMod
                 && Traverse.Create(battle).Property("IsReady").GetValue() is true
                 && !battle.IsGameOver
                 && Traverse.Create(battle).Property("IsPause").GetValue() is true;
-            CombatManager combat = battle == null ? Traverse.Create(typeof(CombatManager)).Property("Instance").GetValue<CombatManager>() : null;
+            CombatManager combat =
+                battle == null
+                    ? Traverse.Create(typeof(CombatManager)).Property("Instance").GetValue<CombatManager>()
+                    : null;
             bool combatReady =
                 combat != null
                 && Time.timeScale > 0
@@ -55,14 +61,21 @@ namespace LegendOfMortalMod
                 _pending = -1;
 
             int[] choices = combatReady && HasDraw(combat) ? new[] { Win, Stalemate, Lose } : new[] { Win, Lose };
-            const float width = 96, height = 28, gap = 8;
+            const float width = 96,
+                height = 28,
+                gap = 8;
             float x = (Screen.width / scale - width * choices.Length - gap * (choices.Length - 1)) / 2;
             Color oldColor = GUI.color;
             GUI.color = new Color(1, 1, 1, 0.6f);
             for (int i = 0; i < choices.Length; i++)
             {
                 bool asking = _pending == choices[i];
-                if (!GUI.Button(new Rect(x + i * (width + gap), 6, width, height), asking ? "再按一次確認" : Labels[choices[i]]))
+                if (
+                    !GUI.Button(
+                        new Rect(x + i * (width + gap), 6, width, height),
+                        asking ? "再按一次確認" : Labels[choices[i]]
+                    )
+                )
                     continue;
                 if (!asking)
                 {
@@ -91,7 +104,8 @@ namespace LegendOfMortalMod
         private static void FinishBattle(GameLevelManager battle, bool win)
         {
             // 輸了劇情還能接下去的關卡用 EnemyWin，其他關卡輸了就是死亡畫面
-            GameOverType type = win ? GameOverType.FriendWin
+            GameOverType type =
+                win ? GameOverType.FriendWin
                 : StoryLoss(Traverse.Create(battle).Field("_levelData").GetValue()) ? GameOverType.EnemyWin
                 : GameOverType.PlayerDie;
             Traverse.Create(battle).Method("PauseGame", false).GetValue();
@@ -103,7 +117,10 @@ namespace LegendOfMortalMod
         {
             if (level == null)
                 return false;
-            if (Traverse.Create(level).Field("_victoryDefeat").GetValue() is true || Traverse.Create(level).Field("_victoryTimeout").GetValue() is true)
+            if (
+                Traverse.Create(level).Field("_victoryDefeat").GetValue() is true
+                || Traverse.Create(level).Field("_victoryTimeout").GetValue() is true
+            )
                 return true;
             foreach (object data in Plugin.Items(level, "_events"))
             foreach (object action in Plugin.Items(data, "_actions"))
@@ -183,7 +200,8 @@ namespace LegendOfMortalMod
             object draw = DrawEvents(combat)
                 .FirstOrDefault(item =>
                     Traverse.Create(item).Field("_logic").GetValue()?.ToString() == "OR"
-                    || Plugin.Items(item, "_conditions")
+                    || Plugin
+                        .Items(item, "_conditions")
                         .Where(condition => condition.GetType().Name != "CombatEventConditionRound")
                         .All(condition => Traverse.Create(condition).Method("Check", combat).GetValue() is true)
                 );

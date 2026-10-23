@@ -30,15 +30,18 @@ namespace LegendOfMortalMod
         private ConfigEntry<float> UiScale;
         private ConfigEntry<bool> BlockMenuClicks;
         private float _guiScale = 1;
+
         // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
         private RectTransform _clickBlocker;
         private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "技能", "講經堂" };
+
         // 講經堂 records live in the global save (Save_universe.dat), which the game only writes at certain points
         private bool _saveUniverse;
         internal bool universeLoaded;
         private int _tab;
         private int _tabInput;
         private readonly Vector2[] _tabScroll = new Vector2[TabNames.Length];
+
         // Unsaved typed values and locked values, keyed by GameStat / RelationshipStat / FlagData
         private readonly Dictionary<ScriptableObject, string> _inputs = new Dictionary<ScriptableObject, string>();
         private readonly Dictionary<ScriptableObject, int> _locks = new Dictionary<ScriptableObject, int>();
@@ -51,7 +54,13 @@ namespace LegendOfMortalMod
         private GUIStyle _rowStyle;
 
         // Table column widths, shared by the header and the rows
-        private const float NameWidth = 200, RangeWidth = 120, StateWidth = 60, InputWidth = 80, SetWidth = 50, StepWidth = 35, LockWidth = 50;
+        private const float NameWidth = 200,
+            RangeWidth = 120,
+            StateWidth = 60,
+            InputWidth = 80,
+            SetWidth = 50,
+            StepWidth = 35,
+            LockWidth = 50;
         private bool _showMenu;
         private float speed = 1;
         private string speedInput = "1";
@@ -65,19 +74,19 @@ namespace LegendOfMortalMod
             Instance = this;
             Log = Logger;
 
-            MenuToggleKey = Config.Bind(
-                "LegendOfMortalMod",
-                "MenuToggleKey",
-                KeyCode.F3,
-                "Menu Toggle Key"
-            );
+            MenuToggleKey = Config.Bind("LegendOfMortalMod", "MenuToggleKey", KeyCode.F3, "Menu Toggle Key");
             UiScale = Config.Bind(
                 "LegendOfMortalMod",
                 "UiScale",
                 1f,
                 "Menu size multiplier, on top of automatic scaling to screen height (1080p = 1x)"
             );
-            BlockMenuClicks = Config.Bind("LegendOfMortalMod", "BlockMenuClicks", true, "Keep clicks on the menu from reaching the game behind it");
+            BlockMenuClicks = Config.Bind(
+                "LegendOfMortalMod",
+                "BlockMenuClicks",
+                true,
+                "Keep clicks on the menu from reaching the game behind it"
+            );
 
             _harmony = Harmony.CreateAndPatchAll(typeof(Patch));
         }
@@ -124,10 +133,7 @@ namespace LegendOfMortalMod
             {
                 if (Time.timeScale != 0)
                 {
-                    if (
-                        !Mathf.Approximately(Time.timeScale, 10)
-                        && !Mathf.Approximately(Time.timeScale, 2)
-                    )
+                    if (!Mathf.Approximately(Time.timeScale, 10) && !Mathf.Approximately(Time.timeScale, 2))
                     {
                         SetTimeScale(1);
                     }
@@ -152,7 +158,11 @@ namespace LegendOfMortalMod
             {
                 if (!block)
                     return;
-                GameObject canvas = new GameObject("LegendOfMortalMod.ClickBlocker", typeof(Canvas), typeof(GraphicRaycaster));
+                GameObject canvas = new GameObject(
+                    "LegendOfMortalMod.ClickBlocker",
+                    typeof(Canvas),
+                    typeof(GraphicRaycaster)
+                );
                 DontDestroyOnLoad(canvas);
                 canvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
                 canvas.GetComponent<Canvas>().sortingOrder = short.MaxValue;
@@ -282,20 +292,31 @@ namespace LegendOfMortalMod
             // GUI.skin is only readable inside OnGUI, so the styles are built on the first draw
             if (_textStyle == null)
             {
-                RectOffset fieldMargin = GUI.skin.textField.margin, fieldPadding = GUI.skin.textField.padding;
-                RectOffset buttonMargin = GUI.skin.button.margin, buttonPadding = GUI.skin.button.padding;
+                RectOffset fieldMargin = GUI.skin.textField.margin,
+                    fieldPadding = GUI.skin.textField.padding;
+                RectOffset buttonMargin = GUI.skin.button.margin,
+                    buttonPadding = GUI.skin.button.padding;
                 _textStyle = new GUIStyle(myStyle)
                 {
                     margin = new RectOffset(0, 0, fieldMargin.top, fieldMargin.bottom),
                     padding = new RectOffset(0, 0, fieldPadding.top, fieldPadding.bottom),
                 };
-                _headerInputStyle = new GUIStyle(GUI.skin.textField) { normal = { background = null }, fontSize = myStyle.fontSize };
+                _headerInputStyle = new GUIStyle(GUI.skin.textField)
+                {
+                    normal = { background = null },
+                    fontSize = myStyle.fontSize,
+                };
                 _headerButtonStyle = new GUIStyle(GUI.skin.button)
                 {
                     normal = { background = null },
                     fontSize = myStyle.fontSize,
                     margin = new RectOffset(buttonMargin.left, buttonMargin.right, fieldMargin.top, fieldMargin.bottom),
-                    padding = new RectOffset(buttonPadding.left, buttonPadding.right, fieldPadding.top, fieldPadding.bottom),
+                    padding = new RectOffset(
+                        buttonPadding.left,
+                        buttonPadding.right,
+                        fieldPadding.top,
+                        fieldPadding.bottom
+                    ),
                 };
                 _headerStyle = new GUIStyle(GUI.skin.box) { margin = new RectOffset() };
                 _rowStyle = new GUIStyle { padding = GUI.skin.box.padding };
@@ -329,11 +350,13 @@ namespace LegendOfMortalMod
             else if (_tab == 6)
             {
                 if (GUILayout.Button("全部解鎖", GUILayout.Width(LockWidth + 30)))
-                    ForLibraryEntries((item, note) =>
-                    {
-                        if (item.Count == 0 && MatchesSearch(LibraryTitle(item), note))
-                            ApplyValue(item, 1);
-                    });
+                    ForLibraryEntries(
+                        (item, note) =>
+                        {
+                            if (item.Count == 0 && MatchesSearch(LibraryTitle(item), note))
+                                ApplyValue(item, 1);
+                        }
+                    );
             }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal(_headerStyle);
@@ -360,7 +383,12 @@ namespace LegendOfMortalMod
                     break;
                 case 2:
                     foreach (RelationshipStat relationship in manager.Relationships.List)
-                        DrawValueRow(relationship, relationship.Type.ToString(), RelationshipNote(relationship), "0 ~ 100");
+                        DrawValueRow(
+                            relationship,
+                            relationship.Type.ToString(),
+                            RelationshipNote(relationship),
+                            "0 ~ 100"
+                        );
                     break;
                 case 3:
                     foreach (FlagCollectionData collectionData in MissionManagerData.Instance.FlagsCollection)
@@ -438,7 +466,10 @@ namespace LegendOfMortalMod
                 ApplyValue(key, value - 1);
 
             bool locked = _locks.ContainsKey(key);
-            if (GUILayout.Toggle(locked, locked ? "已鎖定" : "鎖定", GUI.skin.button, GUILayout.Width(LockWidth)) != locked)
+            if (
+                GUILayout.Toggle(locked, locked ? "已鎖定" : "鎖定", GUI.skin.button, GUILayout.Width(LockWidth))
+                != locked
+            )
             {
                 if (locked)
                     _locks.Remove(key);
@@ -481,7 +512,8 @@ namespace LegendOfMortalMod
             return _loverValues;
         }
 
-        private static string RelationshipNote(RelationshipStat relationship) => relationship.Active ? "已結識" : "未結識";
+        private static string RelationshipNote(RelationshipStat relationship) =>
+            relationship.Active ? "已結識" : "未結識";
 
         private void ForShownRelationships(Action<RelationshipStat> action)
         {
@@ -541,7 +573,15 @@ namespace LegendOfMortalMod
         // so any recorded entry also means it is loaded
         private bool UniverseLoaded(LibrarySystem library)
         {
-            foreach (LibraryItemCollection collection in new[] { library.Dead, library.EndGame, library.Achievement, library.EndCg })
+            foreach (
+                LibraryItemCollection collection in new[]
+                {
+                    library.Dead,
+                    library.EndGame,
+                    library.Achievement,
+                    library.EndCg,
+                }
+            )
             {
                 if (universeLoaded)
                     break;

@@ -14,14 +14,24 @@ namespace LegendOfMortalMod
     // 改寫自 Toufff/zhaohuo-system 的 GameAdapter / NativeDicePresenter，Copyright (c) 2026 Toufff，MIT 授權，見 THIRD-PARTY-NOTICES.md
     internal static class DiceControl
     {
-        private const float ButtonHeight = 32, MinButtonWidth = 76;
+        private const float ButtonHeight = 32,
+            MinButtonWidth = 76;
         private static DiceMenuDialog _dialog;
         private static string _name = "";
         private static int _optionCount;
-        private static bool _awaitingFirstRoll, _rollRequested, _rolling, _observedActive, _failed;
-        private static int? _pendingRaw, _pendingBranch, _forcedBranch;
+        private static bool _awaitingFirstRoll,
+            _rollRequested,
+            _rolling,
+            _observedActive,
+            _failed;
+        private static int? _pendingRaw,
+            _pendingBranch,
+            _forcedBranch;
+
         // 指定的那次擲骰不播轉盤、不等「繼續」，直接出結果
-        private static bool _fastRoll, _fastRolled;
+        private static bool _fastRoll,
+            _fastRolled;
+
         // Index 1..選項數：能落在該選項的原始點數，可能超出轉盤範圍
         private static int?[] _raws = new int?[0];
         private static RectTransform _root;
@@ -159,7 +169,8 @@ namespace LegendOfMortalMod
             _root.anchorMax = Vector2.one;
             _root.sizeDelta = Vector2.zero;
             _root.SetAsLastSibling();
-            Font font = NativeRows[0].GetComponentInChildren<Text>()?.font ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            Font font =
+                NativeRows[0].GetComponentInChildren<Text>()?.font ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             for (int i = 0; i < NativeRows.Count; i++)
                 Buttons.Add(CreateButton(font, i + 1));
         }
@@ -202,12 +213,14 @@ namespace LegendOfMortalMod
         {
             bool canSpecify = CanSpecify();
             // 一欄按鈕放在遊戲選項左邊，避開選項超出框的文字
-            float columnWidth = MinButtonWidth, rowsLeft = float.MaxValue;
+            float columnWidth = MinButtonWidth,
+                rowsLeft = float.MaxValue;
             for (int i = 0; i < Buttons.Count; i++)
             {
                 Button button = Buttons[i];
                 int branch = i + 1;
-                bool visible = branch <= _optionCount && NativeRows[i] != null && NativeRows[i].gameObject.activeInHierarchy;
+                bool visible =
+                    branch <= _optionCount && NativeRows[i] != null && NativeRows[i].gameObject.activeInHierarchy;
                 button.gameObject.SetActive(visible);
                 if (!visible)
                     continue;
@@ -255,7 +268,10 @@ namespace LegendOfMortalMod
                     _dialog.PressRestartButton();
                 }
                 // 自動模式會自己擲，手動轉盤才要按開始
-                else if (Traverse.Create(AccessTools.TypeByName("SystemSettings")).Property("ManualDestiny").GetValue() is true)
+                else if (
+                    Traverse.Create(AccessTools.TypeByName("SystemSettings")).Property("ManualDestiny").GetValue()
+                    is true
+                )
                     _dialog.PressStartButton();
             }
             catch (Exception ex)
@@ -277,7 +293,10 @@ namespace LegendOfMortalMod
             _raws = new int?[_optionCount + 1];
             int min = Traverse.Create(_dialog).Field("_diceMin").GetValue<int>();
             int max = Traverse.Create(_dialog).Field("_diceMax").GetValue<int>();
-            DiceResultConfig config = Traverse.Create(CheckPointManager.Instance).Field("_dice").GetValue<DiceResultConfig>();
+            DiceResultConfig config = Traverse
+                .Create(CheckPointManager.Instance)
+                .Field("_dice")
+                .GetValue<DiceResultConfig>();
             UnityEngine.Object data = null;
             if (config != null)
             {
@@ -328,9 +347,13 @@ namespace LegendOfMortalMod
                 {
                     case "數值":
                         if (traverse.Property("Stat").GetValue() is GameStat stat)
-                            value = stat.LevelLength == 0
-                                ? stat.FinalValue
-                                : (GameStatUtils.GetGameStatLevel(stat.FinalValue, stat.Max, stat.LevelLength) - stat.LevelLength / 2) * 10;
+                            value =
+                                stat.LevelLength == 0
+                                    ? stat.FinalValue
+                                    : (
+                                        GameStatUtils.GetGameStatLevel(stat.FinalValue, stat.Max, stat.LevelLength)
+                                        - stat.LevelLength / 2
+                                    ) * 10;
                         break;
                     case "好感度":
                         if (traverse.Property("Relationship").GetValue() is RelationshipStat relationship)
@@ -359,18 +382,28 @@ namespace LegendOfMortalMod
             Rect bounds = Bounds((RectTransform)row.transform);
             foreach (Text text in row.GetComponentsInChildren<Text>())
             {
-                if (!text.isActiveAndEnabled || string.IsNullOrEmpty(text.text) || text.horizontalOverflow != HorizontalWrapMode.Overflow)
+                if (
+                    !text.isActiveAndEnabled
+                    || string.IsNullOrEmpty(text.text)
+                    || text.horizontalOverflow != HorizontalWrapMode.Overflow
+                )
                     continue;
                 Rect rect = Bounds(text.rectTransform);
                 float local = text.rectTransform.rect.width;
                 float width = text.preferredWidth * (local > 0 ? rect.width / local : 1);
                 float left = text.alignment switch
                 {
-                    TextAnchor.UpperCenter or TextAnchor.MiddleCenter or TextAnchor.LowerCenter => rect.center.x - width / 2,
+                    TextAnchor.UpperCenter or TextAnchor.MiddleCenter or TextAnchor.LowerCenter => rect.center.x
+                        - width / 2,
                     TextAnchor.UpperRight or TextAnchor.MiddleRight or TextAnchor.LowerRight => rect.xMax - width,
                     _ => rect.xMin,
                 };
-                bounds = Rect.MinMaxRect(Mathf.Min(bounds.xMin, left), bounds.yMin, Mathf.Max(bounds.xMax, left + width), bounds.yMax);
+                bounds = Rect.MinMaxRect(
+                    Mathf.Min(bounds.xMin, left),
+                    bounds.yMin,
+                    Mathf.Max(bounds.xMax, left + width),
+                    bounds.yMax
+                );
             }
             return bounds;
         }
