@@ -38,3 +38,4 @@ Source files:
 Conventions:
 - Private/internal game members are accessed via HarmonyX `Traverse` (`Traverse.Create(x).Field("_name")` / `.Method("Name", args)`), not reflection or publicizers. Patches target methods by string name, so a renamed game member compiles fine but fails at runtime. Check the BepInEx log after game updates.
 - Use explicit types rather than `var` (per commit history).
+- `CHANGELOG.md` follows Keep a Changelog: add each user-facing change under `[Unreleased]` in the same commit, in Traditional Chinese under the English `Added` / `Changed` / `Removed` / `Fixed` headings. A release turns `[Unreleased]` into `[x.y.z] - YYYY-MM-DD`, adds its compare link, and its GitHub release notes are taken from that section.

@@ -67,6 +67,8 @@ Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值
 > - Changing whether a character is met only adds them to the list. It does not play the meeting story or set its flags, so related events may break or happen early.
 > - Flags and skills deliberately have no one-click buttons like 全持有 / 歸零, because they are riskier for your save. Save often before editing.
 
+See [CHANGELOG.md](CHANGELOG.md) (Traditional Chinese) for what changed in each version.
+
 ## Screenshots
 
 ### 好感度 Affection
