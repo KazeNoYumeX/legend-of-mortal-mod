@@ -46,6 +46,11 @@ namespace LegendOfMortalMod
         private bool _minimizedInput;
         private float _minimizedHeight = 300;
         private Vector2 _fullSize;
+
+        // 心上人名單是否展開；和分頁一樣等下一次 Layout 才切換
+        private bool _loverList;
+        private bool _loverListInput;
+        private GUIStyle _loverLabelStyle;
         private readonly Vector2[] _tabScroll = new Vector2[TabNames.Length];
 
         // Unsaved typed values and locked values, keyed by GameStat / RelationshipStat / FlagData
@@ -270,6 +275,7 @@ namespace LegendOfMortalMod
             if (Event.current.type == EventType.Layout)
             {
                 _minimized = _minimizedInput;
+                _loverList = _loverListInput;
                 // A filter from another tab would make this one look empty
                 if (_tab != _tabInput)
                     _searchInput = "";
@@ -289,13 +295,33 @@ namespace LegendOfMortalMod
 
         private void DrawBasicTab()
         {
+            // Grouped: time and action points, spending, overlays, the menu itself, then 心上人 last so its list
+            // opens downward without pushing other rows
             // Each row: a 200-wide control, then a 120-wide value field, so the columns line up
             GUILayout.BeginHorizontal();
             _accelerateMode = GUILayout.Toggle(_accelerateMode, "遊戲加速", GUILayout.Width(200));
             speedInput = GUILayout.TextField(speedInput, GUILayout.Width(120));
             float.TryParse(speedInput, out speed);
             GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            RoundControl.Unlimited = GUILayout.Toggle(RoundControl.Unlimited, "行動點無限", GUILayout.Width(200));
+            // 只在大地圖可用；第二次按下 3 秒內才執行
+            GUI.enabled = RoundControl.CanSkip;
+            bool confirming = Time.unscaledTime < _skipConfirmUntil;
+            if (GUILayout.Button(confirming ? "確定嗎？" : "跳過本旬", GUILayout.Width(120)))
+            {
+                if (confirming)
+                {
+                    _skipConfirmUntil = 0;
+                    RoundControl.Skip();
+                }
+                else
+                    _skipConfirmUntil = Time.unscaledTime + 3f;
+            }
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
 
+            GUILayout.Space(8);
             // 修練 / 煉丹 / 鍛造面板的「最大消費」次數不限
             bool spend = GUILayout.Toggle(unlimitedSpend, "無限消費");
             if (spend != unlimitedSpend)
@@ -317,30 +343,17 @@ namespace LegendOfMortalMod
                 }
             }
 
-            GUILayout.BeginHorizontal();
-            RoundControl.Unlimited = GUILayout.Toggle(RoundControl.Unlimited, "行動點無限", GUILayout.Width(200));
-            // 只在大地圖可用；第二次按下 3 秒內才執行
-            GUI.enabled = RoundControl.CanSkip;
-            bool confirming = Time.unscaledTime < _skipConfirmUntil;
-            if (GUILayout.Button(confirming ? "確定嗎？" : "跳過本旬", GUILayout.Width(120)))
-            {
-                if (confirming)
-                {
-                    _skipConfirmUntil = 0;
-                    RoundControl.Skip();
-                }
-                else
-                    _skipConfirmUntil = Time.unscaledTime + 3f;
-            }
-            GUI.enabled = true;
-            GUILayout.EndHorizontal();
-
             GUILayout.Space(8);
             // 單挑隨時顯示；團體戰只在暫停選單顯示
             _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
             _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
+
+            GUILayout.Space(8);
             BlockMenuClicks.Value = GUILayout.Toggle(BlockMenuClicks.Value, "選單不透明");
             _minimizedInput = GUILayout.Toggle(_minimizedInput, "選單最小化");
+
+            GUILayout.Space(8);
+            DrawLoverRow();
             if (_minimized && Event.current.type == EventType.Repaint)
                 _minimizedHeight = GUILayoutUtility.GetLastRect().yMax + 30;
         }
@@ -552,28 +565,75 @@ namespace LegendOfMortalMod
 
         private static string _loverValues;
         private static string _loverLang;
+        private static readonly List<int> LoverIds = new List<int>();
+        private static readonly List<string> LoverNames = new List<string>();
 
-        // 愛人 holds a lover id; the game names each one under PlayerInfo/Lover/<id>. Listed like the flags' notes
+        // 愛人 holds a lover id; the game names each one under PlayerInfo/Lover/<id>
+        private static void LoadLovers(GameStat stat)
+        {
+            // Looked up again after a language switch, and until the locale is loaded
+            string lang = Locale.GetCurrentLang();
+            if (LoverIds.Count > 0 && lang == _loverLang)
+                return;
+            _loverLang = lang;
+            LoverIds.Clear();
+            LoverNames.Clear();
+            StringBuilder values = new StringBuilder();
+            for (int id = stat.Min; id <= stat.Max; id++)
+            {
+                string key = "PlayerInfo/Lover/" + id;
+                string lover = Locale.GetString(key);
+                if (string.IsNullOrEmpty(lover) || lover == key)
+                    continue;
+                LoverIds.Add(id);
+                LoverNames.Add(lover);
+                values.Append($"\n={id}，{lover}");
+            }
+            _loverValues = values.ToString().TrimStart('\n');
+        }
+
+        // Listed like the flags' notes
         private static string StatNote(GameStat stat)
         {
             if (stat.StatType != GameStatType.愛人)
                 return stat.Name;
-            // Looked up again after a language switch, and until the locale is loaded
-            string lang = Locale.GetCurrentLang();
-            if (string.IsNullOrEmpty(_loverValues) || lang != _loverLang)
-            {
-                _loverLang = lang;
-                StringBuilder values = new StringBuilder();
-                for (int id = stat.Min; id <= stat.Max; id++)
-                {
-                    string key = "PlayerInfo/Lover/" + id;
-                    string lover = Locale.GetString(key);
-                    if (!string.IsNullOrEmpty(lover) && lover != key)
-                        values.Append($"\n={id}，{lover}");
-                }
-                _loverValues = values.ToString().TrimStart('\n');
-            }
+            LoadLovers(stat);
             return _loverValues;
+        }
+
+        // 心上人：下拉選單，按鈕顯示目前的愛人，展開的名單直接排在按鈕下面
+        private void DrawLoverRow()
+        {
+            if (PlayerStatManagerData.Instance == null)
+                return;
+            GameStat stat = PlayerStatManagerData.Instance.Stats.Get(GameStatType.愛人);
+            LoadLovers(stat);
+            int current = LoverIds.IndexOf(stat.Value);
+            // The skin's label font is much larger; a toggle without its box keeps the other rows' font and indent
+            if (_loverLabelStyle == null)
+                _loverLabelStyle = new GUIStyle(GUI.skin.toggle)
+                {
+                    normal = { background = null },
+                    hover = { background = null },
+                    active = { background = null },
+                };
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("切換心上人", _loverLabelStyle, GUILayout.Width(200));
+            GUILayout.BeginVertical(GUILayout.Width(120));
+            string name = current >= 0 ? LoverNames[current] : stat.Value.ToString();
+            if (GUILayout.Button(name + (_loverList ? " ▲" : " ▼")))
+                _loverListInput = !_loverListInput;
+            if (_loverList)
+            {
+                int picked = GUILayout.SelectionGrid(current, LoverNames.ToArray(), 1);
+                if (picked != current)
+                {
+                    stat.SetValue(LoverIds[picked]);
+                    _loverListInput = false;
+                }
+            }
+            GUILayout.EndVertical();
+            GUILayout.EndHorizontal();
         }
 
         private static string RelationshipNote(RelationshipStat relationship) =>
