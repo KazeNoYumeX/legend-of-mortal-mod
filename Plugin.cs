@@ -362,14 +362,19 @@ namespace LegendOfMortalMod
                 }
             }
 
-            GUILayout.Space(8);
-            // 單挑隨時顯示；團體戰只在暫停選單顯示
-            _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
-            _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
-            StorySaveAnywhere.Value = GUILayout.Toggle(StorySaveAnywhere.Value, "劇情中隨時存檔");
+            // Set-and-forget options stay out of the minimized menu
+            if (!_minimized)
+            {
+                GUILayout.Space(8);
+                // 單挑隨時顯示；團體戰只在暫停選單顯示
+                _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
+                _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
+                StorySaveAnywhere.Value = GUILayout.Toggle(StorySaveAnywhere.Value, "劇情中隨時存檔");
+            }
 
             GUILayout.Space(8);
-            BlockMenuClicks.Value = GUILayout.Toggle(BlockMenuClicks.Value, "選單不透明");
+            if (!_minimized)
+                BlockMenuClicks.Value = GUILayout.Toggle(BlockMenuClicks.Value, "選單不透明");
             _minimizedInput = GUILayout.Toggle(_minimizedInput, "選單最小化");
 
             GUILayout.Space(8);

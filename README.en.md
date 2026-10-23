@@ -56,7 +56,7 @@ Options on the 基本 (Basic) tab:
 | 骰子畫面顯示指定按鈕 | Add a 指定 (pick) button left of each option of a story dice roll (check); it rolls that result straight away, skipping the wheel. Picking again after a roll costs a fate point, like the game's reroll |
 | 劇情中隨時存檔 | Save anywhere in a story: the menu's 存檔 (save) works mid-story, e.g. before a choice. Loading replays this part of the story from its start with the values it started with, so after a short replay you are back at the same choice. The game's own save points, the map and battles are unchanged. It is remembered. **It writes save files; back up your saves first** |
 | 選單不透明 | Clicks on the menu don't reach the game buttons behind it (on by default, remembered). It only blocks clicks; the menu looks the same |
-| 選單最小化 | Minimize: hide the other tabs and shrink the window to the basic tab; untick it to restore |
+| 選單最小化 | Minimize: hide the other tabs and shrink the window to the basic tab's everyday options (the battle and dice buttons, save anywhere in a story and 選單不透明 are left out); untick it to restore |
 | 切換心上人 | Lover: a dropdown showing the current lover; open it and pick one to switch (the same as 愛人 on the stats tab). If 愛人 is locked on the stats tab it switches back; unlock it first |
 
 Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值 New value; buttons 設定 Set and 鎖定 Lock (講經堂 has only 解鎖 Unlock). A locked value is restored every frame. Setting a locked value (including 全滿 / 歸零) re-locks it at the new value, which is handy for things like money (銀兩) or poison points (毒藥點數). Every tab has a search box that matches the name or the note.
