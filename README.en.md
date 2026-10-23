@@ -35,7 +35,7 @@ Press `F3` in game to open the menu. The key can be changed with `MenuToggleKey`
 
 | Tab | Meaning | What it does |
 |---|---|---|
-| 基本 | Basic | Game speed, per-session spend limit, unlimited action points, skip this round, battle result buttons, dice pick buttons |
+| 基本 | Basic | Game speed, unlimited sessions, unlimited forging/alchemy/training points and money, unlimited action points, skip this round, battle result buttons, dice pick buttons |
 | 角色屬性 | Stats | All player stats: search, set, +1 / -1, lock |
 | 好感度 | Affection | Relationship values for every character, same controls; 全滿 (max) / 歸零 (reset) set every character the search shows to 100 / 0; click the note 已結識 (met) / 未結識 (not met) to toggle it, and 全部結識 (meet all) marks every character the search shows as met |
 | 旗標 | Flags | Story flags, same controls |
@@ -48,7 +48,8 @@ Options on the 基本 (Basic) tab:
 | Label | Meaning |
 |---|---|
 | 遊戲加速 | Speed up the game by the multiplier in the field |
-| 單次消費上限 | Override the per-session spend limit of training (練功), alchemy (煉丹) and forging (鍛造). Tick it and enter the number before opening the panel; if the panel is already open, close and reopen it |
+| 無限消費 | No limit on the 最大消費 (max sessions) count of training (修練), alchemy (煉丹) and forging (鍛造); shown as ∞. Takes effect at once even with the panel open; unticking waits until the panel is opened again |
+| 無限鍛造/煉丹/修練點數/銀兩 | Sets money and the points to their maximum when ticked; after that, spending money (shops, forging, story alike) and training, alchemy and forging take nothing. A panel not opened yet has its points filled the first time it opens. Money or points locked on the stats tab keep the locked value; unlock them first |
 | 行動點無限 | Fill the action points when switched on; nothing spends them until it is switched off |
 | 跳過本旬 | Map only; click again within 3 seconds to confirm. Gives up the round's remaining action points and moves to the next round; a story due on the way (some main missions need 2 or 1 points left) stops there and plays |
 | 顯示戰鬥判定按鈕 | Show 判定勝利 (win) / 判定落敗 (lose) at the top of a fight, plus 判定平手 (draw) in duels that have a draw exit. Click again within 3 s to confirm; the story continues as if the fight ended normally. Always shown in duels (單挑), only in the pause menu in group battles (團體戰) |

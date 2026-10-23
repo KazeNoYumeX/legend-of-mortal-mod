@@ -19,9 +19,8 @@ namespace LegendOfMortalMod
         private bool _battleButtons;
         private bool _diceButtons;
         private readonly GUIStyle myStyle = new GUIStyle();
-        public bool spendLimit;
-        public int spendLimitNumber = 99;
-        private string spendLimitInput = "99";
+        public bool unlimitedSpend;
+        public bool unlimitedResources;
         private bool _accelerateMode;
         private float _skipConfirmUntil;
         private Harmony _harmony;
@@ -297,12 +296,26 @@ namespace LegendOfMortalMod
             float.TryParse(speedInput, out speed);
             GUILayout.EndHorizontal();
 
-            // 練功 / 煉丹 / 鍛造的「最大消費」，面板打開時套用
-            GUILayout.BeginHorizontal();
-            spendLimit = GUILayout.Toggle(spendLimit, "單次消費上限", GUILayout.Width(200));
-            spendLimitInput = GUILayout.TextField(spendLimitInput, GUILayout.Width(120));
-            int.TryParse(spendLimitInput, out spendLimitNumber);
-            GUILayout.EndHorizontal();
+            // 修練 / 煉丹 / 鍛造面板的「最大消費」次數不限
+            bool spend = GUILayout.Toggle(unlimitedSpend, "無限消費");
+            if (spend != unlimitedSpend)
+            {
+                unlimitedSpend = spend;
+                // 面板開著時勾選也馬上套用；取消則等下次打開面板
+                if (spend)
+                    Patch.RefreshSpendPanels();
+            }
+            bool resources = GUILayout.Toggle(unlimitedResources, "無限鍛造/煉丹/修練點數/銀兩");
+            if (resources != unlimitedResources)
+            {
+                unlimitedResources = resources;
+                // 面板開著時也馬上更新點數和按鈕
+                if (resources)
+                {
+                    Patch.FillResources();
+                    Patch.RefreshSpendPanels();
+                }
+            }
 
             GUILayout.BeginHorizontal();
             RoundControl.Unlimited = GUILayout.Toggle(RoundControl.Unlimited, "行動點無限", GUILayout.Width(200));
