@@ -35,7 +35,7 @@ namespace LegendOfMortalMod
 
         // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
         private RectTransform _clickBlocker;
-        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "技能", "講經堂" };
+        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "特殊物品", "技能", "講經堂" };
 
         // 講經堂 records live in the global save (Save_universe.dat), which the game only writes at certain points
         private bool _saveUniverse;
@@ -449,7 +449,7 @@ namespace LegendOfMortalMod
                 if (GUILayout.Button("歸零", GUILayout.Width(SetWidth)))
                     SetAllBooks(false);
             }
-            else if (_tab == 6)
+            else if (_tab == 7)
             {
                 if (GUILayout.Button("全部解鎖", GUILayout.Width(LockWidth + 30)))
                     ForLibraryEntries(
@@ -499,13 +499,17 @@ namespace LegendOfMortalMod
                     break;
                 case 4:
                     foreach (Book book in ItemDatabase.Instance.Books.List)
-                        DrawValueRow(book, BookName(book), BookNote(book), "");
+                        DrawValueRow(book, ItemName(book), BookNote(book), "");
                     break;
                 case 5:
+                    foreach (ItemData item in ItemDatabase.Instance.Special.List)
+                        DrawValueRow(item, ItemName(item), "", "");
+                    break;
+                case 6:
                     foreach (PlayerTalentData talent in manager.Talents.List)
                         DrawValueRow(talent, TalentName(talent), TalentNote(talent), $"0 ~ {TalentMaxLevel(talent)}");
                     break;
-                case 6:
+                case 7:
                     ForLibraryEntries((item, note) => DrawValueRow(item, LibraryTitle(item), note, ""));
                     break;
             }
@@ -673,10 +677,10 @@ namespace LegendOfMortalMod
             }
         }
 
-        private static string BookName(Book book)
+        private static string ItemName(ItemData item)
         {
-            string name = Locale.GetString(book.GetNameKey());
-            return string.IsNullOrEmpty(name) ? book.Id : name;
+            string name = Locale.GetString(item.GetNameKey());
+            return string.IsNullOrEmpty(name) ? item.Id : name;
         }
 
         private static string BookNote(Book book) => book.IsMartial ? "秘笈" : "";
@@ -751,7 +755,7 @@ namespace LegendOfMortalMod
         {
             foreach (Book book in ItemDatabase.Instance.Books.List)
             {
-                if (!MatchesSearch(BookName(book), BookNote(book)))
+                if (!MatchesSearch(ItemName(book), BookNote(book)))
                     continue;
                 if (own && book.CurrentCount == 0)
                     ApplyValue(book, 1);
