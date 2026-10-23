@@ -64,12 +64,9 @@ namespace LegendOfMortalMod
         // Before SaveSystem.SaveGameData(slot): in a story, away from the game's own save points, write the copy
         public static void BeforeSave()
         {
+            // Not gated on Enabled: a button switched on before the toggle went off must still write the copy
             _writing =
-                Enabled
-                && _snapshot != null
-                && !_nativeOpen
-                && StoryManager.Instance != null
-                && FreeManager.Instance == null;
+                _snapshot != null && !_nativeOpen && StoryManager.Instance != null && FreeManager.Instance == null;
             if (_writing)
                 _snapshot.TimeTick = DateTime.Now.Ticks;
         }
