@@ -2,7 +2,7 @@
 
 `BattleResult.cs`, `DiceControl.cs` and `RoundControl.cs` contain code adapted from
 [zhaohuo-system](https://github.com/Toufff/zhaohuo-system) (`CombatResult.cs`, `GameAdapter.cs`,
-`NativeDicePresenter.cs`, `RoundUnlimited.cs`), used under the following license:
+`NativeDicePresenter.cs`, `RoundSkip.cs`, `RoundUnlimited.cs`), used under the following license:
 
 ```
 MIT License

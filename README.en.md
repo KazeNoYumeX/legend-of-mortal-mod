@@ -35,7 +35,7 @@ Press `F3` in game to open the menu. The key can be changed with `MenuToggleKey`
 
 | Tab | Meaning | What it does |
 |---|---|---|
-| 基本 | Basic | Game speed, per-session spend limit, unlimited action points, battle result buttons, dice pick buttons |
+| 基本 | Basic | Game speed, per-session spend limit, unlimited action points, skip this round, battle result buttons, dice pick buttons |
 | 角色屬性 | Stats | All player stats: search, set, +1 / -1, lock |
 | 好感度 | Affection | Relationship values for every character, same controls; 全滿 (max) / 歸零 (reset) set every character the search shows to 100 / 0; click the note 已結識 (met) / 未結識 (not met) to toggle it, and 全部結識 (meet all) marks every character the search shows as met |
 | 旗標 | Flags | Story flags, same controls |
@@ -50,6 +50,7 @@ Options on the 基本 (Basic) tab:
 | 開啟加速 | Speed up the game by the multiplier in the field |
 | 單次消費上限 | Override the per-session spend limit of training (練功), alchemy (煉丹) and forging (鍛造). Tick it and enter the number before opening the panel; if the panel is already open, close and reopen it |
 | 行動點無限 | Fill the action points when switched on; nothing spends them until it is switched off |
+| 跳過本旬 | Map only; click again within 3 seconds to confirm. Gives up the round's remaining action points and moves to the next round; a story due on the way (some main missions need 2 or 1 points left) stops there and plays |
 | 顯示戰鬥判定按鈕 | Show 判定勝利 (win) / 判定落敗 (lose) at the top of a fight, plus 判定平手 (draw) in duels that have a draw exit. Click again within 3 s to confirm; the story continues as if the fight ended normally. Always shown in duels (單挑), only in the pause menu in group battles (團體戰) |
 | 骰子畫面顯示指定按鈕 | Add a 指定 (pick) button left of each option of a story dice roll (check); it rolls that result straight away, skipping the wheel. Picking again after a roll costs a fate point, like the game's reroll |
 | 選單不透明 | Clicks on the menu don't reach the game buttons behind it (on by default, remembered). It only blocks clicks; the menu looks the same |

@@ -11,7 +11,7 @@ namespace LegendOfMortalMod
 {
     public class Patch
     {
-        // 行動點無限：扣點都走 AddValue 負值；換旬用 Set，不受影響
+        // 行動點無限：扣點都走 AddValue 負值；換旬與跳過本旬用 Set，不受影響
         [HarmonyPrefix]
         [HarmonyPatch(typeof(GameStat), "AddValue")]
         public static bool KeepActionPoints(GameStat __instance, int value)
