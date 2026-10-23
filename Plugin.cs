@@ -35,7 +35,18 @@ namespace LegendOfMortalMod
 
         // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
         private RectTransform _clickBlocker;
-        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "貴重品", "雜物", "技能", "講經堂" };
+        private static readonly string[] TabNames =
+        {
+            "基本",
+            "角色屬性",
+            "好感度",
+            "旗標",
+            "書籍",
+            "貴重品",
+            "雜物",
+            "技能",
+            "講經堂",
+        };
 
         // 講經堂 records live in the global save (Save_universe.dat), which the game only writes at certain points
         private bool _saveUniverse;
