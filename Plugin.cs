@@ -292,7 +292,7 @@ namespace LegendOfMortalMod
         {
             // Each row: a 200-wide control, then a 120-wide value field, so the columns line up
             GUILayout.BeginHorizontal();
-            _accelerateMode = GUILayout.Toggle(_accelerateMode, "開啟加速", GUILayout.Width(200));
+            _accelerateMode = GUILayout.Toggle(_accelerateMode, "遊戲加速", GUILayout.Width(200));
             speedInput = GUILayout.TextField(speedInput, GUILayout.Width(120));
             float.TryParse(speedInput, out speed);
             GUILayout.EndHorizontal();

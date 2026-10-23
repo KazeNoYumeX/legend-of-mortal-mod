@@ -47,7 +47,7 @@ Options on the 基本 (Basic) tab:
 
 | Label | Meaning |
 |---|---|
-| 開啟加速 | Speed up the game by the multiplier in the field |
+| 遊戲加速 | Speed up the game by the multiplier in the field |
 | 單次消費上限 | Override the per-session spend limit of training (練功), alchemy (煉丹) and forging (鍛造). Tick it and enter the number before opening the panel; if the panel is already open, close and reopen it |
 | 行動點無限 | Fill the action points when switched on; nothing spends them until it is switched off |
 | 跳過本旬 | Map only; click again within 3 seconds to confirm. Gives up the round's remaining action points and moves to the next round; a story due on the way (some main missions need 2 or 1 points left) stops there and plays |
