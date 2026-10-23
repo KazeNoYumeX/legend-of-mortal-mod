@@ -35,7 +35,7 @@ namespace LegendOfMortalMod
 
         // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
         private RectTransform _clickBlocker;
-        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "特殊物品", "技能", "講經堂" };
+        private static readonly string[] TabNames = { "基本", "角色屬性", "好感度", "旗標", "書籍", "特殊物品", "雜物", "技能", "講經堂" };
 
         // 講經堂 records live in the global save (Save_universe.dat), which the game only writes at certain points
         private bool _saveUniverse;
@@ -460,7 +460,7 @@ namespace LegendOfMortalMod
                     }
                 }
             }
-            else if (_tab == 7)
+            else if (_tab == 8)
             {
                 if (GUILayout.Button("全部解鎖", GUILayout.Width(LockWidth + 30)))
                     ForLibraryEntries(
@@ -517,10 +517,14 @@ namespace LegendOfMortalMod
                         DrawValueRow(item, ItemName(item), "", "");
                     break;
                 case 6:
+                    foreach (ItemData item in ItemDatabase.Instance.Miscs.List)
+                        DrawValueRow(item, ItemName(item), "", "");
+                    break;
+                case 7:
                     foreach (PlayerTalentData talent in manager.Talents.List)
                         DrawValueRow(talent, TalentName(talent), TalentNote(talent), $"0 ~ {TalentMaxLevel(talent)}");
                     break;
-                case 7:
+                case 8:
                     ForLibraryEntries((item, note) => DrawValueRow(item, LibraryTitle(item), note, ""));
                     break;
             }
