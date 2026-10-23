@@ -41,6 +41,12 @@ namespace LegendOfMortalMod
         internal bool universeLoaded;
         private int _tab;
         private int _tabInput;
+
+        // 最小化：只留基本頁，視窗縮到內容大小；還原時回到原本的大小
+        private bool _minimized;
+        private bool _minimizedInput;
+        private float _minimizedHeight = 300;
+        private Vector2 _fullSize;
         private readonly Vector2[] _tabScroll = new Vector2[TabNames.Length];
 
         // Unsaved typed values and locked values, keyed by GameStat / RelationshipStat / FlagData
@@ -189,8 +195,27 @@ namespace LegendOfMortalMod
             if (_battleButtons)
                 BattleResult.DrawButtons(_guiScale);
             if (_showMenu)
+            {
+                ApplyMinimized();
                 windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
+            }
             GUI.matrix = oldMatrix;
+        }
+
+        private void ApplyMinimized()
+        {
+            if (_minimized)
+            {
+                if (_fullSize == Vector2.zero)
+                    _fullSize = windowRect.size;
+                // Two 200 + 120 columns, plus the area's 10 padding on each side
+                windowRect.size = new Vector2(360, _minimizedHeight);
+            }
+            else if (_fullSize != Vector2.zero)
+            {
+                windowRect.size = _fullSize;
+                _fullSize = Vector2.zero;
+            }
         }
 
         private void OnDestroy()
@@ -220,6 +245,8 @@ namespace LegendOfMortalMod
             float width = screenWidth * 0.5f;
             float height = screenHeight * 0.8f;
             windowRect = new Rect((screenWidth - width) / 2, (screenHeight - height) / 2, width, height);
+            // A minimized window takes the new full size when restored
+            _fullSize = Vector2.zero;
         }
 
         private void SetActive(string path, bool active)
@@ -238,10 +265,12 @@ namespace LegendOfMortalMod
             myStyle.normal.textColor = Color.white;
             GUILayout.BeginArea(new Rect(10, 20, windowRect.width - 20, windowRect.height - 30));
 
-            _tabInput = GUILayout.Toolbar(_tabInput, TabNames);
+            if (!_minimized)
+                _tabInput = GUILayout.Toolbar(_tabInput, TabNames);
             // Layout and the events after it must draw the same controls, so tab and filter changes wait for the next Layout
             if (Event.current.type == EventType.Layout)
             {
+                _minimized = _minimizedInput;
                 // A filter from another tab would make this one look empty
                 if (_tab != _tabInput)
                     _searchInput = "";
@@ -298,6 +327,9 @@ namespace LegendOfMortalMod
             _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
             _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
             BlockMenuClicks.Value = GUILayout.Toggle(BlockMenuClicks.Value, "選單不透明");
+            _minimizedInput = GUILayout.Toggle(_minimizedInput, "最小化");
+            if (_minimized && Event.current.type == EventType.Repaint)
+                _minimizedHeight = GUILayoutUtility.GetLastRect().yMax + 30;
         }
 
         // 角色屬性 / 好感度 / 旗標 share one table: name, note, range, current, new value, set, +1, -1, lock
