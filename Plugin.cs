@@ -314,7 +314,11 @@ namespace LegendOfMortalMod
             // opens downward without pushing other rows
             // Each row: a 200-wide control, then a 120-wide value field, so the columns line up
             GUILayout.BeginHorizontal();
-            _accelerateMode = GUILayout.Toggle(_accelerateMode, "遊戲加速", GUILayout.Width(200));
+            bool accelerate = GUILayout.Toggle(_accelerateMode, "遊戲加速", GUILayout.Width(200));
+            // Update leaves 2x alone (the game's own battle speed), so switching off at 2x would stay at 2x
+            if (_accelerateMode && !accelerate && Time.timeScale != 0)
+                Time.timeScale = 1;
+            _accelerateMode = accelerate;
             speedInput = GUILayout.TextField(speedInput, GUILayout.Width(120));
             float.TryParse(speedInput, out speed);
             GUILayout.EndHorizontal();
