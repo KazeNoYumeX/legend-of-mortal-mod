@@ -32,6 +32,7 @@ Source files:
 - `BattleResult.cs` — semi-transparent 判定勝利/落敗/平手 IMGUI buttons (second click within 3 s confirms) over a fight (單挑 always, 團體戰 only while paused), ending it through the game's own result paths.
 - `DiceControl.cs` — uGUI 指定 buttons injected into the dice dialog, one per option; works out the raw roll that lands on it and forces the result in the `CheckPointManager.Dice` patches; that roll skips the wheel spin and the 繼續 prompt.
 - `RoundControl.cs` — 基本 tab's 行動點無限 (a `GameStat.AddValue` patch blocks spending 行動次數) and 跳過本旬 (free map only: sets the points down one at a time, running the mission check after each as the game does, so a story due partway still plays).
+- `StorySave.cs` — 劇情中隨時存檔. A save keeps only the script to start from, so as each story script loads (`LuaEnvironment.LoadLuaFunction`) a `CreateSaveData` copy is kept; a story save away from the game's own save points (`LuaManager.ToggleSaveButton`) writes that copy, and a load replays the script with the values it started with. Right after a load into a story with no action left, one `UpdateCheckMissions` is skipped so the 旬 doesn't change under the story.
 - `Patch.cs` — Harmony patches against game types. It does not force `Debug.isDebugBuild`, so the game hides its own dev/test UI (`DevelopmentOnly`, test win/lose buttons, FPS display) as in a release build; only the profiler overlay needs a patch.
 
 Conventions:

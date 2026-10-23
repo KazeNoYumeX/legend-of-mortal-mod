@@ -9,6 +9,7 @@ using BepInEx.Unity.Mono;
 using HarmonyLib;
 using Mortal.Core;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace LegendOfMortalMod
@@ -29,6 +30,7 @@ namespace LegendOfMortalMod
         private ConfigEntry<KeyCode> MenuToggleKey;
         private ConfigEntry<float> UiScale;
         private ConfigEntry<bool> BlockMenuClicks;
+        private ConfigEntry<bool> StorySaveAnywhere;
         private float _guiScale = 1;
 
         // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
@@ -99,7 +101,15 @@ namespace LegendOfMortalMod
                 "Keep clicks on the menu from reaching the game behind it"
             );
 
+            StorySaveAnywhere = Config.Bind(
+                "LegendOfMortalMod",
+                "StorySaveAnywhere",
+                false,
+                "Allow saving anywhere in a story; loading replays the story from its start"
+            );
+
             _harmony = Harmony.CreateAndPatchAll(typeof(Patch));
+            SceneManager.activeSceneChanged += OnSceneChanged;
         }
 
         private void Update()
@@ -159,6 +169,8 @@ namespace LegendOfMortalMod
             SetActive("[UI]/TopPanel/MenuPanel/TestLose", false);
 
             DiceControl.Update(_diceButtons);
+            StorySave.Enabled = StorySaveAnywhere.Value;
+            StorySave.Update();
             UpdateClickBlocker();
         }
 
@@ -225,8 +237,11 @@ namespace LegendOfMortalMod
         private void OnDestroy()
         {
             _harmony?.UnpatchSelf();
+            SceneManager.activeSceneChanged -= OnSceneChanged;
             DiceControl.Clear();
         }
+
+        private static void OnSceneChanged(Scene before, Scene after) => StorySave.SceneChanged();
 
         internal static IEnumerable<object> Items(object obj, string field)
         {
@@ -347,6 +362,7 @@ namespace LegendOfMortalMod
             // 單挑隨時顯示；團體戰只在暫停選單顯示
             _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
             _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
+            StorySaveAnywhere.Value = GUILayout.Toggle(StorySaveAnywhere.Value, "劇情中隨時存檔");
 
             GUILayout.Space(8);
             BlockMenuClicks.Value = GUILayout.Toggle(BlockMenuClicks.Value, "選單不透明");

@@ -35,7 +35,7 @@ Press `F3` in game to open the menu. The key can be changed with `MenuToggleKey`
 
 | Tab | Meaning | What it does |
 |---|---|---|
-| 基本 | Basic | Game speed, unlimited action points, skip this round, unlimited sessions, unlimited forging/alchemy/training points and money, battle result buttons, dice pick buttons, lover switch |
+| 基本 | Basic | Game speed, unlimited action points, skip this round, unlimited sessions, unlimited forging/alchemy/training points and money, battle result buttons, dice pick buttons, save anywhere in a story, lover switch |
 | 角色屬性 | Stats | All player stats: search, set, +1 / -1, lock |
 | 好感度 | Affection | Relationship values for every character, same controls; 全滿 (max) / 歸零 (reset) set every character the search shows to 100 / 0; click the note 已結識 (met) / 未結識 (not met) to toggle it, and 全部結識 (meet all) marks every character the search shows as met |
 | 旗標 | Flags | Story flags, same controls |
@@ -54,6 +54,7 @@ Options on the 基本 (Basic) tab:
 | 無限鍛造/煉丹/修練點數/銀兩 | Sets money and the points to their maximum when ticked; after that, spending money (shops, forging, story alike) and training, alchemy and forging take nothing. A panel not opened yet has its points filled the first time it opens. Money or points locked on the stats tab keep the locked value; unlock them first |
 | 顯示戰鬥判定按鈕 | Show 判定勝利 (win) / 判定落敗 (lose) at the top of a fight, plus 判定平手 (draw) in duels that have a draw exit. Click again within 3 s to confirm; the story continues as if the fight ended normally. Always shown in duels (單挑), only in the pause menu in group battles (團體戰) |
 | 骰子畫面顯示指定按鈕 | Add a 指定 (pick) button left of each option of a story dice roll (check); it rolls that result straight away, skipping the wheel. Picking again after a roll costs a fate point, like the game's reroll |
+| 劇情中隨時存檔 | Save anywhere in a story: the menu's 存檔 (save) works mid-story, e.g. before a choice. Loading replays this part of the story from its start with the values it started with, so after a short replay you are back at the same choice. The game's own save points, the map and battles are unchanged. It is remembered. **It writes save files; back up your saves first** |
 | 選單不透明 | Clicks on the menu don't reach the game buttons behind it (on by default, remembered). It only blocks clicks; the menu looks the same |
 | 選單最小化 | Minimize: hide the other tabs and shrink the window to the basic tab; untick it to restore |
 | 切換心上人 | Lover: a dropdown showing the current lover; open it and pick one to switch (the same as 愛人 on the stats tab). If 愛人 is locked on the stats tab it switches back; unlock it first |

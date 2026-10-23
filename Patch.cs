@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Fungus;
 using HarmonyLib;
 using Mortal.Battle;
 using Mortal.Combat;
@@ -165,6 +166,61 @@ namespace LegendOfMortalMod
             if (Plugin.Instance.unlimitedSpend)
                 Traverse.Create(__instance).Field("_maxCountText").GetValue<Text>().text =
                     LocalizationManager.Instance.LocaleResolver.GetString("System/Infinity");
+        }
+
+        // 劇情中隨時存檔，見 StorySave
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(LuaEnvironment), "LoadLuaFunction")]
+        public static void StoryScriptLoaded(string friendlyName)
+        {
+            StorySave.ScriptLoaded(friendlyName);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SaveSystem), "SaveGameData", typeof(string))]
+        public static void BeforeSaveGame()
+        {
+            StorySave.BeforeSave();
+        }
+
+        // Finalizer, not postfix: runs even when the save throws, so the copy never stays in place of later saves
+        [HarmonyFinalizer]
+        [HarmonyPatch(typeof(SaveSystem), "SaveGameData", typeof(string))]
+        public static void AfterSaveGame(string slot)
+        {
+            StorySave.AfterSave(slot);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SaveSystem), "CreateSaveData")]
+        public static bool StorySaveData(ref GameSave __result)
+        {
+            GameSave copy = StorySave.Substitute();
+            if (copy == null)
+                return true;
+            __result = copy;
+            return false;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SaveSystem), "LoadGameData")]
+        public static void GameLoaded()
+        {
+            StorySave.Loaded();
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MissionManagerData), "UpdateCheckMissions")]
+        public static bool KeepRoundAfterLoad()
+        {
+            return !StorySave.KeepRound();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(LuaManager), "ToggleSaveButton")]
+        public static void NativeSaveToggle(int active)
+        {
+            StorySave.NativeToggle(active == 1);
         }
 
         // 遊戲讀過全域存檔才會存它 (LoadUniverseData 結尾也會存)；在那之前講經堂是空的，存了會蓋掉真的紀錄
