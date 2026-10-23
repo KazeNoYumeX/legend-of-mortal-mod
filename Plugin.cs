@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -355,7 +356,7 @@ namespace LegendOfMortalMod
             {
                 case 1:
                     foreach (GameStat stat in manager.Stats.List)
-                        DrawValueRow(stat, stat.StatType.ToString(), stat.Name, $"{stat.Min} ~ {stat.Max}");
+                        DrawValueRow(stat, stat.StatType.ToString(), StatNote(stat), $"{stat.Min} ~ {stat.Max}");
                     break;
                 case 2:
                     foreach (RelationshipStat relationship in manager.Relationships.List)
@@ -453,6 +454,32 @@ namespace LegendOfMortalMod
             _search.Length == 0
             || name.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0
             || note.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        private static string _loverValues;
+        private static string _loverLang;
+
+        // 愛人 holds a lover id; the game names each one under PlayerInfo/Lover/<id>. Listed like the flags' notes
+        private static string StatNote(GameStat stat)
+        {
+            if (stat.StatType != GameStatType.愛人)
+                return stat.Name;
+            // Looked up again after a language switch, and until the locale is loaded
+            string lang = Locale.GetCurrentLang();
+            if (string.IsNullOrEmpty(_loverValues) || lang != _loverLang)
+            {
+                _loverLang = lang;
+                StringBuilder values = new StringBuilder();
+                for (int id = stat.Min; id <= stat.Max; id++)
+                {
+                    string key = "PlayerInfo/Lover/" + id;
+                    string lover = Locale.GetString(key);
+                    if (!string.IsNullOrEmpty(lover) && lover != key)
+                        values.Append($"\n={id}，{lover}");
+                }
+                _loverValues = values.ToString().TrimStart('\n');
+            }
+            return _loverValues;
+        }
 
         private static string RelationshipNote(RelationshipStat relationship) => relationship.Active ? "已結識" : "未結識";
 
