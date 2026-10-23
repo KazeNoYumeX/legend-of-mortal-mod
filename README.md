@@ -79,3 +79,11 @@
 ### 旗標
 
 ![旗標頁](docs/screenshots/flags.webp)
+
+### 技能
+
+![技能頁](docs/screenshots/talents.webp)
+
+### 選單最小化
+
+![選單最小化](docs/screenshots/minimized.webp)

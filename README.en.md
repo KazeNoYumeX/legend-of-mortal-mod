@@ -83,3 +83,11 @@ See [CHANGELOG.md](CHANGELOG.md) (Traditional Chinese) for what changed in each 
 ### 旗標 Flags
 
 ![Flags tab](docs/screenshots/flags.webp)
+
+### 技能 Skills
+
+![Skills tab](docs/screenshots/talents.webp)
+
+### 選單最小化 Minimized menu
+
+![Minimized menu](docs/screenshots/minimized.webp)
