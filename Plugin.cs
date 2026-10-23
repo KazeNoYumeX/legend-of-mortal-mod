@@ -274,6 +274,10 @@ namespace LegendOfMortalMod
             int.TryParse(spendLimitInput, out spendLimitNumber);
             GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal();
+            RoundControl.Unlimited = GUILayout.Toggle(RoundControl.Unlimited, "行動點無限", GUILayout.Width(200));
+            GUILayout.EndHorizontal();
+
             GUILayout.Space(8);
             // 單挑隨時顯示；團體戰只在暫停選單顯示
             _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");

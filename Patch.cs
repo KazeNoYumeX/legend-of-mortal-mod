@@ -11,6 +11,14 @@ namespace LegendOfMortalMod
 {
     public class Patch
     {
+        // 行動點無限：扣點都走 AddValue 負值；換旬用 Set，不受影響
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(GameStat), "AddValue")]
+        public static bool KeepActionPoints(GameStat __instance, int value)
+        {
+            return value >= 0 || __instance.StatType != GameStatType.行動次數 || !RoundControl.Unlimited;
+        }
+
         // 骰子畫面開啟、擲骰、關閉，給 DiceControl 的指定按鈕用
         [HarmonyPrefix]
         [HarmonyPatch(typeof(DiceMenuDialog), "ExecuteRoll")]
