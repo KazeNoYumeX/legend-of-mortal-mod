@@ -449,6 +449,17 @@ namespace LegendOfMortalMod
                 if (GUILayout.Button("歸零", GUILayout.Width(SetWidth)))
                     SetAllBooks(false);
             }
+            else if (_tab == 5)
+            {
+                if (GUILayout.Button("全持有", GUILayout.Width(LockWidth + 10)))
+                {
+                    foreach (ItemData item in ItemDatabase.Instance.Special.List)
+                    {
+                        if (item.CurrentCount == 0 && MatchesSearch(ItemName(item), ""))
+                            ApplyValue(item, 1);
+                    }
+                }
+            }
             else if (_tab == 7)
             {
                 if (GUILayout.Button("全部解鎖", GUILayout.Width(LockWidth + 30)))
