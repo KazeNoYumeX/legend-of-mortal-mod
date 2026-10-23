@@ -449,11 +449,12 @@ namespace LegendOfMortalMod
                 if (GUILayout.Button("歸零", GUILayout.Width(SetWidth)))
                     SetAllBooks(false);
             }
-            else if (_tab == 5)
+            else if (_tab == 5 || _tab == 6)
             {
                 if (GUILayout.Button("全持有", GUILayout.Width(LockWidth + 10)))
                 {
-                    foreach (ItemData item in ItemDatabase.Instance.Special.List)
+                    ItemDataCollection items = _tab == 5 ? ItemDatabase.Instance.Special : ItemDatabase.Instance.Miscs;
+                    foreach (ItemData item in items.List)
                     {
                         if (item.CurrentCount == 0 && MatchesSearch(ItemName(item), ""))
                             ApplyValue(item, 1);

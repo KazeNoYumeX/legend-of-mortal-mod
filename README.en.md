@@ -41,7 +41,7 @@ Press `F3` in game to open the menu. The key can be changed with `MenuToggleKey`
 | 旗標 | Flags | Story flags, same controls |
 | 書籍 | Books | How many of each book and martial arts manual you hold, same controls; 全持有 (own all) gives 1 of every shown book you lack, 歸零 (reset) sets shown books to 0 but skips manuals you have trained, since the save drops a book you hold none of and its training progress with it |
 | 貴重品 | Valuables | How many of each valuable you hold, same controls; 全持有 (own all) gives 1 of every shown valuable you lack. Most are story items, so owning them all may change how the story goes |
-| 雜物 | Misc items | How many of each misc item you hold, same controls |
+| 雜物 | Misc items | How many of each misc item you hold, same controls; 全持有 (own all) gives 1 of every shown misc item you lack |
 | 技能 | Skills | Level of each of the hero's skills (0 = not learned), same controls; the note marks duel (決鬥) and group battle (戰役) skills |
 | 講經堂 | Library | Every entry of 生死簿 (deaths) and 汗青書 (endings). 目前 is how many times it was reached (0 = locked); a locked entry has a 解鎖 (unlock) button. Search 生死簿 or 汗青書 to see one list; 全部解鎖 (unlock all) unlocks every locked entry the search shows. Entries live in the global save shared by all saves, so the current save is untouched, and the menu cannot lock them again |
 
