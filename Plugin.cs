@@ -404,13 +404,13 @@ namespace LegendOfMortalMod
 
             GUILayout.Space(8);
             DrawLoverRow();
+            DrawInfo();
             if (_minimized && Event.current.type == EventType.Repaint)
                 _minimizedHeight = GUILayoutUtility.GetLastRect().yMax + 30;
-            if (!_minimized)
-                DrawInfo();
         }
 
-        // 戰鬥中或劇情中，基本頁下方用小字列出戰鬥結果與事件、本段劇情旗標，剩下的高度可捲動
+        // 戰鬥中或劇情中，基本頁下方用小字列出戰鬥結果與事件、本段劇情旗標，可捲動；最小化時固定高度，
+        // 視窗高度量到這裡為止
         private void DrawInfo()
         {
             List<string> lines =
@@ -425,7 +425,10 @@ namespace LegendOfMortalMod
                     wordWrap = true,
                 };
             GUILayout.Space(8);
-            _infoScroll = GUILayout.BeginScrollView(_infoScroll, GUILayout.ExpandHeight(true));
+            _infoScroll = GUILayout.BeginScrollView(
+                _infoScroll,
+                _minimized ? GUILayout.Height(220) : GUILayout.ExpandHeight(true)
+            );
             foreach (string line in lines)
                 GUILayout.Label(line, _infoStyle);
             GUILayout.EndScrollView();
