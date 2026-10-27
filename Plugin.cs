@@ -21,7 +21,9 @@ namespace LegendOfMortalMod
     {
         private bool _battleButtons;
         private bool _diceButtons;
-        private bool _combatInfo;
+        private bool _battleInfo;
+        private GUIStyle _infoStyle;
+        private Vector2 _infoScroll;
         private readonly GUIStyle myStyle = new GUIStyle();
         public bool unlimitedSpend;
         public bool unlimitedResources;
@@ -217,17 +219,13 @@ namespace LegendOfMortalMod
 
         private void OnGUI()
         {
-            if (!_showMenu && !_battleButtons && !_combatInfo && !StoryFlags.Enabled)
+            if (!_showMenu && !_battleButtons)
                 return;
 
             Matrix4x4 oldMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(_guiScale, _guiScale, 1));
             if (_battleButtons)
                 BattleResult.DrawButtons(_guiScale);
-            if (_combatInfo)
-                CombatInfo.Draw(_guiScale);
-            if (StoryFlags.Enabled)
-                StoryFlags.Draw(_guiScale);
             if (_showMenu)
             {
                 ApplyMinimized();
@@ -386,8 +384,8 @@ namespace LegendOfMortalMod
                 GUILayout.Space(8);
                 // 單挑隨時顯示；團體戰只在暫停選單顯示
                 _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
-                _combatInfo = GUILayout.Toggle(_combatInfo, "顯示單挑結果與回合事件");
-                StoryFlags.Enabled = GUILayout.Toggle(StoryFlags.Enabled, "顯示本段劇情旗標");
+                _battleInfo = GUILayout.Toggle(_battleInfo, "顯示戰鬥結果與事件");
+                StoryFlags.Enabled = GUILayout.Toggle(StoryFlags.Enabled, "顯示本段劇情旗標（判定寫進回想）");
                 _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
                 StorySaveAnywhere.Value = GUILayout.Toggle(StorySaveAnywhere.Value, "劇情中隨時存檔");
             }
@@ -401,6 +399,29 @@ namespace LegendOfMortalMod
             DrawLoverRow();
             if (_minimized && Event.current.type == EventType.Repaint)
                 _minimizedHeight = GUILayoutUtility.GetLastRect().yMax + 30;
+            if (!_minimized)
+                DrawInfo();
+        }
+
+        // 戰鬥中或劇情中，基本頁下方用小字列出戰鬥結果與事件、本段劇情旗標，剩下的高度可捲動
+        private void DrawInfo()
+        {
+            List<string> lines =
+                (_battleInfo ? BattleInfo.Lines() : null) ?? (StoryFlags.Enabled ? StoryFlags.Lines() : null);
+            if (lines == null)
+                return;
+            if (_infoStyle == null)
+                _infoStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 12,
+                    richText = true,
+                    wordWrap = true,
+                };
+            GUILayout.Space(8);
+            _infoScroll = GUILayout.BeginScrollView(_infoScroll, GUILayout.ExpandHeight(true));
+            foreach (string line in lines)
+                GUILayout.Label(line, _infoStyle);
+            GUILayout.EndScrollView();
         }
 
         // 角色屬性 / 好感度 / 旗標 share one table: name, note, range, current, new value, set, +1, -1, lock

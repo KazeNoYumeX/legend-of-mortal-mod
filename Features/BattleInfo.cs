@@ -1,67 +1,57 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Mortal.Battle;
 using Mortal.Combat;
 using Mortal.Core;
 using UnityEngine;
+using static LegendOfMortalMod.Features.GameText;
 using SceneController = Mortal.Core.SceneController;
 
 namespace LegendOfMortalMod.Features
 {
-    // 單挑畫面左上的資料面板：勝利/落敗會改哪些旗標，以及關卡裡依回合、數值等條件觸發的事件
-    internal static class CombatInfo
+    // 基本頁的戰鬥資訊：單挑的勝負旗標和依回合、數值等條件觸發的事件；團體戰的結果旗標和依秒數、人數觸發的事件
+    internal static class BattleInfo
     {
         private static object _level;
         private static List<string> _lines;
-        private static Vector2 _scroll;
 
-        private static readonly Dictionary<string, string> Ops = new Dictionary<string, string>
-        {
-            { "Equal", "=" },
-            { "NotEqual", "≠" },
-            { "Less", "<" },
-            { "LessEqual", "≤" },
-            { "Greater", ">" },
-            { "GreaterEqual", "≥" },
-        };
-
-        // 在 OnGUI 裡、已套用選單縮放的座標下呼叫
-        public static void Draw(float scale)
+        // 目前戰鬥的說明，不在戰鬥中時回傳 null；只在 Layout 時重建，免得 Layout 和 Repaint 畫的行數不同
+        public static List<string> Lines()
         {
             if (SceneController.Instance != null && SceneController.Instance.IsLoading)
-                return;
-            CombatManager combat = Traverse
-                .Create(typeof(CombatManager))
-                .Property("Instance")
-                .GetValue<CombatManager>();
-            object level = combat == null ? null : Traverse.Create(combat).Field("_combatLevel").GetValue();
+                return null;
+            GameLevelManager battle = GameLevelManager.Instance;
+            CombatManager combat =
+                battle == null
+                    ? Traverse.Create(typeof(CombatManager)).Property("Instance").GetValue<CombatManager>()
+                    : null;
+            object level =
+                battle != null ? Traverse.Create(battle).Field("_levelData").GetValue()
+                : combat != null ? Traverse.Create(combat).Field("_combatLevel").GetValue()
+                : null;
             if (level == null)
-                return;
-            if (!ReferenceEquals(level, _level))
+                return null;
+            if (Event.current.type == EventType.Layout || _lines == null)
             {
-                _level = level;
-                _lines = Describe(level);
-                _scroll = Vector2.zero;
+                if (!ReferenceEquals(level, _level))
+                {
+                    _level = level;
+                    _lines = battle != null ? null : DescribeCombat(level);
+                }
+                if (battle != null)
+                    _lines = DescribeBattle(battle, level);
             }
-
-            Rect rect = new Rect(10, 40, 420, Mathf.Min(Screen.height / scale - 60, 480));
-            Color oldColor = GUI.color;
-            GUI.color = new Color(1, 1, 1, 0.85f);
-            GUI.Box(rect, "");
-            GUILayout.BeginArea(new Rect(rect.x + 8, rect.y + 6, rect.width - 16, rect.height - 12));
-            GUILayout.Label($"目前第 {Traverse.Create(combat).Property("CurrentRounds").GetValue()} 回合");
-            _scroll = GUILayout.BeginScrollView(_scroll);
-            foreach (string line in _lines)
-                GUILayout.Label(line);
-            GUILayout.EndScrollView();
-            GUILayout.EndArea();
-            GUI.color = oldColor;
+            if (combat != null && _lines != null && _lines.Count > 0)
+                _lines[0] = $"單挑：目前第 {Traverse.Create(combat).Property("CurrentRounds").GetValue()} 回合";
+            return _lines;
         }
 
-        private static List<string> Describe(object level)
+        private static List<string> DescribeCombat(object level)
         {
             List<string> lines = new List<string>
             {
+                "",
                 "【勝利】" + Flags(Plugin.Items(level, "_winResult")),
                 "【落敗】" + Flags(Plugin.Items(level, "_loseResult")),
             };
@@ -87,6 +77,73 @@ namespace LegendOfMortalMod.Features
             return lines;
         }
 
+        // 團體戰的事件看秒數、人數和條件，觸發過一次就不再觸發；人數和秒數每次 Layout 都重算
+        private static List<string> DescribeBattle(GameLevelManager battle, object level)
+        {
+            Traverse manager = Traverse.Create(battle);
+            List<string> lines = new List<string>
+            {
+                $"團體戰：已過 {manager.Field("_currentSessionTime").GetValue()} 秒，"
+                    + $"我方 {manager.Field("_currentFriendNpcs").GetValue()} 人、敵方 {manager.Field("_currentEnemyNpcs").GetValue()} 人",
+            };
+            if (Traverse.Create(level).Field("_victoryTimeout").GetValue() is true)
+                lines.Add($"【限時】{Field(level, "_time")} 秒");
+            foreach (string name in new[] { "_resultFlag", "_resultFlag2" })
+            {
+                FlagData flag = manager.Field(name).GetValue<FlagData>();
+                if (flag != null)
+                    lines.Add($"【結果寫入】{Flag(flag)}：0 陣亡、1 勝利、2 落敗、3 時間到");
+            }
+
+            lines.Add("【戰鬥中事件】");
+            int count = 0;
+            foreach (object data in Plugin.Items(level, "_events"))
+            {
+                List<string> triggers = new List<string>();
+                if (Traverse.Create(data).Field("_checkTriggerSecond").GetValue() is true)
+                    triggers.Add($"第 {Field(data, "_triggerSecond")} 秒");
+                if (Traverse.Create(data).Field("_checkCountThreshold").GetValue() is true)
+                    triggers.Add($"{Field(data, "_thresholdTeam")} 剩 {Field(data, "_countThreshold")} 人");
+                object condition = Traverse.Create(data).Field("_condition").GetValue();
+                if (Traverse.Create(data).Field("_checkCondition").GetValue() is true && condition != null)
+                    triggers.AddRange(
+                        Plugin
+                            .Items(condition, "_items")
+                            .Select(item => $"{Mark(Check(item))} {GameText.Conditions(item)}")
+                    );
+                List<string> actions = Plugin
+                    .Items(data, "_actions")
+                    .Select(BattleAction)
+                    .Where(a => a != null)
+                    .ToList();
+                string done = Traverse.Create(data).Field("_hasTriggered").GetValue() is true ? "（已觸發）" : "";
+                lines.Add(
+                    $"{++count}. 當 {(triggers.Count == 0 ? "（無條件）" : string.Join(" 且 ", triggers))}{done}"
+                        + $"\n    → {(actions.Count == 0 ? "（無）" : string.Join("、", actions))}"
+                );
+            }
+            if (count == 0)
+                lines.Add("（無）");
+            return lines;
+        }
+
+        private static string BattleAction(object action)
+        {
+            switch (action.GetType().Name)
+            {
+                case "BattleEventActionSpawnReinforcement":
+                    return $"{Field(action, "_team")} 援軍 {Field(action, "_count")} 人";
+                case "BattleEventActionCallSupport":
+                    return "援手攻擊";
+                case "BattleEventActionFlashGameOver":
+                    return Field(action, "_result") == "FriendWin" ? "直接判勝利" : "直接判落敗";
+                case "BattleEventActionCinematic":
+                    return null;
+                default:
+                    return action.GetType().Name.Replace("BattleEventAction", "");
+            }
+        }
+
         private static string Flags(IEnumerable<object> flags)
         {
             List<string> list = flags
@@ -107,7 +164,7 @@ namespace LegendOfMortalMod.Features
 
         private static string Condition(object condition)
         {
-            string op = Ops.TryGetValue(Field(condition, "_op"), out string symbol) ? symbol : Field(condition, "_op");
+            string op = Op(Traverse.Create(condition).Field("_op").GetValue());
             switch (condition.GetType().Name)
             {
                 case "CombatEventConditionRound":
@@ -173,15 +230,6 @@ namespace LegendOfMortalMod.Features
                     return action.GetType().Name.Replace("CombatEventAction", "");
             }
         }
-
-        // 備註可能好幾行，只取第一行
-        internal static string Flag(FlagData flag) =>
-            flag == null ? "?"
-            : string.IsNullOrEmpty(flag.DevNote) ? flag.name
-            : $"{flag.name}（{flag.DevNote.Split('\n')[0].Trim()}）";
-
-        private static string Field(object obj, string field) =>
-            obj == null ? "" : Traverse.Create(obj).Field(field).GetValue()?.ToString() ?? "";
 
         private static string Name(object obj, string field) =>
             Traverse.Create(obj).Field(field).GetValue() is Object value && value != null ? value.name : "?";
