@@ -51,7 +51,6 @@ namespace LegendOfMortalMod
             "雜物",
             "技能",
             "講經堂",
-            "存檔備註",
         };
 
         // 講經堂 records live in the global save (Save_universe.dat), which the game only writes at certain points
@@ -318,8 +317,6 @@ namespace LegendOfMortalMod
 
             if (_tab == 0)
                 DrawBasicTab();
-            else if (_tab == TabNames.Length - 1)
-                SaveNotes.Draw();
             else
                 DrawValueTable();
 

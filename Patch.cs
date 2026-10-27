@@ -240,20 +240,16 @@ namespace LegendOfMortalMod
         // 存檔備註，見 SaveNotes
         [HarmonyPostfix]
         [HarmonyPatch(typeof(SaveSlotPanel), "SetupText")]
-        public static void SaveSlotNote(GameSave data, string ____slot, Text[] ____titleText)
+        public static void SaveSlotNote(SaveSlotPanel __instance, GameSave data, string ____slot, Text[] ____timeText)
         {
-            // 空欄位不顯示：存檔可能在遊戲外被刪掉，備註還留著
-            if (data != null)
-                SaveNotes.ShowNote(____slot, ____titleText);
+            SaveNotes.Setup(__instance, data != null, ____slot, ____timeText);
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LoadSlotPanel), "SetupText")]
-        public static void LoadSlotNote(GameSave data, string ____slot, Text[] ____titleText)
+        public static void LoadSlotNote(LoadSlotPanel __instance, GameSave data, string ____slot, Text[] ____timeText)
         {
-            // 空欄位不顯示：存檔可能在遊戲外被刪掉，備註還留著
-            if (data != null)
-                SaveNotes.ShowNote(____slot, ____titleText);
+            SaveNotes.Setup(__instance, data != null, ____slot, ____timeText);
         }
 
         [HarmonyPostfix]

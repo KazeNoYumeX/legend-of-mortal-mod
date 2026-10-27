@@ -1,77 +1,79 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using HarmonyLib;
-using Mortal.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace LegendOfMortalMod.Features
 {
-    // 存檔備註：選單的「存檔備註」頁替每個存檔欄位寫一行字，遊戲的存檔、讀檔畫面接在標題後面顯示。
+    // 存檔備註：遊戲存檔、讀檔畫面的每個手動存檔欄位，存檔時間下方右側加一個輸入框，點了就能寫一行字。
     // 備註跟著欄位走（SlotData），同一格重複存檔不會清掉，刪除存檔時一起刪
     internal static class SaveNotes
     {
         private const string Note = "note";
-        private const float RefreshTime = 2f;
-        private static List<(string slot, DateTime time)> _slots = new List<(string, DateTime)>();
-        private static float _refreshAt;
-        private static Vector2 _scroll;
+        private const string FieldName = "ModSaveNote";
 
-        // 存檔欄位是數字（Save_018.dat）；Save_universe 之類的全域存檔不列
-        private static List<(string slot, DateTime time)> FindSlots()
+        // SetupText 每次打開畫面都會跑；輸入框只建一次，之後更新內容。空欄位沒有存檔可寫，隱藏
+        public static void Setup(Component panel, bool hasSave, string slot, Text[] times)
         {
-            string file = Traverse.Create(SaveSystem.Instance).Method("GetSaveDataFile", "0").GetValue<string>();
-            string folder = file == null ? null : Path.GetDirectoryName(file);
-            if (folder == null || !Directory.Exists(folder))
-                return new List<(string, DateTime)>();
-            return Directory
-                .GetFiles(folder, "Save_*.dat")
-                .Select(path =>
-                    (slot: Path.GetFileNameWithoutExtension(path).Substring(5), time: File.GetLastWriteTime(path))
-                )
-                .Where(item => item.slot.Length > 0 && item.slot.All(char.IsDigit))
-                .OrderBy(item => item.slot)
-                .ToList();
+            // 畫面剛打開時整個欄位可能還沒啟用，看自己的 activeSelf
+            Text time = times?.FirstOrDefault(text => text != null && text.gameObject.activeSelf);
+            if (time == null)
+                return;
+            Transform existing = time.transform.Find(FieldName);
+            InputField field = existing != null ? existing.GetComponent<InputField>() : Create(panel, time);
+            field.gameObject.SetActive(hasSave);
+            field.SetTextWithoutNotify(SlotData.Get(slot, Note));
         }
 
-        // 選單頁面；欄位清單只在 Layout 時重讀，免得 Layout 和 Repaint 畫的列數不同
-        public static void Draw()
+        private static InputField Create(Component panel, Text time)
         {
-            if (SaveSystem.Instance == null)
-            {
-                GUILayout.Label("進入遊戲後才能編輯存檔備註");
-                return;
-            }
-            if (Event.current.type == EventType.Layout && Time.unscaledTime >= _refreshAt)
-            {
-                _refreshAt = Time.unscaledTime + RefreshTime;
-                _slots = FindSlots();
-            }
-            if (_slots.Count == 0)
-            {
-                GUILayout.Label("還沒有存檔");
-                return;
-            }
-            _scroll = GUILayout.BeginScrollView(_scroll, false, true, GUILayout.ExpandHeight(true));
-            foreach ((string slot, DateTime time) in _slots)
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label(slot, GUILayout.Width(40));
-                GUILayout.Label(time.ToString("yyyy/MM/dd HH:mm"), GUILayout.Width(130));
-                SlotData.Set(slot, Note, GUILayout.TextField(SlotData.Get(slot, Note)));
-                GUILayout.EndHorizontal();
-            }
-            GUILayout.EndScrollView();
+            GameObject root = new GameObject(FieldName, typeof(RectTransform), typeof(Image), typeof(InputField));
+            root.transform.SetParent(time.transform, false);
+            // 時間那一行的正下方，靠右
+            RectTransform rect = (RectTransform)root.transform;
+            rect.anchorMin = new Vector2(0, 0);
+            rect.anchorMax = new Vector2(1, 0);
+            rect.pivot = new Vector2(0.5f, 1);
+            rect.sizeDelta = new Vector2(0, time.fontSize + 10);
+            rect.anchoredPosition = new Vector2(0, -2);
+            Image background = root.GetComponent<Image>();
+            background.color = new Color(1, 1, 1, 0.06f);
+
+            InputField field = root.GetComponent<InputField>();
+            field.targetGraphic = background;
+            field.lineType = InputField.LineType.SingleLine;
+            field.characterLimit = 40;
+            field.textComponent = Label(root, time, "Text", time.color);
+            field.placeholder = Label(
+                root,
+                time,
+                "Placeholder",
+                new Color(time.color.r, time.color.g, time.color.b, 0.35f)
+            );
+            ((Text)field.placeholder).text = "備註…";
+            field.onEndEdit.AddListener(value =>
+                SlotData.Set(Traverse.Create(panel).Field("_slot").GetValue<string>(), Note, value)
+            );
+            return field;
         }
 
-        // 遊戲的存檔、讀檔欄位填好標題後，把備註接在第一行標題後面
-        public static void ShowNote(string slot, Text[] titles)
+        private static Text Label(GameObject parent, Text style, string name, Color color)
         {
-            string note = SlotData.Get(slot, Note);
-            if (note.Length > 0 && titles != null && titles.Length > 0 && titles[0] != null)
-                titles[0].text += $"　〔{note}〕";
+            GameObject child = new GameObject(name, typeof(RectTransform), typeof(Text));
+            child.transform.SetParent(parent.transform, false);
+            RectTransform rect = (RectTransform)child.transform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(6, 0);
+            rect.offsetMax = new Vector2(-6, 0);
+            Text text = child.GetComponent<Text>();
+            text.font = style.font;
+            text.fontSize = style.fontSize;
+            text.color = color;
+            text.alignment = TextAnchor.MiddleRight;
+            text.supportRichText = false;
+            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            return text;
         }
     }
 }
