@@ -173,9 +173,25 @@ namespace LegendOfMortalMod
         // 劇情中隨時存檔，見 StorySave
         [HarmonyPrefix]
         [HarmonyPatch(typeof(LuaEnvironment), "LoadLuaFunction")]
-        public static void StoryScriptLoaded(string friendlyName)
+        public static void StoryScriptLoaded(string luaString, string friendlyName)
         {
             StorySave.ScriptLoaded(friendlyName);
+            StoryFlags.ScriptLoaded(luaString, friendlyName);
+        }
+
+        // 顯示本段劇情旗標：判定結果寫進回想，見 StoryFlags
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(CheckPointManager), "Switch")]
+        public static void SwitchChecked(string name, int __result)
+        {
+            StoryFlags.Checked(true, name, __result);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(CheckPointManager), "Condition")]
+        public static void ConditionChecked(string name, bool __result)
+        {
+            StoryFlags.Checked(false, name, __result ? "成立" : "不成立");
         }
 
         [HarmonyPrefix]

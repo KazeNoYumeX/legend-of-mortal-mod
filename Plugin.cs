@@ -217,7 +217,7 @@ namespace LegendOfMortalMod
 
         private void OnGUI()
         {
-            if (!_showMenu && !_battleButtons && !_combatInfo)
+            if (!_showMenu && !_battleButtons && !_combatInfo && !StoryFlags.Enabled)
                 return;
 
             Matrix4x4 oldMatrix = GUI.matrix;
@@ -226,6 +226,8 @@ namespace LegendOfMortalMod
                 BattleResult.DrawButtons(_guiScale);
             if (_combatInfo)
                 CombatInfo.Draw(_guiScale);
+            if (StoryFlags.Enabled)
+                StoryFlags.Draw(_guiScale);
             if (_showMenu)
             {
                 ApplyMinimized();
@@ -385,6 +387,7 @@ namespace LegendOfMortalMod
                 // 單挑隨時顯示；團體戰只在暫停選單顯示
                 _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
                 _combatInfo = GUILayout.Toggle(_combatInfo, "顯示單挑結果與回合事件");
+                StoryFlags.Enabled = GUILayout.Toggle(StoryFlags.Enabled, "顯示本段劇情旗標");
                 _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
                 StorySaveAnywhere.Value = GUILayout.Toggle(StorySaveAnywhere.Value, "劇情中隨時存檔");
             }
