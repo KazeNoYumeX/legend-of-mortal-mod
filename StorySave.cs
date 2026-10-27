@@ -41,7 +41,7 @@ namespace LegendOfMortalMod
             // Only a script the story itself moved to; it is what a save starts from
             if (!string.Equals(player.CurrentStoryScript, name, StringComparison.OrdinalIgnoreCase))
                 return;
-            _snapshot = Traverse.Create(SaveSystem.Instance).Method("CreateSaveData").GetValue<GameSave>();
+            _snapshot = Traverse.Create(SaveSystem.Instance).Method("CreateSaveData", true).GetValue<GameSave>();
             if (_snapshot == null)
                 return;
             _snapshot.StartStoryScript = player.CurrentStoryScript;
