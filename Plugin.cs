@@ -19,6 +19,7 @@ namespace LegendOfMortalMod
     {
         private bool _battleButtons;
         private bool _diceButtons;
+        private bool _combatInfo;
         private readonly GUIStyle myStyle = new GUIStyle();
         public bool unlimitedSpend;
         public bool unlimitedResources;
@@ -214,13 +215,15 @@ namespace LegendOfMortalMod
 
         private void OnGUI()
         {
-            if (!_showMenu && !_battleButtons)
+            if (!_showMenu && !_battleButtons && !_combatInfo)
                 return;
 
             Matrix4x4 oldMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(_guiScale, _guiScale, 1));
             if (_battleButtons)
                 BattleResult.DrawButtons(_guiScale);
+            if (_combatInfo)
+                CombatInfo.Draw(_guiScale);
             if (_showMenu)
             {
                 ApplyMinimized();
@@ -379,6 +382,7 @@ namespace LegendOfMortalMod
                 GUILayout.Space(8);
                 // 單挑隨時顯示；團體戰只在暫停選單顯示
                 _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
+                _combatInfo = GUILayout.Toggle(_combatInfo, "顯示單挑結果與回合事件");
                 _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
                 StorySaveAnywhere.Value = GUILayout.Toggle(StorySaveAnywhere.Value, "劇情中隨時存檔");
             }
