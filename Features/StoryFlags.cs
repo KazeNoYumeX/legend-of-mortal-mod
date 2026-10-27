@@ -137,7 +137,8 @@ namespace LegendOfMortalMod.Features
             AddToLog($"<size=18><color=#BCA136>{text}\n    → 結果 {result}</color></size>");
         }
 
-        // StoryLogData 是 1.0.6001.0 才有的；放在自己的方法裡（不內聯），舊版遊戲只在開關打開時才會載入失敗，不會讓每次判定都出錯
+        // StoryLogData 是 1.0.6001.0 才有的。放在獨立的方法裡，並禁止編譯器把它併回呼叫端，
+        // 舊版遊戲就只在開關打開時才會載入失敗，不會讓每次判定都出錯
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void AddToLog(string text) => StoryLogData.AddText(text, false);
     }
