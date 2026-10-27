@@ -347,6 +347,8 @@ namespace LegendOfMortalMod.Features
                 {
                     case "數值":
                         if (traverse.Property("Stat").GetValue() is GameStat stat)
+                            // Integer halving, as DiceResultData.GetGameStatLevelValue does
+                            // ReSharper disable once PossibleLossOfFraction
                             value =
                                 stat.LevelLength == 0
                                     ? stat.FinalValue

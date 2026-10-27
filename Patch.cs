@@ -4,13 +4,14 @@ using Fungus;
 using HarmonyLib;
 using LegendOfMortalMod.Features;
 using Mortal.Battle;
-using Mortal.Combat;
 using Mortal.Core;
 using Mortal.Story;
 using UnityEngine;
 using UnityEngine.UI;
 using StorySave = LegendOfMortalMod.Features.StorySave;
 
+// Harmony binds __instance, __result, __state and ___field parameters by these exact names
+// ReSharper disable InconsistentNaming
 namespace LegendOfMortalMod
 {
     public class Patch
@@ -292,7 +293,7 @@ namespace LegendOfMortalMod
         [HarmonyPatch(typeof(SaveSystem), "SaveUniverseData")]
         public static void UniverseSaved()
         {
-            Plugin.Instance.universeLoaded = true;
+            Plugin.Instance.IsUniverseLoaded = true;
         }
 
         // 左上角資源監視器 Profiler

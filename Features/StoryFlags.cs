@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -104,7 +103,7 @@ namespace LegendOfMortalMod.Features
                 return null;
             foreach (object config in Plugin.Items(manager, "_switchList"))
             {
-                if (config is SwitchResultConfig switches && switches.GetData(name) is SwitchResultData data)
+                if (config is SwitchResultConfig switches && switches.GetData(name) is { } data)
                     return data;
             }
             return null;

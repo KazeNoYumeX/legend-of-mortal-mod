@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using BepInEx;
 using BepInEx.Configuration;
@@ -24,18 +25,18 @@ namespace LegendOfMortalMod
         private bool _battleInfo;
         private GUIStyle _infoStyle;
         private Vector2 _infoScroll;
-        private readonly GUIStyle myStyle = new GUIStyle();
+        private readonly GUIStyle _myStyle = new GUIStyle();
         public bool unlimitedSpend;
         public bool unlimitedResources;
         private bool _accelerateMode;
         private float _skipConfirmUntil;
         private Harmony _harmony;
 
-        private Vector2Int lastScreenSize;
-        private ConfigEntry<KeyCode> MenuToggleKey;
-        private ConfigEntry<float> UiScale;
-        private ConfigEntry<bool> BlockMenuClicks;
-        private ConfigEntry<bool> StorySaveAnywhere;
+        private Vector2Int _lastScreenSize;
+        private ConfigEntry<KeyCode> _menuToggleKey;
+        private ConfigEntry<float> _uiScale;
+        private ConfigEntry<bool> _blockMenuClicks;
+        private ConfigEntry<bool> _storySaveAnywhere;
         private float _guiScale = 1;
 
         // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
@@ -55,7 +56,7 @@ namespace LegendOfMortalMod
 
         // 講經堂 records live in the global save (Save_universe.dat), which the game only writes at certain points
         private bool _saveUniverse;
-        internal bool universeLoaded;
+        internal bool IsUniverseLoaded;
         private int _tab;
         private int _tabInput;
 
@@ -91,9 +92,9 @@ namespace LegendOfMortalMod
             StepWidth = 35,
             LockWidth = 50;
         private bool _showMenu;
-        private float speed = 2;
-        private string speedInput = "2";
-        private Rect windowRect;
+        private float _speed = 2;
+        private string _speedInput = "2";
+        private Rect _windowRect;
         private static readonly LeanLocalizationResolver Locale = new LeanLocalizationResolver();
         public static Plugin Instance { get; private set; }
         internal static ManualLogSource Log { get; private set; }
@@ -103,21 +104,21 @@ namespace LegendOfMortalMod
             Instance = this;
             Log = Logger;
 
-            MenuToggleKey = Config.Bind("LegendOfMortalMod", "MenuToggleKey", KeyCode.F3, "Menu Toggle Key");
-            UiScale = Config.Bind(
+            _menuToggleKey = Config.Bind("LegendOfMortalMod", "MenuToggleKey", KeyCode.F3, "Menu Toggle Key");
+            _uiScale = Config.Bind(
                 "LegendOfMortalMod",
                 "UiScale",
                 1f,
                 "Menu size multiplier, on top of automatic scaling to screen height (1080p = 1x)"
             );
-            BlockMenuClicks = Config.Bind(
+            _blockMenuClicks = Config.Bind(
                 "LegendOfMortalMod",
                 "BlockMenuClicks",
                 true,
                 "Keep clicks on the menu from reaching the game behind it"
             );
 
-            StorySaveAnywhere = Config.Bind(
+            _storySaveAnywhere = Config.Bind(
                 "LegendOfMortalMod",
                 "StorySaveAnywhere",
                 false,
@@ -130,16 +131,16 @@ namespace LegendOfMortalMod
 
         private void Update()
         {
-            if (Screen.width != lastScreenSize.x || Screen.height != lastScreenSize.y)
+            if (Screen.width != _lastScreenSize.x || Screen.height != _lastScreenSize.y)
             {
                 // Update lastScreenSize with the current screen dimensions
-                lastScreenSize.x = Screen.width;
-                lastScreenSize.y = Screen.height;
+                _lastScreenSize.x = Screen.width;
+                _lastScreenSize.y = Screen.height;
 
                 OnScreenSizeChanged();
             }
 
-            if (Input.GetKeyDown(MenuToggleKey.Value))
+            if (Input.GetKeyDown(_menuToggleKey.Value))
             {
                 _showMenu = !_showMenu;
                 // Unsaved edits would look like real values on reopen; drop them
@@ -153,7 +154,7 @@ namespace LegendOfMortalMod
             }
 
             // Once per frame, so 全部解鎖 writes the file once
-            if (_saveUniverse && universeLoaded && SaveSystem.Instance != null)
+            if (_saveUniverse && IsUniverseLoaded && SaveSystem.Instance != null)
             {
                 _saveUniverse = false;
                 SaveSystem.Instance.SaveUniverseData();
@@ -161,9 +162,9 @@ namespace LegendOfMortalMod
 
             if (_accelerateMode)
             {
-                if (Time.timeScale != 0 && !Mathf.Approximately(Time.timeScale, speed))
+                if (Time.timeScale != 0 && !Mathf.Approximately(Time.timeScale, _speed))
                 {
-                    SetTimeScale(speed);
+                    SetTimeScale(_speed);
                 }
             }
             else
@@ -185,14 +186,14 @@ namespace LegendOfMortalMod
             SetActive("[UI]/TopPanel/MenuPanel/TestLose", false);
 
             DiceControl.Update(_diceButtons);
-            StorySave.Enabled = StorySaveAnywhere.Value;
+            StorySave.Enabled = _storySaveAnywhere.Value;
             StorySave.Update();
             UpdateClickBlocker();
         }
 
         private void UpdateClickBlocker()
         {
-            bool block = _showMenu && BlockMenuClicks.Value;
+            bool block = _showMenu && _blockMenuClicks.Value;
             if (_clickBlocker == null)
             {
                 if (!block)
@@ -213,8 +214,8 @@ namespace LegendOfMortalMod
                 _clickBlocker.anchorMin = _clickBlocker.anchorMax = _clickBlocker.pivot = new Vector2(0, 1);
             }
             _clickBlocker.gameObject.SetActive(block);
-            _clickBlocker.anchoredPosition = new Vector2(windowRect.x, -windowRect.y) * _guiScale;
-            _clickBlocker.sizeDelta = windowRect.size * _guiScale;
+            _clickBlocker.anchoredPosition = new Vector2(_windowRect.x, -_windowRect.y) * _guiScale;
+            _clickBlocker.sizeDelta = _windowRect.size * _guiScale;
         }
 
         private void OnGUI()
@@ -229,7 +230,7 @@ namespace LegendOfMortalMod
             if (_showMenu)
             {
                 ApplyMinimized();
-                windowRect = GUI.Window(123456, windowRect, DoMyWindow, "活俠傳 Mod");
+                _windowRect = GUI.Window(123456, _windowRect, DoMyWindow, "活俠傳 Mod");
             }
             GUI.matrix = oldMatrix;
         }
@@ -239,13 +240,13 @@ namespace LegendOfMortalMod
             if (_minimized)
             {
                 if (_fullSize == Vector2.zero)
-                    _fullSize = windowRect.size;
+                    _fullSize = _windowRect.size;
                 // Two 200 + 120 columns, plus the area's 10 padding on each side
-                windowRect.size = new Vector2(360, _minimizedHeight);
+                _windowRect.size = new Vector2(360, _minimizedHeight);
             }
             else if (_fullSize != Vector2.zero)
             {
-                windowRect.size = _fullSize;
+                _windowRect.size = _fullSize;
                 _fullSize = Vector2.zero;
             }
         }
@@ -274,12 +275,12 @@ namespace LegendOfMortalMod
         // The menu is laid out on a virtual screen 1080 / UiScale units high and scaled up to the real one
         private void OnScreenSizeChanged()
         {
-            _guiScale = Screen.height / 1080f * Mathf.Max(UiScale.Value, 0.1f);
+            _guiScale = Screen.height / 1080f * Mathf.Max(_uiScale.Value, 0.1f);
             float screenWidth = Screen.width / _guiScale;
             float screenHeight = Screen.height / _guiScale;
             float width = screenWidth * 0.5f;
             float height = screenHeight * 0.8f;
-            windowRect = new Rect((screenWidth - width) / 2, (screenHeight - height) / 2, width, height);
+            _windowRect = new Rect((screenWidth - width) / 2, (screenHeight - height) / 2, width, height);
             // A minimized window takes the new full size when restored
             _fullSize = Vector2.zero;
         }
@@ -295,10 +296,10 @@ namespace LegendOfMortalMod
 
         public void DoMyWindow(int windowID)
         {
-            myStyle.fontSize = 14;
-            myStyle.clipping = TextClipping.Clip;
-            myStyle.normal.textColor = Color.white;
-            GUILayout.BeginArea(new Rect(10, 20, windowRect.width - 20, windowRect.height - 30));
+            _myStyle.fontSize = 14;
+            _myStyle.clipping = TextClipping.Clip;
+            _myStyle.normal.textColor = Color.white;
+            GUILayout.BeginArea(new Rect(10, 20, _windowRect.width - 20, _windowRect.height - 30));
 
             if (!_minimized)
                 _tabInput = GUILayout.Toolbar(_tabInput, TabNames);
@@ -335,8 +336,8 @@ namespace LegendOfMortalMod
             if (_accelerateMode && !accelerate && Time.timeScale != 0)
                 Time.timeScale = 1;
             _accelerateMode = accelerate;
-            speedInput = GUILayout.TextField(speedInput, GUILayout.Width(120));
-            float.TryParse(speedInput, out speed);
+            _speedInput = GUILayout.TextField(_speedInput, GUILayout.Width(120));
+            float.TryParse(_speedInput, out _speed);
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             RoundControl.Unlimited = GUILayout.Toggle(RoundControl.Unlimited, "行動點無限", GUILayout.Width(200));
@@ -383,20 +384,20 @@ namespace LegendOfMortalMod
             {
                 GUILayout.Space(8);
                 bool all =
-                    _battleButtons && _battleInfo && StoryFlags.Enabled && _diceButtons && StorySaveAnywhere.Value;
+                    _battleButtons && _battleInfo && StoryFlags.Enabled && _diceButtons && _storySaveAnywhere.Value;
                 if (GUILayout.Toggle(all, "以下全部開啟") != all)
-                    _battleButtons = _battleInfo = StoryFlags.Enabled = _diceButtons = StorySaveAnywhere.Value = !all;
+                    _battleButtons = _battleInfo = StoryFlags.Enabled = _diceButtons = _storySaveAnywhere.Value = !all;
                 // 單挑隨時顯示；團體戰只在暫停選單顯示
                 _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
                 _battleInfo = GUILayout.Toggle(_battleInfo, "顯示戰鬥結果與事件");
                 StoryFlags.Enabled = GUILayout.Toggle(StoryFlags.Enabled, "顯示本段劇情旗標（判定寫進回想）");
                 _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
-                StorySaveAnywhere.Value = GUILayout.Toggle(StorySaveAnywhere.Value, "劇情中隨時存檔");
+                _storySaveAnywhere.Value = GUILayout.Toggle(_storySaveAnywhere.Value, "劇情中隨時存檔");
             }
 
             GUILayout.Space(8);
             if (!_minimized)
-                BlockMenuClicks.Value = GUILayout.Toggle(BlockMenuClicks.Value, "選單不透明");
+                _blockMenuClicks.Value = GUILayout.Toggle(_blockMenuClicks.Value, "選單不透明");
             _minimizedInput = GUILayout.Toggle(_minimizedInput, "選單最小化");
 
             GUILayout.Space(8);
@@ -446,7 +447,7 @@ namespace LegendOfMortalMod
                     fieldPadding = GUI.skin.textField.padding;
                 RectOffset buttonMargin = GUI.skin.button.margin,
                     buttonPadding = GUI.skin.button.padding;
-                _textStyle = new GUIStyle(myStyle)
+                _textStyle = new GUIStyle(_myStyle)
                 {
                     margin = new RectOffset(0, 0, fieldMargin.top, fieldMargin.bottom),
                     padding = new RectOffset(0, 0, fieldPadding.top, fieldPadding.bottom),
@@ -454,12 +455,12 @@ namespace LegendOfMortalMod
                 _headerInputStyle = new GUIStyle(GUI.skin.textField)
                 {
                     normal = { background = null },
-                    fontSize = myStyle.fontSize,
+                    fontSize = _myStyle.fontSize,
                 };
                 _headerButtonStyle = new GUIStyle(GUI.skin.button)
                 {
                     normal = { background = null },
-                    fontSize = myStyle.fontSize,
+                    fontSize = _myStyle.fontSize,
                     margin = new RectOffset(buttonMargin.left, buttonMargin.right, fieldMargin.top, fieldMargin.bottom),
                     padding = new RectOffset(
                         buttonPadding.left,
@@ -558,7 +559,7 @@ namespace LegendOfMortalMod
                         DrawValueRow(flagData, flagData.name, flagData.DevNote, "");
                     break;
                 case 4:
-                    foreach (Book book in ItemDatabase.Instance.Books.List)
+                    foreach (Book book in ItemDatabase.Instance.Books.List.OfType<Book>())
                         DrawValueRow(book, ItemName(book), BookNote(book), "");
                     break;
                 case 5:
@@ -581,14 +582,14 @@ namespace LegendOfMortalMod
             GUILayout.EndVertical();
         }
 
-        private void DrawValueRow(ScriptableObject key, string name, string note, string range)
+        private void DrawValueRow(ScriptableObject key, string title, string note, string range)
         {
             note = note ?? "";
-            if (!MatchesSearch(name, note))
+            if (!MatchesSearch(title, note))
                 return;
 
             GUILayout.BeginHorizontal(_rowStyle);
-            GUILayout.Label(name, _textStyle, GUILayout.Width(NameWidth));
+            GUILayout.Label(title, _textStyle, GUILayout.Width(NameWidth));
             if (key is RelationshipStat relationship)
             {
                 if (GUILayout.Button(note, GUILayout.Width(LockWidth + 10)))
@@ -610,7 +611,7 @@ namespace LegendOfMortalMod
                 if (value == 0)
                 {
                     if (GUILayout.Button("解鎖", GUILayout.Width(SetWidth)))
-                        ApplyValue(key, value + 1);
+                        ApplyValue(key, 1);
                 }
                 else
                     GUILayout.Label("", _headerButtonStyle, GUILayout.Width(SetWidth));
@@ -651,9 +652,9 @@ namespace LegendOfMortalMod
             GUILayout.EndHorizontal();
         }
 
-        private bool MatchesSearch(string name, string note) =>
+        private bool MatchesSearch(string title, string note) =>
             _search.Length == 0
-            || name.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0
+            || title.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0
             || note.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0;
 
         private static string _loverValues;
@@ -713,8 +714,8 @@ namespace LegendOfMortalMod
             GUILayout.BeginHorizontal();
             GUILayout.Label("切換心上人", _loverLabelStyle, GUILayout.Width(200));
             GUILayout.BeginVertical(GUILayout.Width(120));
-            string name = current >= 0 ? LoverNames[current] : stat.Value.ToString();
-            if (GUILayout.Button(name + (_loverList ? " ▲" : " ▼")))
+            string lover = current >= 0 ? LoverNames[current] : stat.Value.ToString();
+            if (GUILayout.Button(lover + (_loverList ? " ▲" : " ▼")))
                 _loverListInput = !_loverListInput;
             if (_loverList)
             {
@@ -800,11 +801,11 @@ namespace LegendOfMortalMod
                 }
             )
             {
-                if (universeLoaded)
+                if (IsUniverseLoaded)
                     break;
-                universeLoaded = collection != null && collection.List.Exists(item => item != null && item.Count > 0);
+                IsUniverseLoaded = collection != null && collection.List.Exists(item => item != null && item.Count > 0);
             }
-            return universeLoaded;
+            return IsUniverseLoaded;
         }
 
         private static string LibraryTitle(LibraryItemData item)
@@ -817,7 +818,7 @@ namespace LegendOfMortalMod
         // with no copies and its 修練 progress with it
         private void SetAllBooks(bool own)
         {
-            foreach (Book book in ItemDatabase.Instance.Books.List)
+            foreach (Book book in ItemDatabase.Instance.Books.List.OfType<Book>())
             {
                 if (!MatchesSearch(ItemName(book), BookNote(book)))
                     continue;
@@ -884,7 +885,7 @@ namespace LegendOfMortalMod
 
         private void SetTimeScale(float targetSpeed)
         {
-            if (speed > 0.0f)
+            if (_speed > 0.0f)
                 Time.timeScale = targetSpeed;
         }
     }
