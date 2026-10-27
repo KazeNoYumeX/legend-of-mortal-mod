@@ -29,18 +29,22 @@ namespace LegendOfMortalMod.Features
         private static string[] _scene;
         private static string[] _restore;
 
-        // Each Lua chunk as the game loads it, before any of it runs. The copy is taken even while switched off, so
-        // switching on mid-story works at once
-        public static void ScriptLoaded(ref string luaString, string friendlyName)
+        // A story script's name from the Lua chunk the game loads, or null for inline chunks (tmp…), which run inside
+        // a script and keep its copy
+        public static string ScriptName(string friendlyName)
         {
             string name = friendlyName ?? "";
             name = name.Substring(name.LastIndexOfAny(new[] { '/', '\\' }) + 1);
-            // Inline chunks (tmp…) run inside a script and keep its copy
             if (!name.EndsWith(ScriptExtension, StringComparison.OrdinalIgnoreCase))
-                return;
+                return null;
             name = name.Substring(0, name.Length - ScriptExtension.Length);
-            if (name.Length == 0 || name.StartsWith("tmp", StringComparison.OrdinalIgnoreCase))
-                return;
+            return name.Length == 0 || name.StartsWith("tmp", StringComparison.OrdinalIgnoreCase) ? null : name;
+        }
+
+        // Each story script as the game loads it, before any of it runs. The copy is taken even while switched off,
+        // so switching on mid-story works at once
+        public static void ScriptLoaded(ref string luaString, string name)
+        {
             _snapshot = null;
             // 讀檔後的第一個腳本就是存檔開始的腳本，沒用上也丟掉，免得補到之後的腳本
             string[] restore = _restore;

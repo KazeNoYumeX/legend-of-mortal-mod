@@ -175,23 +175,40 @@ namespace LegendOfMortalMod
         [HarmonyPatch(typeof(LuaEnvironment), "LoadLuaFunction")]
         public static void StoryScriptLoaded(ref string luaString, string friendlyName)
         {
-            StorySave.ScriptLoaded(ref luaString, friendlyName);
-            StoryFlags.ScriptLoaded(luaString, friendlyName);
+            string name = StorySave.ScriptName(friendlyName);
+            if (name == null)
+                return;
+            StorySave.ScriptLoaded(ref luaString, name);
+            StoryFlags.ScriptLoaded(luaString);
         }
 
-        // 顯示本段劇情旗標：判定結果寫進回想，見 StoryFlags
+        // 顯示本段劇情旗標：判定結果寫進回想，見 StoryFlags。條件文字在判定前算好，經 __state 帶到判定後
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(CheckPointManager), "Switch")]
+        public static void BeforeSwitch(string name, out string __state)
+        {
+            __state = StoryFlags.BeforeCheck(true, name);
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(CheckPointManager), "Switch")]
-        public static void SwitchChecked(string name, int __result)
+        public static void SwitchChecked(int __result, string __state)
         {
-            StoryFlags.Checked(true, name, __result);
+            StoryFlags.Checked(__state, __result);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(CheckPointManager), "Condition")]
+        public static void BeforeCondition(string name, out string __state)
+        {
+            __state = StoryFlags.BeforeCheck(false, name);
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(CheckPointManager), "Condition")]
-        public static void ConditionChecked(string name, bool __result)
+        public static void ConditionChecked(bool __result, string __state)
         {
-            StoryFlags.Checked(false, name, __result ? "成立" : "不成立");
+            StoryFlags.Checked(__state, __result ? "成立" : "不成立");
         }
 
         [HarmonyPrefix]
@@ -223,16 +240,20 @@ namespace LegendOfMortalMod
         // 存檔備註，見 SaveNotes
         [HarmonyPostfix]
         [HarmonyPatch(typeof(SaveSlotPanel), "SetupText")]
-        public static void SaveSlotNote(string ____slot, Text[] ____titleText)
+        public static void SaveSlotNote(GameSave data, string ____slot, Text[] ____titleText)
         {
-            SaveNotes.ShowNote(____slot, ____titleText);
+            // 空欄位不顯示：存檔可能在遊戲外被刪掉，備註還留著
+            if (data != null)
+                SaveNotes.ShowNote(____slot, ____titleText);
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LoadSlotPanel), "SetupText")]
-        public static void LoadSlotNote(string ____slot, Text[] ____titleText)
+        public static void LoadSlotNote(GameSave data, string ____slot, Text[] ____titleText)
         {
-            SaveNotes.ShowNote(____slot, ____titleText);
+            // 空欄位不顯示：存檔可能在遊戲外被刪掉，備註還留著
+            if (data != null)
+                SaveNotes.ShowNote(____slot, ____titleText);
         }
 
         [HarmonyPostfix]

@@ -14,7 +14,6 @@ namespace LegendOfMortalMod.Features
     // 判定執行時也把結果和條件寫進回想（不寫入存檔）
     internal static class StoryFlags
     {
-        private const string ScriptExtension = ".LuaScript";
         private const float RefreshTime = 0.5f;
         private static readonly Regex FlagCall = new Regex(
             @"statmodifymanager\.(SetFlag|AddFlag)\(\s*""([^""]+)""\s*,\s*(-?\d+)\s*\)"
@@ -29,16 +28,9 @@ namespace LegendOfMortalMod.Features
         private static List<string> _lines = new List<string>();
         private static float _refreshAt;
 
-        // Each story script as the game loads it; inline chunks (tmp…) run inside a script and keep its lists
-        public static void ScriptLoaded(string luaString, string friendlyName)
+        // Each story script as the game loads it (see StorySave.ScriptName)
+        public static void ScriptLoaded(string luaString)
         {
-            string name = friendlyName ?? "";
-            name = name.Substring(name.LastIndexOfAny(new[] { '/', '\\' }) + 1);
-            if (
-                !name.EndsWith(ScriptExtension, StringComparison.OrdinalIgnoreCase)
-                || name.StartsWith("tmp", StringComparison.OrdinalIgnoreCase)
-            )
-                return;
             string lua = luaString ?? "";
             _flags = FlagCall.Matches(lua).Cast<Match>().GroupBy(match => match.Value).Select(g => g.First()).ToList();
             _checks = CheckCall
@@ -124,15 +116,13 @@ namespace LegendOfMortalMod.Features
             return config?.List.FirstOrDefault(item => item != null && item.name == name);
         }
 
-        // 判定執行後寫進回想：結果和各分支的條件
-        public static void Checked(bool isSwitch, string name, object result)
+        // 判定前記下各分支的條件，判定後和結果一起寫進回想。條件可能含隨機值，判定後再算一次會和遊戲擲的不同
+        public static string BeforeCheck(bool isSwitch, string name) => Enabled ? Check(isSwitch, name) : null;
+
+        public static void Checked(string text, object result)
         {
-            if (!Enabled)
-                return;
-            StoryLogData.AddText(
-                $"<size=18><color=#BCA136>{Check(isSwitch, name)}\n    → 結果 {result}</color></size>",
-                false
-            );
+            if (text != null)
+                StoryLogData.AddText($"<size=18><color=#BCA136>{text}\n    → 結果 {result}</color></size>", false);
         }
     }
 }
