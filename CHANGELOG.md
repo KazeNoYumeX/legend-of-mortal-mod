@@ -7,17 +7,10 @@
 
 ## [Unreleased]
 
-## [1.6.1] - 2026-10-28
-
-### Removed
-
-- 存檔備註：在存檔、讀檔畫面無法正常使用，先移除。已寫的備註留在 `BepInEx/config/LegendOfMortalMod.slots.txt`，不影響存檔，可以直接刪掉那幾行
-
 ## [1.6.0] - 2026-10-28
 
 ### Added
 
-- 存檔備註：遊戲的存檔、讀檔畫面中，每個手動存檔的時間下方右側多一個輸入框，可以寫一行備註。備註另存，不寫進存檔；同一格重複存檔會保留備註，刪除存檔時一起刪除
 - 基本頁「以下全部開啟」：一次勾選或取消最小化時隱藏的開關（戰鬥判定按鈕、戰鬥結果與事件、劇情旗標、骰子指定按鈕、劇情中隨時存檔）
 - 基本頁「顯示本段劇情旗標」：劇情中在基本頁下方列出這段劇情會改的旗標（附目前的值）和分支判定的條件，依目前的值標出成立或不成立；判定時把結果和條件寫進回想（不寫入存檔）
 - 基本頁「顯示戰鬥結果與事件」：戰鬥中在基本頁下方列出勝利、落敗會改的旗標，以及戰鬥中會觸發的事件和效果。單挑依回合、血量等條件；團體戰依秒數、剩餘人數和條件，並標出已觸發的事件。選單最小化時也會顯示這兩項資訊
@@ -128,8 +121,7 @@
 
 - 第一版：遊戲中按 `F3` 開啟修改選單
 
-[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.1...HEAD
-[1.6.1]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.0...v1.6.1
+[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.0...HEAD
 [1.6.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.3.0...v1.4.0
