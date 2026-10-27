@@ -220,6 +220,28 @@ namespace LegendOfMortalMod
             return false;
         }
 
+        // 存檔備註，見 SaveNotes
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SaveSlotPanel), "SetupText")]
+        public static void SaveSlotNote(string ____slot, Text[] ____titleText)
+        {
+            SaveNotes.ShowNote(____slot, ____titleText);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(LoadSlotPanel), "SetupText")]
+        public static void LoadSlotNote(string ____slot, Text[] ____titleText)
+        {
+            SaveNotes.ShowNote(____slot, ____titleText);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SaveSystem), "DeleteSaveData")]
+        public static void SaveDeleted(string slot)
+        {
+            SlotData.Remove(slot);
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(SaveSystem), "LoadGameData")]
         public static void GameLoaded(SaveSystem __instance)
