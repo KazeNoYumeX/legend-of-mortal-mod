@@ -80,3 +80,6 @@ crashlytics-build.properties
 
 # OS Generated
 .DS_Store
+
+# Screenshots dropped in the repo root while testing (docs images live under docs/)
+/*.png
