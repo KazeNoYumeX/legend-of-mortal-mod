@@ -174,10 +174,11 @@ namespace LegendOfMortalMod.Features
             }
         }
 
-        private static string Flag(FlagData flag) =>
+        // 備註可能好幾行，只取第一行
+        internal static string Flag(FlagData flag) =>
             flag == null ? "?"
             : string.IsNullOrEmpty(flag.DevNote) ? flag.name
-            : $"{flag.name}（{flag.DevNote}）";
+            : $"{flag.name}（{flag.DevNote.Split('\n')[0].Trim()}）";
 
         private static string Field(object obj, string field) =>
             obj == null ? "" : Traverse.Create(obj).Field(field).GetValue()?.ToString() ?? "";
