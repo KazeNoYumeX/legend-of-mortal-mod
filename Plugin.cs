@@ -382,6 +382,10 @@ namespace LegendOfMortalMod
             if (!_minimized)
             {
                 GUILayout.Space(8);
+                bool all =
+                    _battleButtons && _battleInfo && StoryFlags.Enabled && _diceButtons && StorySaveAnywhere.Value;
+                if (GUILayout.Toggle(all, "以下全部開啟") != all)
+                    _battleButtons = _battleInfo = StoryFlags.Enabled = _diceButtons = StorySaveAnywhere.Value = !all;
                 // 單挑隨時顯示；團體戰只在暫停選單顯示
                 _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
                 _battleInfo = GUILayout.Toggle(_battleInfo, "顯示戰鬥結果與事件");
