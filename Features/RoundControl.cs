@@ -4,7 +4,7 @@ using Mortal.Core;
 using Mortal.Free;
 using UnityEngine;
 
-namespace LegendOfMortalMod
+namespace LegendOfMortalMod.Features
 {
     // 「行動點無限」與地圖上的「跳過本旬」
     // 改寫自 Toufff/zhaohuo-system 的 RoundUnlimited / RoundSkip，Copyright (c) 2026 Toufff，MIT 授權，見 THIRD-PARTY-NOTICES.md

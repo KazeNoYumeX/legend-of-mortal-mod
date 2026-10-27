@@ -5,7 +5,7 @@ using Mortal.Free;
 using Mortal.Story;
 using UnityEngine.UI;
 
-namespace LegendOfMortalMod
+namespace LegendOfMortalMod.Features
 {
     // 劇情中隨時存檔。遊戲存檔只記從哪個劇情腳本開始，讀檔時從腳本第一行重播；在腳本中間存當下的數值，重播會把
     // 已經套用的增減再套一次。所以每個腳本開始時先建好一份存檔，劇情中按存檔時寫入這份：讀檔從這個腳本開頭、

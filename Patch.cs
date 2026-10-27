@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using Fungus;
 using HarmonyLib;
+using LegendOfMortalMod.Features;
 using Mortal.Battle;
 using Mortal.Combat;
 using Mortal.Core;
 using Mortal.Story;
 using UnityEngine;
 using UnityEngine.UI;
+using StorySave = LegendOfMortalMod.Features.StorySave;
 
 namespace LegendOfMortalMod
 {

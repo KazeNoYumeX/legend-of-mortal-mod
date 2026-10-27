@@ -7,10 +7,12 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.Mono;
 using HarmonyLib;
+using LegendOfMortalMod.Features;
 using Mortal.Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using StorySave = LegendOfMortalMod.Features.StorySave;
 
 namespace LegendOfMortalMod
 {

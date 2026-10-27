@@ -6,7 +6,7 @@ using Mortal.Core;
 using UnityEngine;
 using SceneController = Mortal.Core.SceneController;
 
-namespace LegendOfMortalMod
+namespace LegendOfMortalMod.Features
 {
     // 單挑畫面左上的資料面板：勝利/落敗會改哪些旗標，以及關卡裡依回合、數值等條件觸發的事件
     internal static class CombatInfo
