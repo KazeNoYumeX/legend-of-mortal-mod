@@ -182,33 +182,40 @@ namespace LegendOfMortalMod
             StoryFlags.ScriptLoaded(luaString);
         }
 
-        // 顯示本段劇情旗標：判定結果寫進回想，見 StoryFlags。條件文字在判定前算好，經 __state 帶到判定後
+        // 顯示本段劇情旗標：判定結果寫進回想，見 StoryFlags。判定前開始記錄，遊戲每算一個分支記一次，判定後寫入
         [HarmonyPrefix]
         [HarmonyPatch(typeof(CheckPointManager), "Switch")]
-        public static void BeforeSwitch(string name, out string __state)
+        public static void BeforeSwitch()
         {
-            __state = StoryFlags.BeforeCheck(true, name);
+            StoryFlags.BeforeCheck();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(CheckPointManager), "Switch")]
-        public static void SwitchChecked(int __result, string __state)
+        public static void SwitchChecked(string name, int __result)
         {
-            StoryFlags.Checked(__state, __result);
+            StoryFlags.Checked(true, name, __result);
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(CheckPointManager), "Condition")]
-        public static void BeforeCondition(string name, out string __state)
+        public static void BeforeCondition()
         {
-            __state = StoryFlags.BeforeCheck(false, name);
+            StoryFlags.BeforeCheck();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(CheckPointManager), "Condition")]
-        public static void ConditionChecked(bool __result, string __state)
+        public static void ConditionChecked(string name, bool __result)
         {
-            StoryFlags.Checked(__state, __result ? "成立" : "不成立");
+            StoryFlags.Checked(false, name, __result ? "成立" : "不成立");
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(ConditionResultItem), "Check")]
+        public static void BranchRolled(ConditionResultItem __instance, bool __result)
+        {
+            StoryFlags.Rolled(__instance, __result);
         }
 
         [HarmonyPrefix]
