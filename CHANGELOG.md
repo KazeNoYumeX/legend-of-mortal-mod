@@ -7,6 +7,8 @@
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-28
+
 ### Added
 
 - 存檔備註：遊戲的存檔、讀檔畫面中，每個手動存檔的時間下方右側多一個輸入框，可以寫一行備註。備註另存，不寫進存檔；同一格重複存檔會保留備註，刪除存檔時一起刪除
@@ -120,7 +122,8 @@
 
 - 第一版：遊戲中按 `F3` 開啟修改選單
 
-[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.2.0...v1.3.0

@@ -17,7 +17,7 @@ using StorySave = LegendOfMortalMod.Features.StorySave;
 
 namespace LegendOfMortalMod
 {
-    [BepInPlugin("LegendOfMortalMod", "活俠傳修改選單", "1.5.0")]
+    [BepInPlugin("LegendOfMortalMod", "活俠傳修改選單", "1.6.0")]
     public class Plugin : BaseUnityPlugin
     {
         private bool _battleButtons;
