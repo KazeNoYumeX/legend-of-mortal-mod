@@ -7,6 +7,8 @@
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-10-28
+
 ### Removed
 
 - 存檔備註：在存檔、讀檔畫面無法正常使用，先移除。已寫的備註留在 `BepInEx/config/LegendOfMortalMod.slots.txt`，不影響存檔，可以直接刪掉那幾行
@@ -126,7 +128,8 @@
 
 - 第一版：遊戲中按 `F3` 開啟修改選單
 
-[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.3.0...v1.4.0
