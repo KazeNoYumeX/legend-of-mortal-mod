@@ -69,8 +69,6 @@ Options on the 基本 (Basic) tab:
 
 Table columns: 名稱 Name, 備註 Note, 範圍 Range, 目前 Current, 新數值 New value; buttons 設定 Set and 鎖定 Lock (講經堂 has only 解鎖 Unlock). A locked value is restored every frame. Setting a locked value (including 全滿 / 歸零) re-locks it at the new value, which is handy for things like money (銀兩) or poison points (毒藥點數). Every tab has a search box that matches the name or the note.
 
-Save notes: in the game's save and load screens, each manual save slot has a faint text box at the bottom right, under its save time. Click it to write a one-line note; Enter or clicking elsewhere stores it. Notes live in `BepInEx/config/LegendOfMortalMod.slots.txt`, not in the save. Saving to the same slot again keeps the note, and deleting the save deletes it.
-
 > [!WARNING]
 > - Locking story flags can soft-lock the story. If unsure, don't lock them.
 > - Normal play never teaches many skills at once, and some skills replace a lower one. Setting levels directly can leave you with both, which may break battles.

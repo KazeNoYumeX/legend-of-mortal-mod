@@ -245,21 +245,7 @@ namespace LegendOfMortalMod
             return false;
         }
 
-        // 存檔備註，見 SaveNotes
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(SaveSlotPanel), "SetupText")]
-        public static void SaveSlotNote(SaveSlotPanel __instance, GameSave data, string ____slot, Text[] ____timeText)
-        {
-            SaveNotes.Setup(__instance, data != null, ____slot, ____timeText);
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(LoadSlotPanel), "SetupText")]
-        public static void LoadSlotNote(LoadSlotPanel __instance, GameSave data, string ____slot, Text[] ____timeText)
-        {
-            SaveNotes.Setup(__instance, data != null, ____slot, ____timeText);
-        }
-
+        // 刪除存檔時一起刪掉這格在 SlotData 的資料（劇情中存檔的背景與音樂）
         [HarmonyPostfix]
         [HarmonyPatch(typeof(SaveSystem), "DeleteSaveData")]
         public static void SaveDeleted(string slot)

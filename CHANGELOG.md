@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+### Removed
+
+- 存檔備註：在存檔、讀檔畫面無法正常使用，先移除。已寫的備註留在 `BepInEx/config/LegendOfMortalMod.slots.txt`，不影響存檔，可以直接刪掉那幾行
+
 ## [1.6.0] - 2026-10-28
 
 ### Added

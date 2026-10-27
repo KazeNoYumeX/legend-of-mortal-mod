@@ -5,7 +5,7 @@ using BepInEx;
 
 namespace LegendOfMortalMod.Features
 {
-    // 依存檔欄位記的小資料（存檔備註、劇情中存檔的背景與音樂），另存在 BepInEx\config，不寫進遊戲存檔，
+    // 依存檔欄位記的小資料（劇情中存檔的背景與音樂），另存在 BepInEx\config，不寫進遊戲存檔，
     // 移除 mod 後存檔不受影響。每行「欄位\t名稱\t值」，有變更才寫檔
     internal static class SlotData
     {
