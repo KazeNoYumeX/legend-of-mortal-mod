@@ -91,6 +91,12 @@ The minimized menu in a story, showing this script's branch check: each branch's
 
 ![Story flags](docs/screenshots/story-flags.webp)
 
+### 回想 Story log
+
+When the game makes a branch check, the 回想 log notes the branch, each condition's result and the branch taken, in small gold text.
+
+![Branch check in the story log](docs/screenshots/story-log.webp)
+
 ### 戰鬥結果與事件 Battle info (duel)
 
 In a duel: the current round, the flags a win or a loss sets, and which event fires on which round.
