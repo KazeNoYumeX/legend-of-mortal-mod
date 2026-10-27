@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using Mortal.Core;
@@ -133,7 +134,11 @@ namespace LegendOfMortalMod.Features
                 return;
             string text = Check(isSwitch, name, _rolled);
             _rolled = null;
-            StoryLogData.AddText($"<size=18><color=#BCA136>{text}\n    → 結果 {result}</color></size>", false);
+            AddToLog($"<size=18><color=#BCA136>{text}\n    → 結果 {result}</color></size>");
         }
+
+        // StoryLogData 是 1.0.6001.0 才有的；放在自己的方法裡（不內聯），舊版遊戲只在開關打開時才會載入失敗，不會讓每次判定都出錯
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void AddToLog(string text) => StoryLogData.AddText(text, false);
     }
 }
