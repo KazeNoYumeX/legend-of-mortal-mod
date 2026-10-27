@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using HarmonyLib;
 using Mortal.Core;
 using Mortal.Free;
@@ -22,9 +23,15 @@ namespace LegendOfMortalMod.Features
         private static bool _writing;
         private static bool _roundCheck;
 
+        // 背景、音樂、環境音通常由前一個腳本設定，重播的腳本不一定會自己設；記下腳本開始時的，存在 SlotData，
+        // 讀這種存檔時加在腳本最前面
+        private static readonly string[] Scene = { "view", "music", "env" };
+        private static string[] _scene;
+        private static string[] _restore;
+
         // Each Lua chunk as the game loads it, before any of it runs. The copy is taken even while switched off, so
         // switching on mid-story works at once
-        public static void ScriptLoaded(string friendlyName)
+        public static void ScriptLoaded(ref string luaString, string friendlyName)
         {
             string name = friendlyName ?? "";
             name = name.Substring(name.LastIndexOfAny(new[] { '/', '\\' }) + 1);
@@ -35,12 +42,21 @@ namespace LegendOfMortalMod.Features
             if (name.Length == 0 || name.StartsWith("tmp", StringComparison.OrdinalIgnoreCase))
                 return;
             _snapshot = null;
+            // 讀檔後的第一個腳本就是存檔開始的腳本，沒用上也丟掉，免得補到之後的腳本
+            string[] restore = _restore;
+            _restore = null;
             PlayerStatManagerData player = PlayerStatManagerData.Instance;
             if (StoryManager.Instance == null || SaveSystem.Instance == null || player == null)
                 return;
             // Only a script the story itself moved to; it is what a save starts from
             if (!string.Equals(player.CurrentStoryScript, name, StringComparison.OrdinalIgnoreCase))
                 return;
+            if (restore != null)
+            {
+                luaString = RestoreLua(restore) + luaString;
+                Plugin.Log.LogInfo($"劇情中存檔：讀檔補上背景 {restore[0]}、音樂 {restore[1]}");
+            }
+            _scene = restore ?? CurrentScene();
             _snapshot = Traverse.Create(SaveSystem.Instance).Method("CreateSaveData", true).GetValue<GameSave>();
             if (_snapshot == null)
                 return;
@@ -73,6 +89,9 @@ namespace LegendOfMortalMod.Features
 
         public static void AfterSave(string slot)
         {
+            // 遊戲自己的存檔從會設定背景的地方開始，不用補
+            for (int i = 0; i < Scene.Length; i++)
+                SlotData.Set(slot, Scene[i], _writing ? _scene?[i] : "");
             if (_writing)
                 Plugin.Log.LogInfo($"劇情中存檔：{slot} 從 {_snapshot.StartStoryScript} 開始");
             _writing = false;
@@ -81,7 +100,40 @@ namespace LegendOfMortalMod.Features
         // In place of SaveSystem.CreateSaveData while that save is written
         public static GameSave Substitute() => _writing ? _snapshot : null;
 
-        public static void Loaded() => _roundCheck = true;
+        public static void Loaded(string slot)
+        {
+            _roundCheck = true;
+            string[] scene = Scene.Select(name => SlotData.Get(slot, name)).ToArray();
+            _restore = scene[0].Length > 0 || scene[1].Length > 0 ? scene : null;
+        }
+
+        private static string[] CurrentScene()
+        {
+            FlowchartPlaceholder flowcharts = UnityEngine.Object.FindObjectOfType<FlowchartPlaceholder>();
+            Traverse sound = Traverse.Create(SoundManager.Instance);
+            return new[]
+            {
+                flowcharts?.view?.GetStringVariable("ViewName") ?? "",
+                sound.Field("_currentMusic").GetValue<string>() ?? "",
+                sound.Field("_currentEnvSound").GetValue<string>() ?? "",
+            };
+        }
+
+        // 和劇情腳本設定背景、音樂的寫法相同
+        private static string RestoreLua(string[] scene)
+        {
+            string lua = "";
+            if (scene[0].Length > 0)
+                lua +=
+                    $"runwait(flowcharts.LoadView(\"{scene[0]}\"))\n"
+                    + $"getvar(flowcharts.view, \"ViewName\").value = \"{scene[0]}\"\n"
+                    + "runblock(flowcharts.view, \"view\")\n";
+            if (scene[1].Length > 0)
+                lua += $"luamanager.PlayMusic(\"{scene[1]}\")\n";
+            if (scene[2].Length > 0)
+                lua += $"luamanager.PlayEnvSound(\"{scene[2]}\")\n";
+            return lua;
+        }
 
         public static void SceneChanged()
         {

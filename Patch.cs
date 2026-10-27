@@ -173,9 +173,9 @@ namespace LegendOfMortalMod
         // 劇情中隨時存檔，見 StorySave
         [HarmonyPrefix]
         [HarmonyPatch(typeof(LuaEnvironment), "LoadLuaFunction")]
-        public static void StoryScriptLoaded(string luaString, string friendlyName)
+        public static void StoryScriptLoaded(ref string luaString, string friendlyName)
         {
-            StorySave.ScriptLoaded(friendlyName);
+            StorySave.ScriptLoaded(ref luaString, friendlyName);
             StoryFlags.ScriptLoaded(luaString, friendlyName);
         }
 
@@ -222,9 +222,9 @@ namespace LegendOfMortalMod
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(SaveSystem), "LoadGameData")]
-        public static void GameLoaded()
+        public static void GameLoaded(SaveSystem __instance)
         {
-            StorySave.Loaded();
+            StorySave.Loaded(Traverse.Create(__instance).Field("_currentSlot").GetValue<string>());
         }
 
         [HarmonyPrefix]
