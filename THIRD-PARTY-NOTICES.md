@@ -1,6 +1,6 @@
 # Third-party notices
 
-`BattleResult.cs`, `DiceControl.cs`, `RoundControl.cs` and `StorySave.cs` contain code adapted from
+`Features/BattleResult.cs`, `Features/DiceControl.cs`, `Features/RoundControl.cs` and `Features/StorySave.cs` contain code adapted from
 [zhaohuo-system](https://github.com/Toufff/zhaohuo-system) (`CombatResult.cs`, `GameAdapter.cs`,
 `NativeDicePresenter.cs`, `RoundSkip.cs`, `RoundUnlimited.cs`, `SegmentSaves.cs`), used under the following license:
 
