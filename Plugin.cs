@@ -230,7 +230,7 @@ namespace LegendOfMortalMod
             if (_showMenu)
             {
                 ApplyMinimized();
-                _windowRect = GUI.Window(123456, _windowRect, DoMyWindow, "活俠傳 Mod");
+                _windowRect = GUI.Window(123456, _windowRect, DoMyWindow, $"活俠傳 Mod v{Info.Metadata.Version}");
             }
             GUI.matrix = oldMatrix;
         }
