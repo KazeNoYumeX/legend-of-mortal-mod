@@ -54,6 +54,15 @@ namespace LegendOfMortalMod.Features
             if (restore != null)
             {
                 luaString = RestoreLua(restore) + luaString;
+                // 記下的是 SoundManager 的音樂鍵（Normal1），不是 luamanager.PlayMusic 用的名稱，所以直接播
+                SoundManager sound = SoundManager.Instance;
+                if (sound != null && restore[1].Length > 0)
+                {
+                    sound.ResetMusic();
+                    sound.PlayMusic(restore[1]);
+                }
+                if (sound != null && restore[2].Length > 0)
+                    sound.PlayEnvSound(restore[2]);
                 Plugin.Log.LogInfo($"劇情中存檔：讀檔補上背景 {restore[0]}、音樂 {restore[1]}");
             }
             _scene = restore ?? CurrentScene();
@@ -119,7 +128,7 @@ namespace LegendOfMortalMod.Features
             };
         }
 
-        // 和劇情腳本設定背景、音樂的寫法相同
+        // 和劇情腳本設定背景的寫法相同
         private static string RestoreLua(string[] scene)
         {
             string lua = "";
@@ -128,10 +137,6 @@ namespace LegendOfMortalMod.Features
                     $"runwait(flowcharts.LoadView(\"{scene[0]}\"))\n"
                     + $"getvar(flowcharts.view, \"ViewName\").value = \"{scene[0]}\"\n"
                     + "runblock(flowcharts.view, \"view\")\n";
-            if (scene[1].Length > 0)
-                lua += $"luamanager.PlayMusic(\"{scene[1]}\")\n";
-            if (scene[2].Length > 0)
-                lua += $"luamanager.PlayEnvSound(\"{scene[2]}\")\n";
             return lua;
         }
 
