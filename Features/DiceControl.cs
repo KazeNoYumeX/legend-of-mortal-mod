@@ -38,6 +38,10 @@ namespace LegendOfMortalMod.Features
         private static readonly List<Button> NativeRows = new();
         private static readonly List<Button> Buttons = new();
 
+        // Looked up once when the buttons are made, so Render doesn't search the hierarchy every frame
+        private static readonly List<Text> Labels = new();
+        private static readonly List<Text[]> RowTexts = new();
+
         public static void Begin(DiceMenuDialog dialog, string name, string[] options)
         {
             Clear();
@@ -146,6 +150,8 @@ namespace LegendOfMortalMod.Features
             _pendingRaw = _pendingBranch = _forcedBranch = null;
             NativeRows.Clear();
             Buttons.Clear();
+            Labels.Clear();
+            RowTexts.Clear();
         }
 
         private static void Attach()
@@ -172,7 +178,11 @@ namespace LegendOfMortalMod.Features
             Font font =
                 NativeRows[0].GetComponentInChildren<Text>()?.font ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             for (int i = 0; i < NativeRows.Count; i++)
+            {
                 Buttons.Add(CreateButton(font, i + 1));
+                // Inactive ones too: VisualBounds skips them while hidden, but they can show up later
+                RowTexts.Add(NativeRows[i].GetComponentsInChildren<Text>(true));
+            }
         }
 
         private static Button CreateButton(Font font, int branch)
@@ -195,6 +205,7 @@ namespace LegendOfMortalMod.Features
             GameObject labelObj = new("Label", typeof(RectTransform), typeof(Text));
             labelObj.transform.SetParent(obj.transform, false);
             Text label = labelObj.GetComponent<Text>();
+            Labels.Add(label);
             label.font = font;
             label.fontSize = 18;
             label.alignment = TextAnchor.MiddleCenter;
@@ -224,11 +235,11 @@ namespace LegendOfMortalMod.Features
                 button.gameObject.SetActive(visible);
                 if (!visible)
                     continue;
-                Text label = button.GetComponentInChildren<Text>();
+                Text label = Labels[i];
                 label.text = "指定";
                 button.interactable = canSpecify;
                 columnWidth = Mathf.Max(columnWidth, label.preferredWidth + 20);
-                rowsLeft = Mathf.Min(rowsLeft, VisualBounds(NativeRows[i]).xMin);
+                rowsLeft = Mathf.Min(rowsLeft, VisualBounds(i).xMin);
             }
             float columnX = Mathf.Max(_root.rect.xMin + 12, rowsLeft - columnWidth - 10);
             for (int i = 0; i < Buttons.Count; i++)
@@ -238,7 +249,7 @@ namespace LegendOfMortalMod.Features
                 RectTransform rect = (RectTransform)Buttons[i].transform;
                 rect.anchorMin = rect.anchorMax = _root.pivot;
                 rect.pivot = new Vector2(0, 1);
-                rect.anchoredPosition = new Vector2(columnX, VisualBounds(NativeRows[i]).center.y + ButtonHeight / 2);
+                rect.anchoredPosition = new Vector2(columnX, VisualBounds(i).center.y + ButtonHeight / 2);
                 rect.sizeDelta = new Vector2(columnWidth, ButtonHeight);
             }
         }
@@ -379,10 +390,10 @@ namespace LegendOfMortalMod.Features
         }
 
         // 選項框加上超出框的文字 (遊戲讓選項文字溢出框外)，換算成 _root 的座標
-        private static Rect VisualBounds(Button row)
+        private static Rect VisualBounds(int row)
         {
-            Rect bounds = Bounds((RectTransform)row.transform);
-            foreach (Text text in row.GetComponentsInChildren<Text>())
+            Rect bounds = Bounds((RectTransform)NativeRows[row].transform);
+            foreach (Text text in RowTexts[row])
             {
                 if (
                     !text.isActiveAndEnabled
