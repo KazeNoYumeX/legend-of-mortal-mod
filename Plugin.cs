@@ -191,29 +191,25 @@ namespace LegendOfMortalMod
             UpdateClickBlocker();
         }
 
+        private void Start()
+        {
+            GameObject canvas = new("LegendOfMortalMod.ClickBlocker", typeof(Canvas), typeof(GraphicRaycaster));
+            DontDestroyOnLoad(canvas);
+            Canvas c = canvas.GetComponent<Canvas>();
+            c.renderMode = RenderMode.ScreenSpaceOverlay;
+            c.sortingOrder = short.MaxValue;
+            GameObject panel = new("Panel", typeof(RectTransform), typeof(Image));
+            panel.transform.SetParent(canvas.transform, false);
+            panel.GetComponent<Image>().color = Color.clear;
+            _clickBlocker = panel.GetComponent<RectTransform>();
+            // IMGUI measures from the top left, in menu units scaled by _guiScale
+            _clickBlocker.anchorMin = _clickBlocker.anchorMax = _clickBlocker.pivot = new Vector2(0, 1);
+            panel.SetActive(false);
+        }
+
         private void UpdateClickBlocker()
         {
-            bool block = _showMenu && _blockMenuClicks.Value;
-            if (_clickBlocker == null)
-            {
-                if (!block)
-                    return;
-                GameObject canvas = new GameObject(
-                    "LegendOfMortalMod.ClickBlocker",
-                    typeof(Canvas),
-                    typeof(GraphicRaycaster)
-                );
-                DontDestroyOnLoad(canvas);
-                canvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
-                canvas.GetComponent<Canvas>().sortingOrder = short.MaxValue;
-                GameObject panel = new GameObject("Panel", typeof(RectTransform), typeof(Image));
-                panel.transform.SetParent(canvas.transform, false);
-                panel.GetComponent<Image>().color = Color.clear;
-                _clickBlocker = panel.GetComponent<RectTransform>();
-                // IMGUI measures from the top left, in menu units scaled by _guiScale
-                _clickBlocker.anchorMin = _clickBlocker.anchorMax = _clickBlocker.pivot = new Vector2(0, 1);
-            }
-            _clickBlocker.gameObject.SetActive(block);
+            _clickBlocker.gameObject.SetActive(_showMenu && _blockMenuClicks.Value);
             _clickBlocker.anchoredPosition = new Vector2(_windowRect.x, -_windowRect.y) * _guiScale;
             _clickBlocker.sizeDelta = _windowRect.size * _guiScale;
         }
