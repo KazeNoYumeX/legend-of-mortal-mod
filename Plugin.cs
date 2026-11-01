@@ -25,7 +25,7 @@ namespace LegendOfMortalMod
         private bool _battleInfo;
         private GUIStyle _infoStyle;
         private Vector2 _infoScroll;
-        private readonly GUIStyle _myStyle = new GUIStyle();
+        private readonly GUIStyle _myStyle = new();
         public bool unlimitedSpend;
         public bool unlimitedResources;
         private bool _accelerateMode;
@@ -73,8 +73,8 @@ namespace LegendOfMortalMod
         private readonly Vector2[] _tabScroll = new Vector2[TabNames.Length];
 
         // Unsaved typed values and locked values, keyed by GameStat / RelationshipStat / FlagData
-        private readonly Dictionary<ScriptableObject, string> _inputs = new Dictionary<ScriptableObject, string>();
-        private readonly Dictionary<ScriptableObject, int> _locks = new Dictionary<ScriptableObject, int>();
+        private readonly Dictionary<ScriptableObject, string> _inputs = new();
+        private readonly Dictionary<ScriptableObject, int> _locks = new();
         private string _search = "";
         private string _searchInput = "";
         private GUIStyle _textStyle;
@@ -95,7 +95,7 @@ namespace LegendOfMortalMod
         private float _speed = 2;
         private string _speedInput = "2";
         private Rect _windowRect;
-        private static readonly LeanLocalizationResolver Locale = new LeanLocalizationResolver();
+        private static readonly LeanLocalizationResolver Locale = new();
         public static Plugin Instance { get; private set; }
         internal static ManualLogSource Log { get; private set; }
 
@@ -655,8 +655,8 @@ namespace LegendOfMortalMod
 
         private static string _loverValues;
         private static string _loverLang;
-        private static readonly List<int> LoverIds = new List<int>();
-        private static readonly List<string> LoverNames = new List<string>();
+        private static readonly List<int> LoverIds = new();
+        private static readonly List<string> LoverNames = new();
 
         // 愛人 holds a lover id; the game names each one under PlayerInfo/Lover/<id>
         private static void LoadLovers(GameStat stat)
@@ -668,7 +668,7 @@ namespace LegendOfMortalMod
             _loverLang = lang;
             LoverIds.Clear();
             LoverNames.Clear();
-            StringBuilder values = new StringBuilder();
+            StringBuilder values = new();
             for (int id = stat.Min; id <= stat.Max; id++)
             {
                 string key = "PlayerInfo/Lover/" + id;

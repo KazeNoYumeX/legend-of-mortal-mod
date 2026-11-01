@@ -86,7 +86,7 @@ namespace LegendOfMortalMod
         }
 
         // 修練（武學點數）、鍛造 / 煉丹面板扣的點數，面板打開時記下來給無限點數用
-        private static readonly HashSet<GameStat> PanelPoints = new HashSet<GameStat>();
+        private static readonly HashSet<GameStat> PanelPoints = new();
 
         // 無限點數 / 銀兩：銀兩和記下的點數設成最大值，錢不夠或點數 0 也能用
         public static void FillResources()

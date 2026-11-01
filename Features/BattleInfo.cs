@@ -49,7 +49,7 @@ namespace LegendOfMortalMod.Features
 
         private static List<string> DescribeCombat(object level)
         {
-            List<string> lines = new List<string>
+            List<string> lines = new()
             {
                 "",
                 "【勝利】" + Flags(Plugin.Items(level, "_winResult")),
@@ -81,7 +81,7 @@ namespace LegendOfMortalMod.Features
         private static List<string> DescribeBattle(GameLevelManager battle, object level)
         {
             Traverse manager = Traverse.Create(battle);
-            List<string> lines = new List<string>
+            List<string> lines = new()
             {
                 $"團體戰：已過 {manager.Field("_currentSessionTime").GetValue()} 秒，"
                     + $"我方 {manager.Field("_currentFriendNpcs").GetValue()} 人、敵方 {manager.Field("_currentEnemyNpcs").GetValue()} 人",
@@ -99,7 +99,7 @@ namespace LegendOfMortalMod.Features
             int count = 0;
             foreach (object data in Plugin.Items(level, "_events"))
             {
-                List<string> triggers = new List<string>();
+                List<string> triggers = new();
                 if (Traverse.Create(data).Field("_checkTriggerSecond").GetValue() is true)
                     triggers.Add($"第 {Field(data, "_triggerSecond")} 秒");
                 if (Traverse.Create(data).Field("_checkCountThreshold").GetValue() is true)

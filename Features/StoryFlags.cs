@@ -15,17 +15,15 @@ namespace LegendOfMortalMod.Features
     internal static class StoryFlags
     {
         private const float RefreshTime = 0.5f;
-        private static readonly Regex FlagCall = new Regex(
+        private static readonly Regex FlagCall = new(
             @"statmodifymanager\.(SetFlag|AddFlag)\(\s*""([^""]+)""\s*,\s*(-?\d+)\s*\)"
         );
-        private static readonly Regex CheckCall = new Regex(
-            @"checkpointmanager\.(Switch|Condition)\(\s*""([^""]+)""\s*\)"
-        );
+        private static readonly Regex CheckCall = new(@"checkpointmanager\.(Switch|Condition)\(\s*""([^""]+)""\s*\)");
 
         public static bool Enabled;
-        private static List<Match> _flags = new List<Match>();
-        private static List<Match> _checks = new List<Match>();
-        private static List<string> _lines = new List<string>();
+        private static List<Match> _flags = new();
+        private static List<Match> _checks = new();
+        private static List<string> _lines = new();
         private static float _refreshAt;
         private static Dictionary<object, bool> _rolled;
 
@@ -59,7 +57,7 @@ namespace LegendOfMortalMod.Features
 
         private static List<string> Describe()
         {
-            List<string> lines = new List<string>();
+            List<string> lines = new();
             if (_flags.Count > 0)
             {
                 lines.Add("【本段會改的旗標】");

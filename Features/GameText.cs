@@ -9,7 +9,7 @@ namespace LegendOfMortalMod.Features
     // 把遊戲的旗標、比較條件轉成選單裡顯示的文字，戰鬥資訊和劇情旗標共用
     internal static class GameText
     {
-        private static readonly Dictionary<string, string> Ops = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> Ops = new()
         {
             { "Equal", "=" },
             { "NotEqual", "≠" },

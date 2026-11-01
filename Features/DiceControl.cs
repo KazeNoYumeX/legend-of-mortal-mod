@@ -35,8 +35,8 @@ namespace LegendOfMortalMod.Features
         // Index 1..選項數：能落在該選項的原始點數，可能超出轉盤範圍
         private static int?[] _raws = new int?[0];
         private static RectTransform _root;
-        private static readonly List<Button> NativeRows = new List<Button>();
-        private static readonly List<Button> Buttons = new List<Button>();
+        private static readonly List<Button> NativeRows = new();
+        private static readonly List<Button> Buttons = new();
 
         public static void Begin(DiceMenuDialog dialog, string name, string[] options)
         {
@@ -177,7 +177,7 @@ namespace LegendOfMortalMod.Features
 
         private static Button CreateButton(Font font, int branch)
         {
-            GameObject obj = new GameObject("Branch" + branch, typeof(RectTransform), typeof(Image), typeof(Button));
+            GameObject obj = new("Branch" + branch, typeof(RectTransform), typeof(Image), typeof(Button));
             obj.transform.SetParent(_root, false);
             Image image = obj.GetComponent<Image>();
             Button button = obj.GetComponent<Button>();
@@ -192,7 +192,7 @@ namespace LegendOfMortalMod.Features
             colors.disabledColor = new Color(0.15f, 0.16f, 0.17f, 0.4f);
             button.colors = colors;
 
-            GameObject labelObj = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            GameObject labelObj = new("Label", typeof(RectTransform), typeof(Text));
             labelObj.transform.SetParent(obj.transform, false);
             Text label = labelObj.GetComponent<Text>();
             label.font = font;

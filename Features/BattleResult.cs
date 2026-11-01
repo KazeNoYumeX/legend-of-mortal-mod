@@ -182,7 +182,7 @@ namespace LegendOfMortalMod.Features
         // 事件的動作，依單挑執行的順序排，到載入場景為止
         private static List<object> ExitActions(object item)
         {
-            List<object> actions = new List<object>();
+            List<object> actions = new();
             foreach (string list in new[] { "_actions", "_afterActions", "_afterResult" })
             foreach (object action in Plugin.Items(item, list))
             {
