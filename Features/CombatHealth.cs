@@ -1,4 +1,3 @@
-using HarmonyLib;
 using Mortal.Battle;
 using Mortal.Combat;
 using UnityEngine;
@@ -15,12 +14,7 @@ namespace LegendOfMortalMod.Features
         // between Layout and Repaint
         public static void Draw()
         {
-            if (GameLevelManager.Instance != null)
-                return;
-            CombatManager combat = Traverse
-                .Create(typeof(CombatManager))
-                .Property("Instance")
-                .GetValue<CombatManager>();
+            CombatManager combat = GameLevelManager.Instance == null ? BattleInfo.Duel() : null;
             if (combat == null || combat.PlayerAction == null || combat.EnemyAction == null)
                 return;
             DrawRow("我方", combat.PlayerAction, ref _playerInput);

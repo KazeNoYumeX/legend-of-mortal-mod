@@ -41,10 +41,7 @@ namespace LegendOfMortalMod.Features
                 && Traverse.Create(battle).Property("IsReady").GetValue() is true
                 && !battle.IsGameOver
                 && Traverse.Create(battle).Property("IsPause").GetValue() is true;
-            CombatManager combat =
-                battle == null
-                    ? Traverse.Create(typeof(CombatManager)).Property("Instance").GetValue<CombatManager>()
-                    : null;
+            CombatManager combat = battle == null ? BattleInfo.Duel() : null;
             bool combatReady =
                 combat != null
                 && Time.timeScale > 0

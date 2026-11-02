@@ -16,16 +16,17 @@ namespace LegendOfMortalMod.Features
         private static object _level;
         private static List<string> _lines;
 
+        // The current 單挑, or null; callers check GameLevelManager first, since a 團體戰 is not a 單挑
+        internal static CombatManager Duel() =>
+            Traverse.Create(typeof(CombatManager)).Property("Instance").GetValue<CombatManager>();
+
         // 目前戰鬥的說明，不在戰鬥中時回傳 null；只在 Layout 時重建，免得 Layout 和 Repaint 畫的行數不同
         public static List<string> Lines()
         {
             if (SceneController.Instance != null && SceneController.Instance.IsLoading)
                 return null;
             GameLevelManager battle = GameLevelManager.Instance;
-            CombatManager combat =
-                battle == null
-                    ? Traverse.Create(typeof(CombatManager)).Property("Instance").GetValue<CombatManager>()
-                    : null;
+            CombatManager combat = battle == null ? Duel() : null;
             object level =
                 battle != null ? Traverse.Create(battle).Field("_levelData").GetValue()
                 : combat != null ? Traverse.Create(combat).Field("_combatLevel").GetValue()
