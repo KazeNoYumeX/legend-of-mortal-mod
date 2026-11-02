@@ -569,8 +569,23 @@ namespace LegendOfMortalMod
             switch (_tab)
             {
                 case 1:
-                    foreach (GameStat stat in manager.Stats.List)
-                        DrawValueRow(stat, stat.StatType.ToString(), StatNote(stat), $"{stat.Min} ~ {stat.Max}");
+                    foreach (
+                        IGrouping<int, GameStat> section in manager.Stats.List.GroupBy(StatSection).OrderBy(g => g.Key)
+                    )
+                    {
+                        List<GameStat> shown = section
+                            .Where(stat => MatchesSearch(stat.StatType.ToString(), StatNote(stat)))
+                            .OrderBy(stat => Array.IndexOf(StatSections[section.Key].Types, stat.StatType))
+                            .ToList();
+                        if (shown.Count == 0)
+                            continue;
+                        // Same padding as the rows, so the title lines up with the names
+                        GUILayout.BeginHorizontal(_rowStyle);
+                        GUILayout.Label($"【{StatSections[section.Key].Name}】", _textStyle);
+                        GUILayout.EndHorizontal();
+                        foreach (GameStat stat in shown)
+                            DrawValueRow(stat, stat.StatType.ToString(), StatNote(stat), $"{stat.Min} ~ {stat.Max}");
+                    }
                     break;
                 case 2:
                     foreach (RelationshipStat relationship in manager.Relationships.List)
@@ -730,6 +745,86 @@ namespace LegendOfMortalMod
                 values.Append($"\n={id}，{lover}");
             }
             _loverValues = values.ToString().TrimStart('\n');
+        }
+
+        // 角色屬性 in sections, the ones people change most first, in the order of the game's 屬性 page;
+        // anything not listed goes to the last one
+        private static readonly (string Name, GameStatType[] Types)[] StatSections =
+        {
+            (
+                "常用",
+                new[]
+                {
+                    GameStatType.心理衛生,
+                    GameStatType.學問,
+                    GameStatType.嘴力,
+                    GameStatType.抗毒,
+                    GameStatType.抗麻,
+                    GameStatType.性情,
+                    GameStatType.處世,
+                    GameStatType.道德,
+                    GameStatType.修養,
+                    GameStatType.魅力,
+                    GameStatType.命運,
+                    GameStatType.廚藝,
+                }
+            ),
+            (
+                "武學",
+                new[]
+                {
+                    GameStatType.體力,
+                    GameStatType.內力,
+                    GameStatType.輕功,
+                    GameStatType.武功刀劍,
+                    GameStatType.武功拳掌,
+                    GameStatType.武功暗器,
+                    GameStatType.武功腿法,
+                    GameStatType.武功奇門,
+                    GameStatType.武功軟兵器,
+                    GameStatType.武功槍棍,
+                    GameStatType.武功內功,
+                    GameStatType.陰陽內功,
+                    GameStatType.儒學,
+                    GameStatType.道學,
+                    GameStatType.佛學,
+                    GameStatType.防禦,
+                    GameStatType.攻擊爆擊,
+                    GameStatType.暗器爆擊,
+                    GameStatType.武學點數,
+                    GameStatType.全武學點數,
+                }
+            ),
+            (
+                "資源",
+                new[]
+                {
+                    GameStatType.銀兩,
+                    GameStatType.鍛造,
+                    GameStatType.毒藥,
+                    GameStatType.行動次數,
+                    GameStatType.個人貢獻度,
+                }
+            ),
+            (
+                "門派",
+                new[]
+                {
+                    GameStatType.門派規模,
+                    GameStatType.門派名聲,
+                    GameStatType.門派人數,
+                    GameStatType.向心力,
+                    GameStatType.門派資產,
+                    GameStatType.門派貢獻,
+                }
+            ),
+            ("其他", new GameStatType[0]),
+        };
+
+        private static int StatSection(GameStat stat)
+        {
+            int section = Array.FindIndex(StatSections, s => Array.IndexOf(s.Types, stat.StatType) >= 0);
+            return section < 0 ? StatSections.Length - 1 : section;
         }
 
         // Listed like the flags' notes
