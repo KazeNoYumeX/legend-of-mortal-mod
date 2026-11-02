@@ -7,6 +7,8 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-11-02
+
 ### Added
 
 - 單挑時，基本頁的戰鬥結果與事件上方可以直接改我方和敵方的血量，方便觸發「血量低於多少」的事件
@@ -133,7 +135,8 @@
 
 - 第一版：遊戲中按 `F3` 開啟修改選單
 
-[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.3.0...v1.4.0
