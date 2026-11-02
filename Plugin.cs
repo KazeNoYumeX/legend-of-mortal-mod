@@ -957,10 +957,14 @@ namespace LegendOfMortalMod
             return string.IsNullOrEmpty(name) ? item.name : name;
         }
 
-        // 鍛造 and 煉丹 items (武器, 防具, 暗器, 毒術, 煉丹), grouped by slot
+        // 鍛造 and 煉丹 items (武器, 防具, 暗器, 毒術, 煉丹), grouped by slot. A renamed field lists nothing
+        // instead of throwing in OnGUI every frame
         private static IEnumerable<UpgradeItemData> UpgradeItems(PlayerStatManagerData manager) =>
             new[] { "_weaponUpgradeItems", "_poisonUpgradeItems" }
-                .SelectMany(field => Traverse.Create(manager).Field(field).GetValue<UpgradeItemCollectionData>().List)
+                .SelectMany(field =>
+                    Traverse.Create(manager).Field(field).GetValue<UpgradeItemCollectionData>()?.List
+                    ?? new List<UpgradeItemData>()
+                )
                 .OrderBy(item => item.ItemType);
 
         private static string UpgradeItemName(UpgradeItemData item)
