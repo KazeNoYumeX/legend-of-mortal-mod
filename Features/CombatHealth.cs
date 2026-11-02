@@ -31,7 +31,11 @@ namespace LegendOfMortalMod.Features
         {
             CombatStatController stat = action.Stat;
             GUILayout.BeginHorizontal();
-            GUILayout.Label($"{side}血量 {stat.CurrentHealth} / {stat.MaxHealthValue}", GUILayout.Width(200));
+            GUILayout.Label(
+                $"{side}血量 {stat.CurrentHealth} / {stat.MaxHealthValue}",
+                Plugin.RowLabelStyle,
+                GUILayout.Width(200)
+            );
             input = GUILayout.TextField(input, GUILayout.Width(66));
             // At least 1: 0 kills mid-turn, and ending a fight is what 判定勝利/落敗 is for
             if (GUILayout.Button("設定", GUILayout.Width(50)) && int.TryParse(input, out int value) && !action.IsDead)

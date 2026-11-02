@@ -87,7 +87,17 @@ namespace LegendOfMortalMod
         // 心上人名單是否展開；和分頁一樣等下一次 Layout 才切換
         private bool _loverList;
         private bool _loverListInput;
-        private GUIStyle _loverLabelStyle;
+        private static GUIStyle _rowLabelStyle;
+
+        // Labels in the 基本 tab's rows. The skin's label font is much larger; a toggle without its box keeps
+        // the other rows' font and indent. GUI.skin is only readable inside OnGUI
+        internal static GUIStyle RowLabelStyle =>
+            _rowLabelStyle ??= new GUIStyle(GUI.skin.toggle)
+            {
+                normal = { background = null },
+                hover = { background = null },
+                active = { background = null },
+            };
         private readonly Vector2[] _tabScroll = new Vector2[TabNames.Length];
 
         // Unsaved typed values and locked values, keyed by GameStat / RelationshipStat / FlagData
@@ -844,16 +854,8 @@ namespace LegendOfMortalMod
             GameStat stat = PlayerStatManagerData.Instance.Stats.Get(GameStatType.愛人);
             LoadLovers(stat);
             int current = LoverIds.IndexOf(stat.Value);
-            // The skin's label font is much larger; a toggle without its box keeps the other rows' font and indent
-            if (_loverLabelStyle == null)
-                _loverLabelStyle = new GUIStyle(GUI.skin.toggle)
-                {
-                    normal = { background = null },
-                    hover = { background = null },
-                    active = { background = null },
-                };
             GUILayout.BeginHorizontal();
-            GUILayout.Label("切換心上人", _loverLabelStyle, GUILayout.Width(200));
+            GUILayout.Label("切換心上人", RowLabelStyle, GUILayout.Width(200));
             GUILayout.BeginVertical(GUILayout.Width(120));
             string lover = current >= 0 ? LoverNames[current] : stat.Value.ToString();
             if (GUILayout.Button(lover + (_loverList ? " ▲" : " ▼")))
