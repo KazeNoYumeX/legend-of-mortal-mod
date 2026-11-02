@@ -61,6 +61,23 @@ namespace LegendOfMortalMod
         private int _tab;
         private int _tabInput;
 
+        // 上排是分類，分類下有多個分頁時再加一排；各分類記住上次選的分頁
+        private static readonly (string Name, int[] Tabs)[] TabGroups =
+        {
+            ("基本", new[] { 0 }),
+            ("角色", new[] { 1, 2, 7 }),
+            ("物品", new[] { 4, 5, 6, 9 }),
+            ("旗標", new[] { 3 }),
+            ("講經堂", new[] { 8 }),
+        };
+        private static readonly string[] GroupNames = TabGroups.Select(group => group.Name).ToArray();
+        private static readonly string[][] GroupTabNames = TabGroups
+            .Select(group => group.Tabs.Select(tab => TabNames[tab]).ToArray())
+            .ToArray();
+        private int _group;
+        private int _groupInput;
+        private readonly int[] _groupTab = new int[TabGroups.Length];
+
         // 選單最小化：只留基本頁，視窗縮到內容大小；還原時回到原本的大小
         private bool _minimized;
         private bool _minimizedInput;
@@ -298,8 +315,17 @@ namespace LegendOfMortalMod
             _myStyle.normal.textColor = Color.white;
             GUILayout.BeginArea(new Rect(10, 20, _windowRect.width - 20, _windowRect.height - 30));
 
+            // Committed before drawing, so this Layout already draws the new group's row and picks its tab
+            if (Event.current.type == EventType.Layout)
+                _group = _groupInput;
             if (!_minimized)
-                _tabInput = GUILayout.Toolbar(_tabInput, TabNames);
+            {
+                _groupInput = GUILayout.Toolbar(_groupInput, GroupNames);
+                int[] tabs = TabGroups[_group].Tabs;
+                if (tabs.Length > 1)
+                    _groupTab[_group] = GUILayout.Toolbar(_groupTab[_group], GroupTabNames[_group]);
+                _tabInput = tabs[_groupTab[_group]];
+            }
             // Layout and the events after it must draw the same controls, so tab and filter changes wait for the next Layout
             if (Event.current.type == EventType.Layout)
             {
