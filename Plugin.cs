@@ -434,10 +434,15 @@ namespace LegendOfMortalMod
         // 視窗高度量到這裡為止
         private void DrawInfo()
         {
-            List<string> lines =
-                (_battleInfo ? BattleInfo.Lines() : null) ?? (StoryFlags.Enabled ? StoryFlags.Lines() : null);
+            List<string> battleLines = _battleInfo ? BattleInfo.Lines() : null;
+            List<string> lines = battleLines ?? (StoryFlags.Enabled ? StoryFlags.Lines() : null);
             if (lines == null)
                 return;
+            if (battleLines != null)
+            {
+                GUILayout.Space(8);
+                CombatHealth.Draw();
+            }
             if (_infoStyle == null)
                 _infoStyle = new GUIStyle(GUI.skin.label)
                 {
