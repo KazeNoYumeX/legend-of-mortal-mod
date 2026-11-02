@@ -1,6 +1,6 @@
 # Legend of Mortal Mod
 
-[繁體中文](README.md) | English
+[繁體中文](README.md) | English | [日本語](README.ja.md) | [한국어](README.ko.md)
 
 An in-game cheat/debug menu for **Legend of Mortal (活俠傳)**, built as a BepInEx 6 plugin.
 

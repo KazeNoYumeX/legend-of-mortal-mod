@@ -1,6 +1,6 @@
 # 活俠傳修改 Mod
 
-繁體中文 | [English](README.en.md)
+繁體中文 | [English](README.en.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
 ## 安裝方法 Installation
 
