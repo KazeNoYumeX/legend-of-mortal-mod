@@ -84,7 +84,7 @@ See [CHANGELOG.md](CHANGELOG.md) (Traditional Chinese) for what changed in each 
 
 ### 基本 Basic
 
-Every option; the five under 以下全部開啟 are the ones the minimized menu hides.
+Every option; the minimized menu keeps only game speed, unlimited action points, skip this round, 選單最小化 and the lover switch.
 
 ![Basic tab](docs/screenshots/basic.webp)
 
@@ -102,7 +102,7 @@ When the game makes a branch check, the 回想 log notes the branch, each condit
 
 ### 戰鬥結果與事件 Battle info (duel)
 
-In a duel: the current round, the flags a win or a loss sets, and which event fires on which round.
+The minimized menu in a duel: both sides' HP (which you can set), the current round, the flags a win or a loss sets, and which event fires on which condition.
 
 ![Battle info in a duel](docs/screenshots/battle-combat.webp)
 
@@ -111,6 +111,12 @@ In a duel: the current round, the flags a win or a loss sets, and which event fi
 In a group battle: elapsed seconds, both sides' headcount, the time limit and the flags the result is written to.
 
 ![Battle info in a group battle](docs/screenshots/battle-group.webp)
+
+### 角色屬性 Stats
+
+In sections, the common stats first.
+
+![Stats tab](docs/screenshots/stats.webp)
 
 ### 好感度 Affection
 
