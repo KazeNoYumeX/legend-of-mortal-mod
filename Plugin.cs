@@ -52,6 +52,7 @@ namespace LegendOfMortalMod
             "雜物",
             "技能",
             "講經堂",
+            "開發項目",
         };
 
         // 講經堂 records live in the global save (Save_universe.dat), which the game only writes at certain points
@@ -573,6 +574,10 @@ namespace LegendOfMortalMod
                 case 8:
                     ForLibraryEntries((item, note) => DrawValueRow(item, LibraryTitle(item), note, ""));
                     break;
+                case 9:
+                    foreach (UpgradeItemData item in UpgradeItems(manager))
+                        DrawValueRow(item, UpgradeItemName(item), item.ItemType.ToString(), $"0 ~ {item.LevelCounts}");
+                    break;
             }
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
@@ -591,6 +596,20 @@ namespace LegendOfMortalMod
                 if (GUILayout.Button(note, GUILayout.Width(LockWidth + 10)))
                     relationship.SetActive(!relationship.Active);
                 GUILayout.FlexibleSpace();
+            }
+            else if (key is UpgradeItemData upgrade)
+            {
+                // 裝備中的那件按鈕停用；未開發的換上時從 0 級開始
+                bool equipped = PlayerStatManagerData.Instance.GetUpgradeItem(upgrade.ItemType) == upgrade;
+                GUI.enabled = !equipped;
+                if (GUILayout.Button(equipped ? "裝備中" : "裝備", GUILayout.Width(LockWidth + 10)))
+                {
+                    if (upgrade.CurrentLevel < 0)
+                        upgrade.Setup(0, 0, true);
+                    PlayerStatManagerData.Instance.SetCurrentUpgradeItem(upgrade.ItemType, upgrade.Key);
+                }
+                GUI.enabled = true;
+                GUILayout.Label(note, _textStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
             }
             else
                 GUILayout.Label(note, _textStyle, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
@@ -810,6 +829,28 @@ namespace LegendOfMortalMod
             return string.IsNullOrEmpty(name) ? item.name : name;
         }
 
+        // 鍛造 and 煉丹 items (武器, 防具, 暗器, 毒術, 煉丹), grouped by slot
+        private static IEnumerable<UpgradeItemData> UpgradeItems(PlayerStatManagerData manager) =>
+            new[] { "_weaponUpgradeItems", "_poisonUpgradeItems" }
+                .SelectMany(field => Traverse.Create(manager).Field(field).GetValue<UpgradeItemCollectionData>().List)
+                .OrderBy(item => item.ItemType);
+
+        private static string UpgradeItemName(UpgradeItemData item)
+        {
+            string name = Locale.GetString(item.GetNameKey());
+            return string.IsNullOrEmpty(name) ? item.Key : name;
+        }
+
+        // Like UpgradeItemData.Upgrade, each level gained sets that level's flags
+        private static void SetUpgradeLevel(UpgradeItemData item, int level)
+        {
+            level = Mathf.Clamp(level, 0, item.LevelCounts);
+            for (int i = Mathf.Max(item.CurrentLevel, 0); i < level; i++)
+                item.UpgradeLevels[i].ModifyFlag();
+            item.Setup(level, 0, true);
+            item.UpdateStatus();
+        }
+
         // 全持有 only gives books not held yet; 歸零 skips practiced books, since the save drops a book
         // with no copies and its 修練 progress with it
         private void SetAllBooks(bool own)
@@ -848,6 +889,8 @@ namespace LegendOfMortalMod
                     return talent.Level;
                 case LibraryItemData entry:
                     return entry.Count;
+                case UpgradeItemData upgrade:
+                    return upgrade.CurrentLevel;
                 default:
                     return ((FlagData)key).State;
             }
@@ -872,6 +915,9 @@ namespace LegendOfMortalMod
                 case LibraryItemData entry:
                     entry.Set(value);
                     Instance._saveUniverse = true;
+                    break;
+                case UpgradeItemData upgrade:
+                    SetUpgradeLevel(upgrade, value);
                     break;
                 default:
                     ((FlagData)key).State = value;
