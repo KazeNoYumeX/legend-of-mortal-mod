@@ -74,7 +74,7 @@ namespace LegendOfMortalMod.Features
             if (_snapshot == null)
                 return;
             _snapshot.StartStoryScript = player.CurrentStoryScript;
-            Plugin.Log.LogInfo($"劇情中存檔：已記下 {name} 開始時的存檔");
+            Plugin.Log.LogDebug($"劇情中存檔：已記下 {name} 開始時的存檔");
         }
 
         public static void NativeToggle(bool active) => _nativeOpen = active;
