@@ -353,31 +353,31 @@ namespace LegendOfMortalMod
             GUI.enabled = true;
             GUILayout.EndHorizontal();
 
-            GUILayout.Space(8);
-            // 修練 / 煉丹 / 鍛造面板的「最大消費」次數不限
-            bool spend = GUILayout.Toggle(unlimitedSpend, "無限消費");
-            if (spend != unlimitedSpend)
-            {
-                unlimitedSpend = spend;
-                // 面板開著時勾選也馬上套用；取消則等下次打開面板
-                if (spend)
-                    Patch.RefreshSpendPanels();
-            }
-            bool resources = GUILayout.Toggle(unlimitedResources, "無限鍛造/煉丹/修練點數/銀兩");
-            if (resources != unlimitedResources)
-            {
-                unlimitedResources = resources;
-                // 面板開著時也馬上更新點數和按鈕
-                if (resources)
-                {
-                    Patch.FillResources();
-                    Patch.RefreshSpendPanels();
-                }
-            }
-
             // Set-and-forget options stay out of the minimized menu
             if (!_minimized)
             {
+                GUILayout.Space(8);
+                // 修練 / 煉丹 / 鍛造面板的「最大消費」次數不限
+                bool spend = GUILayout.Toggle(unlimitedSpend, "無限消費");
+                if (spend != unlimitedSpend)
+                {
+                    unlimitedSpend = spend;
+                    // 面板開著時勾選也馬上套用；取消則等下次打開面板
+                    if (spend)
+                        Patch.RefreshSpendPanels();
+                }
+                bool resources = GUILayout.Toggle(unlimitedResources, "無限鍛造/煉丹/修練點數/銀兩");
+                if (resources != unlimitedResources)
+                {
+                    unlimitedResources = resources;
+                    // 面板開著時也馬上更新點數和按鈕
+                    if (resources)
+                    {
+                        Patch.FillResources();
+                        Patch.RefreshSpendPanels();
+                    }
+                }
+
                 GUILayout.Space(8);
                 bool all =
                     _battleButtons && _battleInfo && StoryFlags.Enabled && _diceButtons && _storySaveAnywhere.Value;
