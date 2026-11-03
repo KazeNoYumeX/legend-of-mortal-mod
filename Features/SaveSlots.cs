@@ -109,6 +109,7 @@ namespace LegendOfMortalMod.Features
                 if (text.preferredWidth <= width)
                     break;
             }
+            text.transform.SetAsLastSibling();
             text.gameObject.SetActive(true);
         }
 
@@ -118,7 +119,9 @@ namespace LegendOfMortalMod.Features
             obj.transform.SetParent(slot, false);
             Text text = obj.GetComponent<Text>();
             text.alignment = TextAnchor.MiddleLeft;
+            // 遊戲的宋體行高比字大，框不夠高時 Truncate 會把整行藏起來
             text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
             text.supportRichText = false;
             text.raycastTarget = false;
             return text;
