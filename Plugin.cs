@@ -45,7 +45,7 @@ namespace LegendOfMortalMod
         // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
         private RectTransform _clickBlocker;
 
-        // 同一個 canvas 上，擋住存檔備註視窗底下的遊戲畫面
+        // 同一個 canvas 上，擋住快速解鎖清單和存檔備註視窗底下的遊戲畫面
         private RectTransform _popupBlocker;
         private static readonly string[] TabNames =
         {
@@ -266,7 +266,7 @@ namespace LegendOfMortalMod
             _clickBlocker.anchoredPosition = new Vector2(_windowRect.x, -_windowRect.y) * _guiScale;
             _clickBlocker.sizeDelta = _windowRect.size * _guiScale;
             // 上一幀畫的範圍（螢幕像素，左上原點）
-            Rect popup = SaveSlots.Editing ? new Rect(0, 0, Screen.width, Screen.height) : default;
+            Rect popup = SaveSlots.Editing ? new Rect(0, 0, Screen.width, Screen.height) : OptionUnlock.PopupRect;
             _popupBlocker.gameObject.SetActive(popup.width > 0);
             _popupBlocker.anchoredPosition = new Vector2(popup.x, -popup.y);
             _popupBlocker.sizeDelta = popup.size;
@@ -274,6 +274,7 @@ namespace LegendOfMortalMod
 
         private void OnGUI()
         {
+            OptionUnlock.DrawHidden();
             SaveSlots.DrawEditor();
             if (!_showMenu && !_battleButtons)
                 return;
@@ -452,6 +453,7 @@ namespace LegendOfMortalMod
                     && _battleInfo
                     && StoryFlags.Enabled
                     && _diceButtons
+                    && OptionUnlock.Enabled
                     && PinballScore.Enabled
                     && _storySaveAnywhere.Value;
                 if (GUILayout.Toggle(all, "以下全部開啟") != all)
@@ -459,6 +461,7 @@ namespace LegendOfMortalMod
                         _battleInfo =
                         StoryFlags.Enabled =
                         _diceButtons =
+                        OptionUnlock.Enabled =
                         PinballScore.Enabled =
                         _storySaveAnywhere.Value =
                             !all;
@@ -467,6 +470,7 @@ namespace LegendOfMortalMod
                 _battleInfo = GUILayout.Toggle(_battleInfo, "顯示戰鬥結果與事件");
                 StoryFlags.Enabled = GUILayout.Toggle(StoryFlags.Enabled, "顯示本段劇情旗標（判定寫進回想）");
                 _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
+                OptionUnlock.Enabled = GUILayout.Toggle(OptionUnlock.Enabled, "快速解鎖事件/選項/分支判定");
                 PinballScore.Enabled = GUILayout.Toggle(PinballScore.Enabled, "彈珠台可改總分");
                 _storySaveAnywhere.Value = GUILayout.Toggle(_storySaveAnywhere.Value, "劇情中隨時存檔");
                 DrawSaveSlotsRow();
@@ -506,8 +510,8 @@ namespace LegendOfMortalMod
         private void DrawInfo()
         {
             List<string> battleLines = _battleInfo ? BattleInfo.Lines() : null;
-            List<string> lines = battleLines ?? (StoryFlags.Enabled ? StoryFlags.Lines() : null);
-            if (lines == null)
+            List<StoryFlags.Line> storyLines = battleLines == null && StoryFlags.Enabled ? StoryFlags.Lines() : null;
+            if (battleLines == null && storyLines == null)
                 return;
             if (battleLines != null)
             {
@@ -526,8 +530,28 @@ namespace LegendOfMortalMod
                 _infoScroll,
                 _minimized ? GUILayout.Height(220) : GUILayout.ExpandHeight(true)
             );
-            foreach (string line in lines)
-                GUILayout.Label(line, _infoStyle);
+            if (battleLines != null)
+            {
+                foreach (string line in battleLines)
+                    GUILayout.Label(line, _infoStyle);
+            }
+            else
+            {
+                foreach (StoryFlags.Line line in storyLines)
+                {
+                    if (line.Branch == null)
+                    {
+                        GUILayout.Label(line.Text, _infoStyle);
+                        continue;
+                    }
+                    // 把這個分支的條件改到成立（只看這一個分支），改了什麼寫進回想
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label(line.Text, _infoStyle);
+                    if (GUILayout.Button("設定", GUILayout.Width(50)))
+                        OptionUnlock.SetBranch(line.Branch, line.Label);
+                    GUILayout.EndHorizontal();
+                }
+            }
             GUILayout.EndScrollView();
         }
 
@@ -946,7 +970,7 @@ namespace LegendOfMortalMod
             }
         }
 
-        private static string ItemName(ItemData item)
+        internal static string ItemName(ItemData item)
         {
             string name = Locale.GetString(item.GetNameKey());
             return string.IsNullOrEmpty(name) ? item.Id : name;
@@ -954,7 +978,7 @@ namespace LegendOfMortalMod
 
         private static string BookNote(Book book) => book.IsMartial ? "秘笈" : "";
 
-        private static string TalentName(PlayerTalentData talent)
+        internal static string TalentName(PlayerTalentData talent)
         {
             string name = Locale.GetString(talent.GetIdKey());
             return string.IsNullOrEmpty(name) ? talent.Id : name;
@@ -1060,7 +1084,7 @@ namespace LegendOfMortalMod
         }
 
         // Sets a value from the menu; a locked value is re-locked at the new one
-        private void ApplyValue(ScriptableObject key, int value)
+        internal void ApplyValue(ScriptableObject key, int value)
         {
             SetValue(key, value);
             _inputs.Remove(key);
@@ -1068,7 +1092,7 @@ namespace LegendOfMortalMod
                 _locks[key] = GetValue(key);
         }
 
-        private static int GetValue(ScriptableObject key)
+        internal static int GetValue(ScriptableObject key)
         {
             switch (key)
             {

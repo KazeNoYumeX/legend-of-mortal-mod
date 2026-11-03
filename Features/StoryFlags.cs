@@ -23,7 +23,16 @@ namespace LegendOfMortalMod.Features
         public static bool Enabled;
         private static List<Match> _flags = new();
         private static List<Match> _checks = new();
-        private static List<string> _lines = new();
+        private static List<Line> _lines = new();
+
+        // 基本頁的一行；Branch 是這一行的分支（ConditionResultItem），能靠改數值成立時旁邊有「設定」
+        internal sealed class Line
+        {
+            public string Text;
+            public object Branch;
+            public string Label;
+        }
+
         private static float _refreshAt;
         private static Dictionary<object, bool> _rolled;
 
@@ -43,7 +52,7 @@ namespace LegendOfMortalMod.Features
 
         // 目前劇情腳本的說明，不在劇情中或沒有旗標時回傳 null；條件可能含隨機值，每幀重算會閃，所以隔一段時間、
         // 而且只在 Layout 時重建，免得 Layout 和 Repaint 畫的行數不同
-        public static List<string> Lines()
+        public static List<Line> Lines()
         {
             if (StoryManager.Instance == null || (_flags.Count == 0 && _checks.Count == 0))
                 return null;
@@ -55,33 +64,65 @@ namespace LegendOfMortalMod.Features
             return _lines;
         }
 
-        private static List<string> Describe()
+        private static List<Line> Describe()
         {
-            List<string> lines = new();
+            List<Line> lines = new();
             if (_flags.Count > 0)
             {
-                lines.Add("【本段會改的旗標】");
+                lines.Add(new Line { Text = "【本段會改的旗標】" });
                 foreach (Match match in _flags)
                 {
                     FlagData flag = MissionManagerData.Instance?.GetFlag(match.Groups[2].Value);
                     string op = match.Groups[1].Value == "SetFlag" ? "=" : "+=";
                     string current = flag == null ? "" : $"（目前 {flag.State}）";
                     lines.Add(
-                        $"{(flag == null ? match.Groups[2].Value : Flag(flag))} {op} {match.Groups[3].Value}{current}"
+                        new Line
+                        {
+                            Text =
+                                $"{(flag == null ? match.Groups[2].Value : Flag(flag))} {op} {match.Groups[3].Value}{current}",
+                        }
                     );
                 }
             }
             if (_checks.Count > 0)
             {
-                lines.Add("【本段的分支判定】");
+                lines.Add(new Line { Text = "【本段的分支判定】" });
                 foreach (Match match in _checks)
-                    lines.Add(Check(match.Groups[1].Value == "Switch", match.Groups[2].Value));
+                    lines.AddRange(Branches(match.Groups[1].Value == "Switch", match.Groups[2].Value));
             }
             return lines;
         }
 
         // Switch 依序檢查各分支，Condition 只看成立與否；每個分支一行，標出目前成立或不成立
-        private static string Check(bool isSwitch, string name, Dictionary<object, bool> rolled = null)
+        private static List<Line> Branches(bool isSwitch, string name)
+        {
+            object data = isSwitch ? SwitchData(name) : ConditionData(name);
+            List<object> items = Plugin.Items(data, "_items").ToList();
+            if (data == null || items.Count == 0)
+                return new List<Line> { new() { Text = $"{name}：（找不到條件）" } };
+            List<Line> lines = new() { new Line { Text = isSwitch ? $"分支 {name}" : $"條件 {name}" } };
+            // 依進入次數選分支的 Switch 不看條件，改數值沒用
+            bool settable = OptionUnlock.Enabled && !Traverse.Create(data).Field("_useCount").GetValue<bool>();
+            for (int i = 0; i < items.Count; i++)
+            {
+                object item = items[i];
+                lines.Add(
+                    new Line
+                    {
+                        Text = BranchText(isSwitch, i, item, Mark(GameText.Check(item))),
+                        Branch = settable && OptionUnlock.CanSet(item) ? item : null,
+                        Label = isSwitch ? $"{name} {i + 1}" : name,
+                    }
+                );
+            }
+            return lines;
+        }
+
+        private static string BranchText(bool isSwitch, int i, object item, string mark) =>
+            $"    {mark} {(isSwitch ? $"{i + 1}. " : "")}{Conditions(item)}";
+
+        // 回想用：判定時遊戲自己算出的結果
+        private static string Check(bool isSwitch, string name, Dictionary<object, bool> rolled)
         {
             object data = isSwitch ? SwitchData(name) : ConditionData(name);
             List<object> items = Plugin.Items(data, "_items").ToList();
@@ -90,8 +131,8 @@ namespace LegendOfMortalMod.Features
             string text = isSwitch ? $"分支 {name}" : $"條件 {name}";
             for (int i = 0; i < items.Count; i++)
                 text +=
-                    $"\n    {(rolled == null ? Mark(GameText.Check(items[i])) : rolled.TryGetValue(items[i], out bool ok) ? Mark(ok) : "—")} "
-                    + $"{(isSwitch ? $"{i + 1}. " : "")}{Conditions(items[i])}";
+                    "\n"
+                    + BranchText(isSwitch, i, items[i], rolled.TryGetValue(items[i], out bool ok) ? Mark(ok) : "—");
             return text;
         }
 
@@ -108,7 +149,7 @@ namespace LegendOfMortalMod.Features
             return null;
         }
 
-        private static object ConditionData(string name)
+        internal static object ConditionData(string name)
         {
             CheckPointManager manager = CheckPointManager.Instance;
             ConditionResultConfig config =
@@ -138,6 +179,6 @@ namespace LegendOfMortalMod.Features
         // StoryLogData 是 1.0.6001.0 才有的。放在獨立的方法裡，並禁止編譯器把它併回呼叫端，
         // 舊版遊戲就只在開關打開時才會載入失敗，不會讓每次判定都出錯
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void AddToLog(string text) => StoryLogData.AddText(text, false);
+        internal static void AddToLog(string text) => StoryLogData.AddText(text, false);
     }
 }

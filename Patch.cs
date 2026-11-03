@@ -180,8 +180,25 @@ namespace LegendOfMortalMod
             string name = StorySave.ScriptName(friendlyName);
             if (name == null)
                 return;
+            OptionUnlock.ScriptLoaded(luaString);
             StorySave.ScriptLoaded(ref luaString, name);
             StoryFlags.ScriptLoaded(luaString);
+        }
+
+        // 鎖住的選項旁的快速解鎖，見 OptionUnlock
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(NormalOptionButton), "UpdateContent")]
+        public static void OptionUpdated(NormalOptionButton __instance)
+        {
+            OptionUnlock.RowUpdated(__instance);
+        }
+
+        // 議題、走訪這類選單會把條件不滿足的選項整列藏起來，見 OptionUnlock.DrawHidden
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(BreakOptionButton), "UpdateContent")]
+        public static void BreakOptionUpdated(BreakOptionButton __instance)
+        {
+            OptionUnlock.BreakRowUpdated(__instance);
         }
 
         // 存檔備註與格數，見 SaveSlots
