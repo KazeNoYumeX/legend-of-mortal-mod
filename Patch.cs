@@ -183,6 +183,57 @@ namespace LegendOfMortalMod
             StoryFlags.ScriptLoaded(luaString);
         }
 
+        // 存檔備註與格數，見 SaveSlots
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(LoadSlotPanel), "Setup")]
+        public static void LoadSlotSetup(LoadSlotPanel __instance)
+        {
+            SaveSlots.SlotSetup(__instance);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SaveSlotPanel), "Setup")]
+        public static void SaveSlotSetup(SaveSlotPanel __instance)
+        {
+            SaveSlots.SlotSetup(__instance);
+        }
+
+        // 打備註時按 Delete 不要開刪除存檔的確認
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(LoadGamePanel), "DeleteActionPerformed")]
+        public static bool DeleteSlotKey()
+        {
+            return !SaveSlots.Editing;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(LoadGamePanel), "Awake")]
+        public static void LoadPanelAwake(LoadGamePanel __instance)
+        {
+            SaveSlots.Expand(__instance);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SaveGamePanel), "Awake")]
+        public static void SavePanelAwake(SaveGamePanel __instance)
+        {
+            SaveSlots.Expand(__instance);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(LoadGamePanel), "OnPanelOpen")]
+        public static void LoadPanelOpen(LoadGamePanel __instance)
+        {
+            SaveSlots.Fit(__instance);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SaveGamePanel), "OnPanelOpen")]
+        public static void SavePanelOpen(SaveGamePanel __instance)
+        {
+            SaveSlots.Fit(__instance);
+        }
+
         // 顯示本段劇情旗標：判定結果寫進回想，見 StoryFlags。判定前開始記錄，遊戲每算一個分支記一次，判定後寫入
         [HarmonyPrefix]
         [HarmonyPatch(typeof(CheckPointManager), "Switch")]

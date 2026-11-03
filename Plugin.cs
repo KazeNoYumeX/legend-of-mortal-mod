@@ -37,10 +37,16 @@ namespace LegendOfMortalMod
         private ConfigEntry<float> _uiScale;
         private ConfigEntry<bool> _blockMenuClicks;
         private ConfigEntry<bool> _storySaveAnywhere;
+        private ConfigEntry<bool> _saveFeatures;
+        private ConfigEntry<int> _saveSlots;
+        private string _saveSlotsInput;
         private float _guiScale = 1;
 
         // Invisible uGUI panel under the menu window, so clicks on the menu don't reach the game UI behind it
         private RectTransform _clickBlocker;
+
+        // 同一個 canvas 上，擋住存檔備註視窗底下的遊戲畫面
+        private RectTransform _popupBlocker;
         private static readonly string[] TabNames =
         {
             "基本",
@@ -153,6 +159,22 @@ namespace LegendOfMortalMod
                 "Allow saving anywhere in a story; loading replays the story from its start"
             );
 
+            _saveFeatures = Config.Bind(
+                "LegendOfMortalMod",
+                "SaveFeatures",
+                true,
+                "Save notes and the manual save slot count; off shows the game's 20 slots without notes"
+            );
+            SaveSlots.Enabled = _saveFeatures.Value;
+            _saveSlots = Config.Bind(
+                "LegendOfMortalMod",
+                "SaveSlots",
+                40,
+                $"Manual save slots on the load and save pages, {SaveSlots.Min}-{SaveSlots.Max} (the game has 20)"
+            );
+            SaveSlots.Count = Mathf.Clamp(_saveSlots.Value, SaveSlots.Min, SaveSlots.Max);
+            _saveSlotsInput = SaveSlots.Count.ToString();
+
             _harmony = Harmony.CreateAndPatchAll(typeof(Patch));
             SceneManager.activeSceneChanged += OnSceneChanged;
         }
@@ -233,6 +255,8 @@ namespace LegendOfMortalMod
             // IMGUI measures from the top left, in menu units scaled by _guiScale
             _clickBlocker.anchorMin = _clickBlocker.anchorMax = _clickBlocker.pivot = new Vector2(0, 1);
             panel.SetActive(false);
+
+            _popupBlocker = Instantiate(panel, canvas.transform).GetComponent<RectTransform>();
         }
 
         private void UpdateClickBlocker()
@@ -240,10 +264,16 @@ namespace LegendOfMortalMod
             _clickBlocker.gameObject.SetActive(_showMenu && _blockMenuClicks.Value);
             _clickBlocker.anchoredPosition = new Vector2(_windowRect.x, -_windowRect.y) * _guiScale;
             _clickBlocker.sizeDelta = _windowRect.size * _guiScale;
+            // 上一幀畫的範圍（螢幕像素，左上原點）
+            Rect popup = SaveSlots.Editing ? new Rect(0, 0, Screen.width, Screen.height) : default;
+            _popupBlocker.gameObject.SetActive(popup.width > 0);
+            _popupBlocker.anchoredPosition = new Vector2(popup.x, -popup.y);
+            _popupBlocker.sizeDelta = popup.size;
         }
 
         private void OnGUI()
         {
+            SaveSlots.DrawEditor();
             if (!_showMenu && !_battleButtons)
                 return;
 
@@ -426,6 +456,7 @@ namespace LegendOfMortalMod
                 StoryFlags.Enabled = GUILayout.Toggle(StoryFlags.Enabled, "顯示本段劇情旗標（判定寫進回想）");
                 _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
                 _storySaveAnywhere.Value = GUILayout.Toggle(_storySaveAnywhere.Value, "劇情中隨時存檔");
+                DrawSaveSlotsRow();
             }
 
             GUILayout.Space(8);
@@ -438,6 +469,23 @@ namespace LegendOfMortalMod
             DrawInfo();
             if (_minimized && Event.current.type == EventType.Repaint)
                 _minimizedHeight = GUILayoutUtility.GetLastRect().yMax + 30;
+        }
+
+        // 存檔備註與格數；格數下次打開讀檔或存檔頁時生效
+        private void DrawSaveSlotsRow()
+        {
+            GUILayout.BeginHorizontal();
+            SaveSlots.Enabled = _saveFeatures.Value = GUILayout.Toggle(
+                _saveFeatures.Value,
+                $"存檔備註與格數（{SaveSlots.Min}–{SaveSlots.Max}）",
+                GUILayout.Width(200)
+            );
+            GUI.enabled = SaveSlots.Enabled;
+            _saveSlotsInput = GUILayout.TextField(_saveSlotsInput, 2, GUILayout.Width(120));
+            GUI.enabled = true;
+            if (int.TryParse(_saveSlotsInput, out int count) && count >= SaveSlots.Min && count <= SaveSlots.Max)
+                SaveSlots.Count = _saveSlots.Value = count;
+            GUILayout.EndHorizontal();
         }
 
         // 戰鬥中或劇情中，基本頁下方用小字列出戰鬥結果與事件、本段劇情旗標，可捲動；最小化時固定高度，
