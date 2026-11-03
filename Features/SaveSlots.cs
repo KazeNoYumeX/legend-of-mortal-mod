@@ -136,6 +136,7 @@ namespace LegendOfMortalMod.Features
         private static GUIStyle _field;
         private static GUIStyle _button;
         private static Texture2D _fill;
+        private static float _styleScale;
 
         // 編輯備註時擋住滑鼠和按鍵，免得 Enter 讀了選到的存檔、Delete 開了刪除確認
         public static bool Editing => (object)_editing != null;
@@ -178,19 +179,24 @@ namespace LegendOfMortalMod.Features
                 return;
             }
             float k = Screen.height / 1080f;
-            if (_title == null)
+            if (_fill == null)
             {
                 _fill = new Texture2D(1, 1) { hideFlags = HideFlags.HideAndDontSave };
                 _fill.SetPixel(0, 0, new Color(0.05f, 0.06f, 0.07f, 0.96f));
                 _fill.Apply();
             }
-            _title = new GUIStyle(GUI.skin.label)
+            // 字的大小跟著畫面高度，換解析度才重建
+            if (_title == null || !Mathf.Approximately(_styleScale, k))
             {
-                fontSize = Mathf.RoundToInt(20 * k),
-                normal = { textColor = new Color(0.91f, 0.83f, 0.66f) },
-            };
-            _field = new GUIStyle(GUI.skin.textField) { fontSize = Mathf.RoundToInt(20 * k) };
-            _button = new GUIStyle(GUI.skin.button) { fontSize = Mathf.RoundToInt(18 * k) };
+                _styleScale = k;
+                _title = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = Mathf.RoundToInt(20 * k),
+                    normal = { textColor = new Color(0.91f, 0.83f, 0.66f) },
+                };
+                _field = new GUIStyle(GUI.skin.textField) { fontSize = Mathf.RoundToInt(20 * k) };
+                _button = new GUIStyle(GUI.skin.button) { fontSize = Mathf.RoundToInt(18 * k) };
+            }
 
             Rect box = new((Screen.width - 640 * k) / 2, (Screen.height - 190 * k) / 2, 640 * k, 190 * k);
             float pad = 20 * k;
