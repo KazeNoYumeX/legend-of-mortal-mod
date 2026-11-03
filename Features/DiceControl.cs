@@ -187,35 +187,8 @@ namespace LegendOfMortalMod.Features
 
         private static Button CreateButton(Font font, int branch)
         {
-            GameObject obj = new("Branch" + branch, typeof(RectTransform), typeof(Image), typeof(Button));
-            obj.transform.SetParent(_root, false);
-            Image image = obj.GetComponent<Image>();
-            Button button = obj.GetComponent<Button>();
-            button.targetGraphic = image;
-            // 手把和鍵盤仍只選得到遊戲自己的選項
-            button.navigation = new Navigation { mode = Navigation.Mode.None };
-            ColorBlock colors = button.colors;
-            colors.normalColor = new Color(0.15f, 0.18f, 0.21f, 0.75f);
-            colors.highlightedColor = new Color(0.25f, 0.32f, 0.39f, 0.9f);
-            colors.pressedColor = new Color(0.22f, 0.37f, 0.51f, 1);
-            colors.selectedColor = colors.normalColor;
-            colors.disabledColor = new Color(0.15f, 0.16f, 0.17f, 0.4f);
-            button.colors = colors;
-
-            GameObject labelObj = new("Label", typeof(RectTransform), typeof(Text));
-            labelObj.transform.SetParent(obj.transform, false);
-            Text label = labelObj.GetComponent<Text>();
-            Labels.Add(label);
-            label.font = font;
-            label.fontSize = 18;
-            label.alignment = TextAnchor.MiddleCenter;
-            label.color = new Color(0.94f, 0.95f, 0.96f, 1);
-            label.raycastTarget = false;
-            RectTransform labelRect = label.rectTransform;
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
-
+            Button button = UiButton.Create(_root, font, "", "Branch" + branch);
+            Labels.Add(button.GetComponentInChildren<Text>());
             button.onClick.AddListener(() => Roll(branch));
             return button;
         }
