@@ -5,6 +5,7 @@ using HarmonyLib;
 using LegendOfMortalMod.Features;
 using Mortal.Battle;
 using Mortal.Core;
+using Mortal.Pinball;
 using Mortal.Story;
 using UnityEngine;
 using UnityEngine.UI;
@@ -232,6 +233,14 @@ namespace LegendOfMortalMod
         public static void SavePanelOpen(SaveGamePanel __instance)
         {
             SaveSlots.Fit(__instance);
+        }
+
+        // 在彈珠台的總分輸入框打字時，按鍵不要發射彈珠
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SpringLauncher2D), "OnLaunchStarted")]
+        public static bool PinballLaunch()
+        {
+            return !PinballScore.Editing;
         }
 
         // 顯示本段劇情旗標：判定結果寫進回想，見 StoryFlags。判定前開始記錄，遊戲每算一個分支記一次，判定後寫入

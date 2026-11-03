@@ -238,6 +238,7 @@ namespace LegendOfMortalMod
             DiceControl.Update(_diceButtons);
             StorySave.Enabled = _storySaveAnywhere.Value;
             StorySave.Update();
+            PinballScore.Update();
             UpdateClickBlocker();
         }
 
@@ -447,14 +448,26 @@ namespace LegendOfMortalMod
 
                 GUILayout.Space(8);
                 bool all =
-                    _battleButtons && _battleInfo && StoryFlags.Enabled && _diceButtons && _storySaveAnywhere.Value;
+                    _battleButtons
+                    && _battleInfo
+                    && StoryFlags.Enabled
+                    && _diceButtons
+                    && PinballScore.Enabled
+                    && _storySaveAnywhere.Value;
                 if (GUILayout.Toggle(all, "以下全部開啟") != all)
-                    _battleButtons = _battleInfo = StoryFlags.Enabled = _diceButtons = _storySaveAnywhere.Value = !all;
+                    _battleButtons =
+                        _battleInfo =
+                        StoryFlags.Enabled =
+                        _diceButtons =
+                        PinballScore.Enabled =
+                        _storySaveAnywhere.Value =
+                            !all;
                 // 單挑隨時顯示；團體戰只在暫停選單顯示
                 _battleButtons = GUILayout.Toggle(_battleButtons, "顯示戰鬥判定按鈕");
                 _battleInfo = GUILayout.Toggle(_battleInfo, "顯示戰鬥結果與事件");
                 StoryFlags.Enabled = GUILayout.Toggle(StoryFlags.Enabled, "顯示本段劇情旗標（判定寫進回想）");
                 _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
+                PinballScore.Enabled = GUILayout.Toggle(PinballScore.Enabled, "彈珠台可改總分");
                 _storySaveAnywhere.Value = GUILayout.Toggle(_storySaveAnywhere.Value, "劇情中隨時存檔");
                 DrawSaveSlotsRow();
             }
