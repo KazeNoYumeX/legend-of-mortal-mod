@@ -16,7 +16,7 @@ namespace LegendOfMortalMod.Features
         private const string NoteName = "Note";
 
         // 太長會超出存檔格
-        private const int NoteLength = 20;
+        private const int NoteLength = 12;
         public static bool Enabled = true;
         public static int Count = 40;
         private static int Shown => Enabled ? Count : Min;
@@ -44,18 +44,12 @@ namespace LegendOfMortalMod.Features
 
         // ---- 備註：LoadSlotPanel / SaveSlotPanel.Setup 之後 ----
 
-        // 遊戲每次 Setup 都重寫存檔時間的文字，備註接在它後面；有存檔的格子右下角放「備註」按鈕
+        // 遊戲每次 Setup 都重寫存檔時間的文字，備註接在它後面；有存檔的格子在那一行的右端放「備註」按鈕
         public static void SlotSetup(MonoBehaviour slot)
         {
             Traverse t = Traverse.Create(slot);
             string id = t.Field("_slot").GetValue<string>();
             Text[] times = t.Field("_timeText").GetValue<Text[]>() ?? Array.Empty<Text>();
-            string note = Enabled ? SlotData.Get(id, NoteName) : "";
-            if (note.Length > 0)
-            {
-                foreach (Text shown in times)
-                    shown.text += "　" + note;
-            }
             Transform existing = slot.transform.Find("LegendOfMortalMod.Note");
             bool show = Enabled && t.Property("HasSaveData").GetValue<bool>() && times.Length > 0;
             if (!show)
@@ -72,21 +66,38 @@ namespace LegendOfMortalMod.Features
             button.transform.SetAsLastSibling();
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(() => Edit(slot, id));
-            // 接在存檔時間（和備註）文字的後面，不會蓋到備註。按鈕放在格子底下而不是文字底下：
-            // 滑鼠移過去時遊戲會改文字的樣子，按鈕跟著動就點不到
+            // 按鈕固定在格子右端、存檔時間那一行，放在格子底下而不是文字底下：滑鼠移過去時遊戲會改文字的樣子，
+            // 按鈕跟著動就點不到
             RectTransform rect = (RectTransform)button.transform;
             RectTransform line = time.rectTransform;
             RectTransform owner = (RectTransform)slot.transform;
             int size = Mathf.Max(14, Mathf.RoundToInt(time.fontSize * 0.8f));
-            Vector3 end = line.TransformPoint(
-                new Vector3(line.rect.xMin + time.preferredWidth + size * 0.8f, line.rect.center.y)
-            );
+            Vector2 buttonSize = new(size * 3.2f, size * 1.5f);
+            float right = owner.rect.xMax - size * 0.5f,
+                row = owner.InverseTransformPoint(line.TransformPoint(line.rect.center)).y;
             rect.anchorMin = rect.anchorMax = owner.pivot;
-            rect.pivot = new Vector2(0, 0.5f);
-            rect.sizeDelta = new Vector2(size * 3.2f, size * 1.5f);
-            rect.anchoredPosition = owner.InverseTransformPoint(end);
+            rect.pivot = new Vector2(1, 0.5f);
+            rect.sizeDelta = buttonSize;
+            rect.anchoredPosition = new Vector2(right, row);
             button.GetComponentInChildren<Text>().fontSize = size;
             button.gameObject.SetActive(true);
+
+            // 備註接在存檔時間後面，放不下按鈕前的空間就從後面截掉、加「…」（完整的在編輯視窗看）
+            string note = SlotData.Get(id, NoteName);
+            if (note.Length == 0)
+                return;
+            float room =
+                line.InverseTransformPoint(owner.TransformPoint(new Vector3(right - buttonSize.x - size * 0.5f, row))).x
+                - line.rect.xMin;
+            string original = time.text;
+            for (int keep = note.Length; keep >= 0; keep--)
+            {
+                time.text = original + "　" + (keep == note.Length ? note : note.Substring(0, keep) + "…");
+                if (time.preferredWidth <= room)
+                    break;
+            }
+            foreach (Text other in times)
+                other.text = time.text;
         }
 
         private static MonoBehaviour _editing;
@@ -159,7 +170,7 @@ namespace LegendOfMortalMod.Features
             GUI.DrawTexture(box, _fill);
             GUI.Label(
                 new Rect(box.x + pad, box.y + pad, box.width - pad * 2, 32 * k),
-                $"第 {_editingSlot} 格的備註",
+                $"第 {_editingSlot} 格的備註（最多 {NoteLength} 字）",
                 _title
             );
             GUI.SetNextControlName("LegendOfMortalMod.Note");
