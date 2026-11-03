@@ -7,6 +7,8 @@
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-11-04
+
 ### Added
 
 - 基本頁新增「快速解鎖事件/選項/分支判定」：鎖住的選項（「解鎖條件：？？？」）條件能靠改數值滿足時，旁邊有「快速解鎖」，把沒滿足的條件直接改到滿足，選項當場解鎖，選了走的是遊戲自己的分支；改了哪些值（例如「修養 3→5」）會寫進回想，改完仍不成立（例如超過屬性上限）就改回原本的值。條件是幾項數值相加比大小時（例如六道加起來 > 1），差多少就補在其中一項上。議題、走訪這類選單會把條件不滿足的選項整列藏起來，開著時選單標題旁會有「另有 N 個選項未滿足條件」，點開列出這些選項、各自的條件和快速解鎖會改的值，也能快速解鎖；用選單改過數值後點這個按鈕，條件已經成立的選項會直接出現
@@ -143,7 +145,8 @@
 
 - 第一版：遊戲中按 `F3` 開啟修改選單
 
-[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/KazeNoYumeX/legend-of-mortal-mod/compare/v1.4.0...v1.5.0
