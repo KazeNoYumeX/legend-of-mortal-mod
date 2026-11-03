@@ -284,8 +284,13 @@ namespace LegendOfMortalMod.Features
         // 本段劇情的分支判定：只看這一個分支（一組條件）能不能靠改數值成立，前面的分支不管
         public static bool CanSet(object branch) => PlanGroup(branch) is { Count: > 0 };
 
-        public static void SetBranch(object branch, string label) =>
-            Write(PlanGroup(branch), () => Check(branch), $"分支設定「{label}」");
+        public static void SetBranch(object branch, string label)
+        {
+            List<Change> plan = PlanGroup(branch);
+            // 清單 0.5 秒才更新一次，按鈕還在時再按一次已經沒有要改的，不寫進回想
+            if (plan is { Count: > 0 })
+                Write(plan, () => Check(branch), $"分支設定「{label}」");
+        }
 
         // 寫入計畫的值，寫完再檢查一次；不成立就改回原本的值。改了什麼寫進回想和記錄檔
         private static bool Write(List<Change> plan, System.Func<bool> holds, string what)
