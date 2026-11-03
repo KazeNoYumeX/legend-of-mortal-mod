@@ -16,7 +16,7 @@ namespace LegendOfMortalMod.Features
         private const string NoteName = "Note";
 
         // 太長會超出存檔格
-        private const int NoteLength = 12;
+        private const int NoteLength = 20;
         public static bool Enabled = true;
         public static int Count = 40;
         private static int Shown => Enabled ? Count : Min;
@@ -44,20 +44,32 @@ namespace LegendOfMortalMod.Features
 
         // ---- 備註：LoadSlotPanel / SaveSlotPanel.Setup 之後 ----
 
-        // 遊戲每次 Setup 都重寫存檔時間的文字，備註接在它後面；有存檔的格子在那一行的右端放「備註」按鈕
+        // 有存檔的格子在存檔時間那一行的右端放「備註」按鈕，備註顯示在存檔時間下面那一行。都放在格子底下而不是
+        // 文字底下：滑鼠移過去時遊戲會改文字的樣子，跟著動的按鈕就點不到
         public static void SlotSetup(MonoBehaviour slot)
         {
             Traverse t = Traverse.Create(slot);
             string id = t.Field("_slot").GetValue<string>();
             Text[] times = t.Field("_timeText").GetValue<Text[]>() ?? Array.Empty<Text>();
             Transform existing = slot.transform.Find("LegendOfMortalMod.Note");
+            Transform shownNote = slot.transform.Find("LegendOfMortalMod.NoteText");
             bool show = Enabled && t.Property("HasSaveData").GetValue<bool>() && times.Length > 0;
             if (!show)
             {
                 existing?.gameObject.SetActive(false);
+                shownNote?.gameObject.SetActive(false);
                 return;
             }
             Text time = times[0];
+            RectTransform line = time.rectTransform;
+            RectTransform owner = (RectTransform)slot.transform;
+            int size = Mathf.Max(14, Mathf.RoundToInt(time.fontSize * 0.8f));
+            Vector2 buttonSize = new(size * 3.2f, size * 1.5f);
+            Vector3 start = owner.InverseTransformPoint(
+                line.TransformPoint(new Vector3(line.rect.xMin, line.rect.center.y))
+            );
+            float right = owner.rect.xMax - size * 0.5f;
+
             Button button =
                 existing != null
                     ? existing.GetComponent<Button>()
@@ -66,38 +78,50 @@ namespace LegendOfMortalMod.Features
             button.transform.SetAsLastSibling();
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(() => Edit(slot, id));
-            // 按鈕固定在格子右端、存檔時間那一行，放在格子底下而不是文字底下：滑鼠移過去時遊戲會改文字的樣子，
-            // 按鈕跟著動就點不到
             RectTransform rect = (RectTransform)button.transform;
-            RectTransform line = time.rectTransform;
-            RectTransform owner = (RectTransform)slot.transform;
-            int size = Mathf.Max(14, Mathf.RoundToInt(time.fontSize * 0.8f));
-            Vector2 buttonSize = new(size * 3.2f, size * 1.5f);
-            float right = owner.rect.xMax - size * 0.5f,
-                row = owner.InverseTransformPoint(line.TransformPoint(line.rect.center)).y;
             rect.anchorMin = rect.anchorMax = owner.pivot;
             rect.pivot = new Vector2(1, 0.5f);
             rect.sizeDelta = buttonSize;
-            rect.anchoredPosition = new Vector2(right, row);
+            rect.anchoredPosition = new Vector2(right, start.y);
             button.GetComponentInChildren<Text>().fontSize = size;
             button.gameObject.SetActive(true);
 
-            // 備註接在存檔時間後面，放不下按鈕前的空間就從後面截掉、加「…」（完整的在編輯視窗看）
             string note = SlotData.Get(id, NoteName);
             if (note.Length == 0)
+            {
+                shownNote?.gameObject.SetActive(false);
                 return;
-            float room =
-                line.InverseTransformPoint(owner.TransformPoint(new Vector3(right - buttonSize.x - size * 0.5f, row))).x
-                - line.rect.xMin;
-            string original = time.text;
+            }
+            Text text = shownNote != null ? shownNote.GetComponent<Text>() : NoteText(slot.transform);
+            text.font = time.font;
+            text.fontSize = size;
+            text.color = time.color;
+            RectTransform place = text.rectTransform;
+            float width = right - start.x;
+            place.anchorMin = place.anchorMax = owner.pivot;
+            place.pivot = new Vector2(0, 0.5f);
+            place.sizeDelta = new Vector2(width, size * 1.4f);
+            place.anchoredPosition = new Vector2(start.x, start.y - time.fontSize * 1.2f);
+            // 從存檔時間的左邊到格子右端，放不下就從後面截掉、加「…」（完整的在編輯視窗看）
             for (int keep = note.Length; keep >= 0; keep--)
             {
-                time.text = original + "　" + (keep == note.Length ? note : note.Substring(0, keep) + "…");
-                if (time.preferredWidth <= room)
+                text.text = keep == note.Length ? note : note.Substring(0, keep) + "…";
+                if (text.preferredWidth <= width)
                     break;
             }
-            foreach (Text other in times)
-                other.text = time.text;
+            text.gameObject.SetActive(true);
+        }
+
+        private static Text NoteText(Transform slot)
+        {
+            GameObject obj = new("LegendOfMortalMod.NoteText", typeof(RectTransform), typeof(Text));
+            obj.transform.SetParent(slot, false);
+            Text text = obj.GetComponent<Text>();
+            text.alignment = TextAnchor.MiddleLeft;
+            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            text.supportRichText = false;
+            text.raycastTarget = false;
+            return text;
         }
 
         private static MonoBehaviour _editing;
