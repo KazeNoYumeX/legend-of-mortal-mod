@@ -17,7 +17,7 @@ namespace LegendOfMortalMod.Features
 
         // 太長會超出存檔格
         private const int NoteLength = 20;
-        public static bool Enabled = true;
+        public static bool Enabled;
         public static int Count = 40;
         private static int Shown => Enabled ? Count : Min;
 

@@ -162,8 +162,8 @@ namespace LegendOfMortalMod
             _saveFeatures = Config.Bind(
                 "LegendOfMortalMod",
                 "SaveFeatures",
-                true,
-                "Save notes and the manual save slot count; off shows the game's 20 slots without notes"
+                false,
+                "Save notes and the manual save slot count; off shows the game's 20 slots without notes. Off by default: 趙活系統 (ZhaoHuoSystem) has its own notes and slot count, and both on at once show two sets of notes and rebuild the slots twice"
             );
             SaveSlots.Enabled = _saveFeatures.Value;
             _saveSlots = Config.Bind(
