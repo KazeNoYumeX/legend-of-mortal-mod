@@ -49,7 +49,7 @@ The top row holds the groups; 角色 (Character) and 物品 (Items) have a secon
 | 物品／雜物 | Misc items | How many of each misc item you hold, same controls; 全持有 (own all) gives 1 of every shown misc item you lack |
 | 物品／開發項目 | Development | Every 鍛造 (forging) and 煉丹 (alchemy) item: weapon, armor, the three hidden weapons, poison and pill. 目前 is its level (-1 = not developed). 裝備 (equip) puts it in its slot right away, without following the upgrade path; an undeveloped item starts at level 0. Setting the level also applies what each level gained unlocks |
 | 旗標 | Flags | Story flags, same controls |
-| 講經堂 | Library | Every entry of 生死簿 (deaths) and 汗青書 (endings). 目前 is how many times it was reached (0 = locked); a locked entry has a 解鎖 (unlock) button. Search 生死簿 or 汗青書 to see one list; 全部解鎖 (unlock all) unlocks every locked entry the search shows. Entries live in the global save shared by all saves, so the current save is untouched, and the menu cannot lock them again |
+| 講經堂 | Library | Every entry of 生死簿 (deaths) and 汗青書 (endings). 目前 is how many times it was reached (0 = locked); a locked entry has a 解鎖 (unlock) button. Search 生死簿 or 汗青書 to see one list; 全部解鎖 (unlock all, press again within 3 s to confirm) unlocks every locked entry the search shows. Entries live in the global save shared by all saves, so the current save is untouched, and the menu cannot lock them again |
 
 Options on the 基本 (Basic) tab:
 

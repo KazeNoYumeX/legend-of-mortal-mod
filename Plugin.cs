@@ -625,7 +625,8 @@ namespace LegendOfMortalMod
             }
             else if (_tab == 8)
             {
-                if (GUILayout.Button("全部解鎖", GUILayout.Width(LockWidth + 30)))
+                // 解鎖後無法鎖回，要按兩下
+                if (ConfirmButton.Layout("全部解鎖", GUILayout.Width(LockWidth + 30)))
                     ForLibraryEntries(
                         (item, note) =>
                         {
