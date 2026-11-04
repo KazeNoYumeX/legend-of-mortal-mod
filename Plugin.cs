@@ -29,7 +29,6 @@ namespace LegendOfMortalMod
         public bool unlimitedSpend;
         public bool unlimitedResources;
         private bool _accelerateMode;
-        private float _skipConfirmUntil;
         private Harmony _harmony;
 
         private Vector2Int _lastScreenSize;
@@ -406,19 +405,10 @@ namespace LegendOfMortalMod
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             RoundControl.Unlimited = GUILayout.Toggle(RoundControl.Unlimited, "行動點無限", GUILayout.Width(200));
-            // 只在大地圖可用；第二次按下 3 秒內才執行
+            // 只在大地圖可用，要按兩下
             GUI.enabled = RoundControl.CanSkip;
-            bool confirming = Time.unscaledTime < _skipConfirmUntil;
-            if (GUILayout.Button(confirming ? "確定嗎？" : "跳過本旬", GUILayout.Width(120)))
-            {
-                if (confirming)
-                {
-                    _skipConfirmUntil = 0;
-                    RoundControl.Skip();
-                }
-                else
-                    _skipConfirmUntil = Time.unscaledTime + 3f;
-            }
+            if (ConfirmButton.Layout("跳過本旬", GUILayout.Width(120)))
+                RoundControl.Skip();
             GUI.enabled = true;
             GUILayout.EndHorizontal();
 

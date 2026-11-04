@@ -19,11 +19,6 @@ namespace LegendOfMortalMod.Features
             Stalemate = 2;
         private static readonly string[] Labels = { "判定勝利", "判定落敗", "判定平手" };
         private const int ForcedEnemyWin = 1; // Mortal.Battle.BattleForceResult
-        private const float ConfirmTime = 3f;
-
-        // 第一次按下的按鈕，ConfirmTime 秒內再按一次才結算
-        private static int _pending = -1;
-        private static float _pendingUntil;
         private static int _endedCombat = -1; // 已經結束的單挑，避免重複結算
         private static object _drawLevel;
         private static bool _drawAvailable;
@@ -50,11 +45,9 @@ namespace LegendOfMortalMod.Features
                 && combat.GetInstanceID() != _endedCombat;
             if (!battleReady && !combatReady)
             {
-                _pending = -1;
+                ConfirmButton.Cancel(Labels);
                 return;
             }
-            if (_pending >= 0 && Time.unscaledTime > _pendingUntil)
-                _pending = -1;
 
             int[] choices = combatReady && HasDraw(combat) ? new[] { Win, Stalemate, Lose } : new[] { Win, Lose };
             const float width = 96,
@@ -65,21 +58,8 @@ namespace LegendOfMortalMod.Features
             GUI.color = new Color(1, 1, 1, 0.6f);
             for (int i = 0; i < choices.Length; i++)
             {
-                bool asking = _pending == choices[i];
-                if (
-                    !GUI.Button(
-                        new Rect(x + i * (width + gap), 6, width, height),
-                        asking ? "再按一次確認" : Labels[choices[i]]
-                    )
-                )
+                if (!ConfirmButton.Draw(new Rect(x + i * (width + gap), 6, width, height), Labels[choices[i]]))
                     continue;
-                if (!asking)
-                {
-                    _pending = choices[i];
-                    _pendingUntil = Time.unscaledTime + ConfirmTime;
-                    continue;
-                }
-                _pending = -1;
                 try
                 {
                     if (battleReady)
