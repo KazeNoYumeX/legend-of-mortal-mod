@@ -99,6 +99,28 @@
 
 ![回想裡的判定紀錄](docs/screenshots/story-log.webp)
 
+### 快速解鎖選項
+
+鎖住的選項條件能靠改數值滿足時，旁邊多一個「快速解鎖」。
+
+![快速解鎖選項](docs/screenshots/option-unlock.webp)
+
+### 藏起來的選項
+
+議題、走訪這類選單藏起來的選項，列在選單標題旁，也能快速解鎖；劇情旗標的每個分支旁也有「設定」。
+
+![藏起來的選項](docs/screenshots/hidden-options.webp)
+
+### 存檔備註
+
+讀檔、存檔頁的存檔格可以寫備註，顯示在存檔時間下面。
+
+![存檔備註](docs/screenshots/save-notes.webp)
+
+### 彈珠台改總分
+
+![彈珠台改總分](docs/screenshots/pinball.webp)
+
 ### 戰鬥結果與事件（單挑）
 
 最小化的選單在單挑時顯示雙方血量（可以直接改）、目前回合、勝敗會設定的旗標，以及什麼條件會觸發什麼事件。

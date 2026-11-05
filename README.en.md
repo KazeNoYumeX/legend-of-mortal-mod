@@ -103,6 +103,28 @@ When the game makes a branch check, the 回想 log notes the branch, each condit
 
 ![Branch check in the story log](docs/screenshots/story-log.webp)
 
+### 快速解鎖 Option unlock
+
+A locked option whose conditions can be met by changing values gets a 快速解鎖 button.
+
+![Option unlock](docs/screenshots/option-unlock.webp)
+
+### 未滿足條件的選項 Hidden options
+
+Options that menus such as 議題 hide are listed beside the menu title and can be unlocked there; each branch in the story flags also gets a 設定 button.
+
+![Hidden options](docs/screenshots/hidden-options.webp)
+
+### 存檔備註 Save notes
+
+Save slots on the load and save pages can hold a note, shown below the save time.
+
+![Save notes](docs/screenshots/save-notes.webp)
+
+### 彈珠台 Pinball
+
+![Pinball total score](docs/screenshots/pinball.webp)
+
 ### 戰鬥結果與事件 Battle info (duel)
 
 The minimized menu in a duel: both sides' HP (which you can set), the current round, the flags a win or a loss sets, and which event fires on which condition.
