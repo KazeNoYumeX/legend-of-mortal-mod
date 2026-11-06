@@ -281,7 +281,9 @@ namespace LegendOfMortalMod.Features
             return Write(Plan(condition), () => Met(condition), $"快速解鎖「{Name(entry)}」");
         }
 
-        // 本段劇情的分支判定：只看這一個分支（一組條件）能不能靠改數值成立，前面的分支不管
+        // 本段劇情的分支判定：只看這一個分支（一組條件）能不能靠改數值成立，前面的分支不管。
+        // Switch 取第一個成立的分支，前面的也成立時仍走前面的；判定在腳本跑到那行時才做一次，已經做過就要下次進劇情才生效。
+        // 只認目前與最近的劇情腳本，大地圖事件的條件（MissionManagerData）不在範圍內
         public static bool CanSet(object branch) => PlanGroup(branch) is { Count: > 0 };
 
         public static void SetBranch(object branch, string label)
