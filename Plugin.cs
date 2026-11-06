@@ -460,7 +460,7 @@ namespace LegendOfMortalMod
                 _battleInfo = GUILayout.Toggle(_battleInfo, "顯示戰鬥結果與事件");
                 StoryFlags.Enabled = GUILayout.Toggle(StoryFlags.Enabled, "顯示本段劇情旗標（判定寫進回想）");
                 _diceButtons = GUILayout.Toggle(_diceButtons, "骰子畫面顯示指定按鈕");
-                OptionUnlock.Enabled = GUILayout.Toggle(OptionUnlock.Enabled, "快速解鎖事件/選項/分支判定");
+                OptionUnlock.Enabled = GUILayout.Toggle(OptionUnlock.Enabled, "快速解鎖選項與分支判定");
                 PinballScore.Enabled = GUILayout.Toggle(PinballScore.Enabled, "彈珠台可改總分");
                 _storySaveAnywhere.Value = GUILayout.Toggle(_storySaveAnywhere.Value, "劇情中隨時存檔");
                 DrawSaveSlotsRow();
